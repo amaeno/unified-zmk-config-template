@@ -1,0 +1,7 @@
+# ローカルビルド成果物
+firmware/
+build/
+.west/
+
+# マシン固有の Claude 設定（共有しない）
+.claude/settings.local.json
