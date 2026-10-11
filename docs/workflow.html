@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>開発フロー — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="git の運用、ビルド、書き込み、トラブル対応、資料と AI の使い方">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html" aria-current="page">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><span class="nav-todo">機能<small>準備中</small></span></li>
+<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+</ul>
+</nav>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>開発フロー</h1>
+<p class="lead">カスタマイズを進めるときの手順と決まりごとです。git の運用、ビルド、書き込み、うまくいかないときの対処、資料と AI の使い方をまとめています。</p>
+</header>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#decide">ビルドが要るか</a></li>
+<li><a href="#loop">開発の流れ</a></li>
+<li><a href="#git">git の運用</a></li>
+<li><a href="#build">ビルド</a></li>
+<li><a href="#flash">書き込み</a></li>
+<li><a href="#trouble">うまくいかないとき</a></li>
+<li><a href="#internals">ビルドスクリプトを直すとき</a></li>
+<li><a href="#docs">資料の更新</a></li>
+<li><a href="#ai">AI と進めるとき</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="decide">ビルドが要るか</h2>
+<p>右側（セントラル）は ZMK Studio が有効です（<code>CONFIG_ZMK_STUDIO=y</code>、ロック無し）。キー割り当てを変えるだけなら、<a href="https://zmk.studio">zmk.studio</a> に USB でつなぐだけで済み、ビルドも書き込みも要りません。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>変えたいもの</th><th>手段</th><th>触るファイル</th></tr></thead>
+<tbody>
+<tr><td>キー割り当て、レイヤーの使い分け</td><td><span class="badge ok">ビルド不要</span> ZMK Studio</td><td>—</td></tr>
+<tr><td>コンボ、エンコーダの割り当て（<code>sensor-bindings</code>）、新しい behavior</td><td><span class="badge build">要ビルド</span></td><td><code>config/sosho.keymap</code></td></tr>
+<tr><td>スクロール量などのマクロ（<code>#define</code>）</td><td><span class="badge build">要ビルド</span></td><td><code>config/sosho.keymap</code></td></tr>
+<tr><td>ポインタの速度・反転・スクロール化（<code>input-processors</code>）</td><td><span class="badge build">要ビルド</span></td><td><code>boards/shields/sosho/*.overlay</code></td></tr>
+<tr><td>Bluetooth・LED・電池などの設定（Kconfig）</td><td><span class="badge build">要ビルド</span></td><td><code>boards/shields/sosho/*.conf</code></td></tr>
+<tr><td>ピン配置などのハードウェア定義、外部モジュール</td><td><span class="badge build">要ビルド</span></td><td><code>*.dtsi</code>・<code>config/west.yml</code></td></tr>
+</tbody>
+</table>
+</div>
+<aside class="callout note">
+<p><strong>予約レイヤー:</strong> キーマップ末尾の <code>scroll</code> と <code>extra2</code> は <code>status = "reserved"</code> の空き枠です。Studio からレイヤーを増やすときに使われるので、Studio で使うだけなら再ビルドは要りません。</p>
+</aside>
+<aside class="callout warn">
+<p><strong>Studio とファイルの優先順位:</strong> 一度 Studio でキーマップを変えると、その後に <code>config/sosho.keymap</code> を書き換えて書き込んでも、キー割り当ては反映されません。ファイル側を反映させたいときは、Studio の「Restore Stock Settings」を実行します（ZMK 公式ドキュメントの記述による）。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="loop">開発の流れ</h2>
+<p>ファイルを編集してビルドする変更は、次の順で進めます。</p>
+<ol class="steps">
+<li>
+<p><strong>ブランチを切る。</strong> <code>main</code> から作業用のブランチを作ります。名前の付け方は <a href="#branches">ブランチ</a> を参照。</p>
+<pre><code>git switch -c feature/&lt;名前&gt; main</code></pre>
+</li>
+<li>
+<p><strong>編集する。</strong> どのファイルを触ると何が変わるかは <a href="settings.html#map">設定項目 › どこを触ると何が変わるか</a> にあります。触るファイルが <a href="known-issues.html">既知の課題</a> に載っていないかも確かめます。</p>
+</li>
+<li>
+<p><strong>lint を通す。</strong> ツールチェーン無しで数十 ms で終わります。<code>ok:</code> が出るまで直します。</p>
+<pre><code>python3 scripts/lint-keymap.py</code></pre>
+</li>
+<li>
+<p><strong>資料を作り直す。</strong> 設定の変更が資料の自動生成部分に反映されます。</p>
+<pre><code>python3 scripts/gen-docs.py</code></pre>
+</li>
+<li>
+<p><strong>ビルドする。</strong> 普段は 1 ターゲットだけ。キーマップの変更なら約 14 秒です。</p>
+<pre><code>./scripts/build-local.sh sosho_R_trackpad</code></pre>
+</li>
+<li>
+<p><strong>書き込んで、実機で確かめる。</strong> どちらの半分に書き込むかは <a href="#flash">書き込み</a> を参照。</p>
+</li>
+<li>
+<p><strong>コミットする。</strong> メッセージは日本語で書きます。</p>
+</li>
+<li>
+<p><strong>main に取り込み、タグを打つ。</strong> 実機で問題がなければ取り込みます。手順は <a href="#merge">取り込みとタグ</a> を参照。</p>
+</li>
+</ol>
+</section>
+
+<section>
+<h2 id="git">git の運用</h2>
+
+<h3 id="remotes">リモート</h3>
+<ul>
+<li><code>origin</code> は自分の GitHub フォーク（<code>amaeno/unified-zmk-config-template</code>）です。<strong>バックアップ置き場</strong>として使います。</li>
+<li>フォーク元（upstream）はリモートに登録しません。追従しないので不要で、あると誤って fetch や push をするもとになります。</li>
+<li>フォーク元へ PR は送りません。</li>
+</ul>
+<aside class="callout warn">
+<p><strong>フォークの PR の送り先:</strong> GitHub のフォークでは、PR 作成画面や <code>gh pr create</code> の既定の送り先がフォーク元になります。万一 PR を作るときは、base repository が自分のリポジトリになっているか確かめてください。</p>
+</aside>
+
+<h3 id="branches">ブランチ</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ブランチ</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td><code>main</code></td><td>実機に書き込んで常用している状態。ここにあるものは動く</td></tr>
+<tr><td><code>feature/…</code></td><td>機能の追加</td></tr>
+<tr><td><code>fix/…</code></td><td>不具合の修正</td></tr>
+<tr><td><code>build/…</code></td><td>ビルド環境・スクリプト</td></tr>
+<tr><td><code>docs/…</code></td><td>資料・AI 用の設定（skills やサブエージェント）</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="merge">取り込みとタグ</h3>
+<p>実機で確かめてから、<code>--no-ff</code> で <code>main</code> に取り込みます。ブランチ単位の変更が履歴の上で 1 つのまとまりとして残ります。</p>
+<p>ファームウェアを書き込んだら、<code>main</code> のそのコミットに <code>fw-日付</code> の注釈付きタグを打ちます。メッセージには書き込んだターゲットを書きます。同じ日に 2 回目を打つときは <code>fw-2026-10-11.2</code> のように番号を付けます。</p>
+<pre><code>git switch main
+git merge --no-ff feature/&lt;名前&gt;
+git tag -a fw-2026-10-11 -m "R: sosho_R_trackpad / L: sosho_L_trackpad"</code></pre>
+
+<h3 id="rollback">前の版に戻す</h3>
+<p>書き込んだ版にはタグがあるので、そこからビルドし直せば戻せます。</p>
+<pre><code>git tag -l 'fw-*'
+git switch --detach fw-2026-10-01
+./scripts/build-local.sh sosho_R_trackpad
+git switch main</code></pre>
+
+<h3 id="push">バックアップ（push）</h3>
+<p>push は自分の手で、ときどき行います。Claude からの <code>git push</code> は <code>.claude/settings.json</code> で禁止してあります（意図的な設定です）。</p>
+<pre><code>git push origin main --tags</code></pre>
+
+<h3 id="actions">GitHub Actions</h3>
+<p>ビルドはローカルに一本化し、GitHub Actions は使いません。<code>.github/workflows/build.yml</code> は本家由来のファイルとして残し、GitHub のリポジトリ設定（Settings → Actions → General → Disable actions）で止めます。ファイルを残しておけば、Docker が使えないときに設定を戻すだけで予備のビルド手段になります。</p>
+
+<h3 id="commits">コミットメッセージ</h3>
+<p>日本語で書きます。1 行目に何をしたかの要約、空行を挟んで理由や補足を書きます。本家由来の古い履歴は英語ですが、このリポジトリでの変更は日本語に統一します。</p>
+</section>
+
+<section>
+<h2 id="build">ビルド</h2>
+<p>Docker の中でローカルにビルドします。GitHub Actions より速く（キーマップの変更なら約 14 秒）、成果物をダウンロードする手間もありません。成果物は <code>firmware/&lt;ターゲット&gt;.uf2</code> にできます（git の管理外）。</p>
+
+<h3 id="commands">コマンド</h3>
+<!-- gen:build-commands -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>コマンド</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td><code>./scripts/build-local.sh</code></td><td>既定ターゲットをビルド</td></tr>
+<tr><td><code>./scripts/build-local.sh sosho_L_trackball</code></td><td>build.yaml のターゲットを 1 つビルド</td></tr>
+<tr><td><code>./scripts/build-local.sh --all</code></td><td>全ターゲットをビルド（リリース時）</td></tr>
+<tr><td><code>./scripts/build-local.sh --list</code></td><td>ターゲット一覧</td></tr>
+<tr><td><code>./scripts/build-local.sh -p sosho_R_trackpad</code></td><td>クリーンビルド</td></tr>
+<tr><td><code>./scripts/build-local.sh --update</code></td><td>west update をやり直す（west.yml を変えた後）</td></tr>
+<tr><td><code>./scripts/build-local.sh --ref</code></td><td>ZMK のソースと資料を .zmk-ref/ に写す（調査用）</td></tr>
+<tr><td><code>./scripts/build-local.sh --shell</code></td><td>ツールチェーンのコンテナ内シェル</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>scripts/build-local.sh</code> の冒頭コメント</p>
+</div>
+<!-- /gen:build-commands -->
+
+<h3 id="targets">ターゲット</h3>
+<p>左右で別の uf2 を使います。トラックパッド版とトラックボール版はどちらか一方です。</p>
+<!-- gen:build-targets -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>ターゲット</th><th>書き込む側</th><th>役割</th><th>ポインタ</th><th>Studio</th></tr></thead>
+<tbody>
+<tr><td><code>sosho_R_trackpad</code> <span class="badge ok">この機体</span></td><td>右</td><td>セントラル</td><td>トラックパッド (Cirque)</td><td>有効</td></tr>
+<tr class="dim"><td><code>sosho_R_trackball</code></td><td>右</td><td>セントラル</td><td>トラックボール (PMW3610)</td><td>有効</td></tr>
+<tr class="dim"><td><code>sosho_L_trackpad</code></td><td>左</td><td>ペリフェラル</td><td>トラックパッド (Cirque)</td><td>—</td></tr>
+<tr><td><code>sosho_L_trackball</code> <span class="badge ok">この機体</span></td><td>左</td><td>ペリフェラル</td><td>トラックボール (PMW3610)</td><td>—</td></tr>
+<tr><td><code>settings_reset</code></td><td>左右とも</td><td>設定の消去</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>build.yaml</code></p>
+</div>
+<!-- /gen:build-targets -->
+
+<h3 id="timing">所要時間</h3>
+<p>Apple Silicon、Docker に 8 CPU・メモリ 4.1GB を割り当てたときの実測です。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ケース</th><th>所要時間</th></tr></thead>
+<tbody>
+<tr><td>初回（イメージ取得・west update・フルビルド）</td><td>約 6 分</td></tr>
+<tr><td>キーマップを変えて 1 ターゲット</td><td><strong>約 14 秒</strong></td></tr>
+<tr><td>何も変えずに 1 ターゲット</td><td>約 6 秒</td></tr>
+<tr><td><code>--all</code>（5 ターゲット、キャッシュあり）</td><td>約 60 秒</td></tr>
+</tbody>
+</table>
+</div>
+<p>試行錯誤の間は 1 ターゲットだけをビルドし、<code>--all</code> はまとめて書き込むときに使います。</p>
+
+<h3 id="mechanism">仕組み</h3>
+<ul>
+<li>ビルドは Docker イメージ <code>zmkfirmware/zmk-build-arm:stable</code> の中で動きます。</li>
+<li>west ワークスペース（ZMK 本体と依存一式）と ccache は、名前付きボリューム <code>sosho-zmk-ws</code> に置きます。初回に取得したものを以降ずっと再利用します。</li>
+<li>ディスク使用量はイメージ 2.2GB とワークスペース 3.2GB です。捨てるときは <code>docker volume rm sosho-zmk-ws</code>。</li>
+<li>ZMK や外部モジュールのバージョンが動くのは <code>--update</code> を実行したときだけです。通常のビルドは同じ版を使い続けます。</li>
+</ul>
+
+<h3 id="modules">取り込んでいるモジュール</h3>
+<!-- gen:west-projects -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>プロジェクト</th><th>revision</th><th>置き場所</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/zmkfirmware/zmk">zmk</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>zmk</code></td><td>ZMK 本体</td></tr>
+<tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>zmk-rgbled-widget</code></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
+<tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>zmk-pmw3610-driver</code></td><td>トラックボール (PMW3610) のドライバ</td></tr>
+<tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>modules/zmk_encoder</code></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>config/west.yml</code></p>
+</div>
+<aside class="callout warn"><p><strong>バージョンが固定されていません。</strong><code>zmk</code>、<code>zmk-rgbled-widget</code>、<code>zmk-pmw3610-driver</code>、<code>zmk_encoder</code> は revision がブランチ名なので、<code>./scripts/build-local.sh --update</code> を実行するたびにその時点の最新を取り込みます（通常のビルドでは動きません）。安定させたいならコミットかタグに固定します。</p></aside>
+<!-- /gen:west-projects -->
+</section>
+
+<section>
+<h2 id="flash">書き込み</h2>
+<ol class="steps">
+<li><p><strong>ブートローダに入れる。</strong> XIAO のリセットボタンを素早く 2 回押すと、USB ドライブとして見えます。</p></li>
+<li><p><strong>uf2 をコピーする。</strong> <code>firmware/&lt;ターゲット&gt;.uf2</code> をそのドライブにコピーします。</p></li>
+<li><p><strong>再起動を待つ。</strong> 書き込みが終わると自動で再起動します。</p></li>
+</ol>
+<aside class="callout warn">
+<p><strong>左右で別の uf2 です。</strong> <code>sosho_L_*</code> は左、<code>sosho_R_*</code> は右に書き込みます。トラックパッド版とトラックボール版も取り違えないでください。この機体の組み合わせは <!-- gen:value of=my-targets -->
+右 <code>sosho_R_trackpad</code> ／ 左 <code>sosho_L_trackball</code>
+<!-- /gen:value --> です。</p>
+</aside>
+<p>何を変えたかによって、書き込む側が変わります。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>変えたもの</th><th>書き込む側</th></tr></thead>
+<tbody>
+<tr><td>キーマップ・コンボ・エンコーダの割り当て</td><td>右だけ（キーマップはセントラルが処理する）</td></tr>
+<tr><td>ポインタの速度・反転（左右とも）</td><td>右だけ（<code>input-processors</code> は右の overlay にある）</td></tr>
+<tr><td>右の <code>*.conf</code>・<code>*.overlay</code></td><td>右</td></tr>
+<tr><td>左の <code>*.conf</code>・<code>*.overlay</code></td><td>左</td></tr>
+<tr><td>共通の <code>sosho.dtsi</code>、<code>config/west.yml</code></td><td>左右とも</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="reset">接続がおかしいとき</h3>
+<p>左右が繋がらない、ペアリングがおかしいといったときは、設定を消してから書き直します（ZMK 公式の手順）。</p>
+<ol class="steps">
+<li><p>左右とも <code>settings_reset.uf2</code> を書き込む。</p></li>
+<li><p>左右とも通常の uf2 を書き直す。</p></li>
+<li><p>左右が繋がらなければ、両方のリセットボタンをほぼ同時に押す。</p></li>
+<li><p>PC の Bluetooth 設定から古い <code>sosho</code> を削除して、ペアリングし直す。</p></li>
+</ol>
+</section>
+
+<section>
+<h2 id="trouble">うまくいかないとき</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>症状</th><th>対処</th></tr></thead>
+<tbody>
+<tr><td><code>Docker デーモンが動いていません</code></td><td>Docker Desktop を起動する</td></tr>
+<tr><td><code>ninja: build stopped</code>、またはビルドが唐突に終わる</td><td>Docker のメモリ不足。Docker Desktop → Settings → Resources → Memory を 8GB に上げる（現状 4.1GB）。上げたくなければ <code>west build</code> に <code>-j4</code> を足して並列度を下げる</td></tr>
+<tr><td><code>west init</code> が「already initialized」</td><td>ワークスペースが壊れている。<code>docker volume rm sosho-zmk-ws</code> で作り直す</td></tr>
+<tr><td><code>config/west.yml</code> を変えたのに反映されない</td><td><code>./scripts/build-local.sh --update</code></td></tr>
+<tr><td>何も変えていないのにビルドが壊れた</td><td><code>config/west.yml</code> はすべてブランチ追従。<code>--update</code> を実行したときだけ版が動くので、直前に <code>--update</code> したなら upstream の破壊的変更を疑う</td></tr>
+<tr><td><code>Missing ZMK Compat</code></td><td>board 名から <code>/zmk</code> が落ちている。<code>xiao_ble/nrf52840/zmk</code> が正しい</td></tr>
+<tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code> の <code>board_root: .</code> を有効にしている</td></tr>
+<tr><td>キーマップを書き換えて書き込んだのに、割り当てが変わらない</td><td>Studio での変更が優先されている。Studio の「Restore Stock Settings」を実行する（<a href="#decide">ビルドが要るか</a>）</td></tr>
+<tr><td>USB 給電中に、Bluetooth 側でキー入力が届かない</td><td>USB 接続中は USB 出力が優先される。レイヤー 3 の <code>&amp;out OUT_BLE</code> で Bluetooth 出力に切り替える</td></tr>
+<tr><td>macOS で「接続済み」なのに入力できない</td><td>macOS の Bluetooth 設定からキーボードを削除し、該当プロファイルを選んだ状態でレイヤー 3 の <code>&amp;bt BT_CLR</code> を押してから、接続し直す</td></tr>
+</tbody>
+</table>
+</div>
+<p>Docker がどうしても使えないときは、<a href="#actions">GitHub Actions</a> を有効に戻してブランチを push し、Actions のページから成果物をダウンロードできます。</p>
+</section>
+
+<section>
+<h2 id="internals">ビルドスクリプトを直すとき</h2>
+<p><code>scripts/build-local.sh</code> と <code>scripts/build-in-container.sh</code> には、壊すとビルドが通らなくなる前提があります。</p>
+<ul>
+<li><strong>west ワークスペースをリポジトリ直下に置かない。</strong> <code>west init -l config</code> は topdir をリポジトリルートにするため、<code>west update</code> が作る <code>zephyr/</code> が既存の <code>zephyr/module.yml</code> と衝突します。この <code>module.yml</code> が <code>board_root: .</code> を供給しており、失うと <code>boards/</code> が見つからなくなります。ZMK 公式 CI も同じ回避をしています。シンボリックリンクも不可です（<code>west init -l</code> は <code>Path.resolve()</code> するのでリポジトリ内に戻ってしまう）。</li>
+<li><strong><code>-u $(id -u)</code> を付けない。</strong> Zephyr SDK は root の CMake パッケージレジストリ（<code>/root/.cmake/packages/Zephyr-sdk</code>）に登録されています。同じ理由で <code>/root</code> に何もマウントしないこと。</li>
+<li><strong>ビルドディレクトリは名前付きボリュームに置く。</strong> macOS の bind mount は小さなファイルが大量にあると極端に遅くなります。</li>
+<li><strong><code>west zephyr-export</code> を毎回実行する。</strong> <code>--rm</code> で <code>/root</code> が消えるためです。</li>
+<li><strong>複数語の shield は、1 つの空白区切り文字列として <code>-DSHIELD</code> に渡す。</strong> フラグを分けてはいけません（<code>Kconfig.shield</code> の <code>shields_list_contains</code> がこのリストを解釈します）。</li>
+<li><code>snippet</code> は west の引数なので <code>--</code> より前、<code>cmake-args</code> は <code>--</code> より後に置きます。</li>
+</ul>
+</section>
+
+<section>
+<h2 id="docs">資料の更新</h2>
+<p>資料は <code>docs/</code> の HTML です。<code>docs/index.html</code> をブラウザで開いて読みます。外部への依存は無いので、ファイルを直接開けば表示できます。</p>
+
+<h3 id="docs-gen">手書きと自動生成</h3>
+<p>各ページは、手書きの説明と自動生成のブロックでできています。自動生成のブロックは HTML の中で次のように囲まれていて、<code>scripts/gen-docs.py</code> が中身を上書きします。</p>
+<pre><code>&lt;!-- gen:build-targets --&gt;
+（ここはスクリプトが上書きする）
+&lt;!-- /gen:build-targets --&gt;</code></pre>
+<pre><code>python3 scripts/gen-docs.py           # 生成ブロックを更新する
+python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（要るなら終了コード 1）</code></pre>
+
+<h3 id="docs-rules">決まりごと</h3>
+<ul>
+<li><strong>繰り返し変わる事実は手で書かない。</strong> ビルドターゲット、モジュール、キーマップ、設定値などは <code>scripts/gen-docs.py</code> に生成器を足して作ります。手書きは「なぜそうなっているか」「どう変えるか」の説明に使います。</li>
+<li><strong>同じ事実を 2 か所に書かない。</strong> 事実の正本は資料にあり、<code>CLAUDE.md</code> や skills からは資料へのリンクで済ませます。AI へのルールだけは <code>CLAUDE.md</code> が正本で、資料はそれを自動で取り込みます。</li>
+<li><strong>設定を変えたら資料も作り直す。</strong> 生成結果も同じコミットに含めます。</li>
+<li><strong>本家の資料はオリジナルのまま残す。</strong> <code>memo.md</code>（本家の verB2 リリースノート）は編集しません。</li>
+</ul>
+
+<h3 id="scripts">スクリプト一覧</h3>
+<!-- gen:scripts -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>ファイル</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td><code>scripts/build-in-container.sh</code></td><td>zmkfirmware/zmk-build-arm コンテナの中で動く。ホストから直接実行しないこと。</td></tr>
+<tr><td><code>scripts/build-local.sh</code></td><td>双掌 (sosho) のファームウェアを Docker でローカルビルドする。</td></tr>
+<tr><td><code>scripts/gen-docs.py</code></td><td>docs/*.html の自動生成ブロックを、リポジトリ内の元ファイルから作り直す。</td></tr>
+<tr><td><code>scripts/lint-keymap.py</code></td><td>双掌 (sosho) のキーマップをツールチェーン無しで検査する。</td></tr>
+<tr><td><code>scripts/zmk_dts.py</code></td><td>双掌 (sosho) の devicetree とキーマップを、ツールチェーン無しで読むための部品。</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>scripts/</code> の各ファイル冒頭</p>
+</div>
+<!-- /gen:scripts -->
+</section>
+
+<section>
+<h2 id="ai">AI と進めるとき</h2>
+<p>Claude Code は毎回 <code>CLAUDE.md</code> を読み込み、そこから資料や skills をたどります。作業の型が決まっているものは skills やサブエージェントにして、手順と前提を書き込んであります。頼み方は普段どおりで構いません。たとえば「左のトラックボールを少し遅くしたい」と頼めば、<code>/add-feature</code> の流れで調査・編集・ビルド・レビューまで進み、書き込みの手前で止まります。</p>
+
+<h3 id="ai-tools">skills とサブエージェント</h3>
+<!-- gen:ai-tools -->
+<div class="gen">
+<ul class="item-list">
+<li><p class="item-head"><code>/add-feature</code> <span class="badge">skill</span> <span class="badge">opus</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) のファームウェアに機能を足す・設定を変える・不具合を直すときの一連の流れ（要否の判断 → 調査 → ブランチ → 編集 → lint・資料・ビルド → レビュー → コミット → 実機確認の依頼）。コンボ、behavior、マクロ、エンコーダの挙動、ポインタの速さや向き、Kconfig、外部モジュールの追加・変更を頼まれたら、作業を始める前にこれを使うこと。キー割り当てだけの変更なら ZMK Studio で済むので使わない。</p></li>
+<li><p class="item-head"><code>/retro</code> <span class="badge">skill</span> <span class="badge">opus</span> <span class="badge">メイン会話で実行</span></p><p>skills・サブエージェント・CLAUDE.md の改善案を出す振り返り。.claude/improvements.md の未対応メモと、このセッションで手順どおりに進まなかった出来事から「どのファイルをどう直すか」を提案し、ユーザーが承認したものだけを適用する。作業の区切りでフック（retro-nudge）から促されたとき、またはユーザーが振り返り・改善提案・skills の見直しを頼んだときに使う。</p></li>
+<li><p class="item-head"><code>/update-docs</code> <span class="badge">skill</span> <span class="badge">sonnet</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) の資料（docs/*.html）を書く・直すときの決まりごと。ページのひな形、使える CSS の部品、自動生成ブロックの扱い、生成器（scripts/docgen/）の足し方、文章の書き方、見た目の確かめ方。資料のページを足すとき、手書きの説明を直すとき、資料に新しい事実を載せるとき、生成器を足すときは、HTML を書き始める前に必ずこれを読むこと。</p></li>
+<li><p class="item-head"><code>/zmk-build</code> <span class="badge">skill</span> <span class="badge">haiku</span> <span class="badge">fork で実行</span></p><p>双掌 (sosho) のファームウェアを lint してビルドし、結果を要約して返す。キーマップ・コンボ・エンコーダ挙動・ポインタ設定・Kconfig を変更した後の検証に使う。引数はターゲット名（複数可。省略時は sosho_R_trackpad、--all で全部）。書き込みはユーザーが行う。</p></li>
+<li><p class="item-head"><code>config-reviewer</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>双掌 (sosho) の設定変更（キーマップ・シールドの dtsi / overlay / conf・build.yaml・west.yml）を、コミットや書き込みの前にレビューする。lint と資料の生成チェックを実行し、ZMK の書き方の誤り、左右の書き込み先、既知の課題への抵触、資料の更新漏れを指摘する。設定ファイルを変更したら、コミットする前に必ずこのエージェントに見せること。指摘だけを返し、ファイルは直さない。</p></li>
+<li><p class="item-head"><code>docs-sync</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>設定やスクリプトを変えたあとに、docs/ の資料（HTML）を実態に合わせる。scripts/gen-docs.py で生成部分を作り直し、手書き部分の古くなった記述を直して、何を直したかを報告する。設定やスクリプトを変えて手書きの説明が古くなりそうなときや、資料の点検を頼まれたときに使う。</p></li>
+<li><p class="item-head"><code>zmk-researcher</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>ZMK 本体・外部モジュール（zmk-rgbled-widget / zmk-pmw3610-driver / zmk_encoder）・XIAO のボード定義の仕様を、このリポジトリが実際に使っている版のソースとドキュメントで調べて答える。「ZMK で○○はできるか」「この behavior・Kconfig・devicetree プロパティの意味と書き方」「この挙動はどこで実装されているか」を確かめたいときは、記憶で答えずにこのエージェントに調べさせること。読み取り専用。</p></li>
+</ul>
+<p class="gen-note">自動生成 · 元: <code>.claude/skills/*/SKILL.md</code>・<code>.claude/agents/*.md</code> の frontmatter</p>
+</div>
+<!-- /gen:ai-tools -->
+
+<h3 id="ai-rules">エージェントとモデルのルール</h3>
+<!-- gen:claude-md section=エージェントとモデル -->
+<div class="gen">
+<ul>
+<li>サブエージェントの<strong>同時起動は最大 5 本</strong>、1 つの依頼で起動する延べ数は<strong>最大 10 本</strong>。超えそうなときは先にユーザーに確認する</li>
+<li>Workflow（多数のエージェントを束ねる仕組み）は、ユーザーが明示的に頼んだときだけ使う</li>
+<li>場所の分かっている数ファイルを読むだけなら、エージェントを使わず直接読む</li>
+<li>長い出力が出る作業（ビルドログなど）は、<code>context: fork</code> の skill かサブエージェントに任せ、メイン会話には要約だけを戻す</li>
+<li>skills とサブエージェントは frontmatter の <code>model</code> でモデルを指定する。低いモデルに任せるものほど、前提・手順・完了条件・やってはいけないことを本文に明記する</li>
+</ul>
+<div class="table-wrap">
+<table>
+<thead><tr><th>モデル</th><th>任せる作業</th></tr></thead>
+<tbody>
+<tr><td><code>haiku</code></td><td>手順が決まっている作業。ビルドの実行と結果の要約、生成スクリプトの実行、定型の確認</td></tr>
+<tr><td><code>sonnet</code></td><td>読んで判断する作業。ZMK のソースやドキュメントの調査、設定のレビュー、資料の執筆</td></tr>
+<tr><td><code>opus</code>（メイン会話）</td><td>設計判断、新しい機能の設計、複数ファイルにまたがる変更</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「エージェントとモデル」節</p>
+</div>
+<!-- /gen:claude-md -->
+
+<h3 id="ai-improve">使いながら直す仕組み</h3>
+<p>skills やサブエージェントは、使って困ったところを直すことで良くなっていきます。困ったことは作業中にメモしておき、作業の区切りで Claude が改善案を出します。直すかどうかを決めるのは自分です。</p>
+<ol class="steps">
+<li><p><strong>メモする。</strong> 手順どおりに進まなかったことを、Claude が <code>.claude/improvements.md</code> に 1 行ずつ書きます。</p></li>
+<li><p><strong>区切りで提案する。</strong> 未コミットの変更が無いときに未対応のメモがあると、ターンの終わりに Stop フックが働き、Claude が <code>/retro</code> の手順で改善案を出します（1 セッション 1 回まで）。自分から <code>/retro</code> と頼むこともできます。</p></li>
+<li><p><strong>選んで直す。</strong> 適用する案を番号で選ぶと、その分だけ直して、メモを「対応済み」に移します。</p></li>
+</ol>
+<!-- gen:claude-md section=改善メモと振り返り -->
+<div class="gen">
+<ul>
+<li>skills・サブエージェントが手順どおりに進まなかったとき（失敗、前提の不足、遠回り、ユーザーからの訂正、モデルの力不足や過剰）は、その場で <code>.claude/improvements.md</code> の「未対応」に 1 行書く。直すのは後でよい</li>
+<li>サブエージェントや fork の skill の報告に「改善メモ」があれば、メイン会話がそれを転記する</li>
+<li>作業の区切り（未コミットの変更が無い）で未対応のメモがあると、Stop フック（<code>.claude/hooks/retro-nudge.py</code>）が <code>/retro</code> での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 <code>SOSHO_RETRO_NUDGE=0</code></li>
+<li>改善案を適用するのは、ユーザーが承認したものだけ</li>
+</ul>
+<p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「改善メモと振り返り」節</p>
+</div>
+<!-- /gen:claude-md -->
+
+<h4 id="ai-improve-log">いまの改善メモ</h4>
+<!-- gen:improvements -->
+<div class="gen">
+<p>未対応 <strong>0</strong> 件 ／ 対応済み 2 件</p>
+<details>
+<summary>最近の対応済み（2 件）</summary>
+<ul>
+<li>2026-10-11 zmk-researcher: 試験で、検索ツール（Grep / Glob）が無い環境のため Read だけでパスを推測して調べ、約 23 万トークン・9 分かかった。`.zmk-ref/` の構成も分からなかった → Bash の grep / find を読み取り専用で使えるようにし、`.zmk-ref/` の地図と「該当箇所だけを読む」探し方を定義に足した（直したあとの本番では約 3.2 万トークン・32 秒）</li>
+<li>2026-10-11 zmk-researcher: 「メモリに記録する」と報告しながら、書く前に答えを返して作業を終えていた（メモリは空のまま）。また、この機体では使っていない overlay を例に挙げた → メモリへの記録を「答えを返す前に」行う順番を明記し、例は「この機体」を前提にするよう定義に足した（再試験でメモリに記録されることを確認）</li>
+</ul>
+</details>
+<p class="gen-note">自動生成 · 元: <code>.claude/improvements.md</code></p>
+</div>
+<!-- /gen:improvements -->
+
+<h3 id="ai-ref">ZMK の調査用コピー</h3>
+<p>調査役の <code>zmk-researcher</code> は、記憶や Web ではなく、このリポジトリが使っている版の ZMK のソースと資料を読んで答えます。そのためのコピーが <code>.zmk-ref/</code>（git 管理外）にあります。<code>./scripts/build-local.sh --ref</code> で作り直せ、<code>--update</code> で版を上げたときは自動で作り直されます。どの版を写したかは <code>.zmk-ref/VERSIONS.txt</code> にあります。</p>
+</section>
+</main>
+</div>
+</body>
+</html>

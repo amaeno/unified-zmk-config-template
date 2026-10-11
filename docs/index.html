@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="ELEKIT 製分割キーボード 双掌 (sosho) の ZMK ファームウェアを自分用にカスタマイズするための資料">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<ul>
+<li><a href="index.html" aria-current="page">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><span class="nav-todo">機能<small>準備中</small></span></li>
+<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+</ul>
+</nav>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>双掌 (sosho) カスタマイズ資料</h1>
+<p class="lead">ELEKIT 製の分割キーボード「双掌」の ZMK ファームウェアを、自分用にカスタマイズしていくための資料です。本家への push や PR は行わず、このリポジトリの中だけで完結させます。</p>
+</header>
+
+<section>
+<h2 id="overview">このキーボード</h2>
+<dl class="facts">
+<dt>構成</dt>
+<dd>44 キーの分割キーボード。左右それぞれに Seeed XIAO nRF52840 を載せる</dd>
+<dt>入力</dt>
+<dd>各半分にロータリーエンコーダ 1 個と、ポインティングデバイス（トラックパッドかトラックボールのどちらか）</dd>
+<dt>左右の役割</dt>
+<dd><strong>右がセントラル</strong>（PC と Bluetooth で繋がる側。ZMK Studio もここ）、左がペリフェラル</dd>
+<dt>ファームウェア</dt>
+<dd>ZMK。左右で別々の uf2 を書き込む</dd>
+</dl>
+</section>
+
+<section>
+<h2 id="start">やりたいことから探す</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>やりたいこと</th><th>手段</th><th>見る場所</th></tr></thead>
+<tbody>
+<tr><td>いまのキー割り当てを見る</td><td>レイヤー図</td><td><a href="keymap.html#layers">キーマップ › レイヤー</a></td></tr>
+<tr><td>キー割り当てを変える・レイヤーを使い分ける</td><td><span class="badge ok">ビルド不要</span> ZMK Studio</td><td><a href="workflow.html#decide">開発フロー › ビルドが要るか</a></td></tr>
+<tr><td>コンボ・エンコーダ・ポインタの感度を変える</td><td><span class="badge build">要ビルド</span> ファイルを編集</td><td><a href="settings.html#map">設定項目 › どこを触ると何が変わるか</a></td></tr>
+<tr><td>コンボのキー位置番号を調べる</td><td>番号付きの図</td><td><a href="keymap.html#positions">キーマップ › キー位置番号</a></td></tr>
+<tr><td>ピン配置や配線を調べる</td><td>シールド定義から作った表</td><td><a href="hardware.html">ハードウェア</a></td></tr>
+<tr><td>ファームウェアをビルドして書き込む</td><td><code>./scripts/build-local.sh</code></td><td><a href="workflow.html#build">開発フロー › ビルド</a>・<a href="workflow.html#flash">書き込み</a></td></tr>
+<tr><td>新しい機能を足す・不具合を直す</td><td>トピックブランチで作業する</td><td><a href="workflow.html#loop">開発フロー › 開発の流れ</a></td></tr>
+<tr><td>ペアリングや左右の接続がおかしい</td><td><code>settings_reset</code> を書き込む</td><td><a href="workflow.html#reset">開発フロー › 接続がおかしいとき</a></td></tr>
+<tr><td>ビルドが通らない・変更が反映されない</td><td>症状から探す</td><td><a href="workflow.html#trouble">開発フロー › うまくいかないとき</a></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2 id="pages">ページ一覧</h2>
+<!-- gen:page-cards -->
+<ul class="cards">
+<li><a href="workflow.html"><strong>開発フロー</strong><span>git の運用・ビルド・書き込み・トラブル対応・資料と AI の使い方</span></a></li>
+<li><a href="hardware.html"><strong>ハードウェア</strong><span>マイコン・左右の役割・ピン配置・エンコーダ・ポインティングデバイス</span></a></li>
+<li><a href="keymap.html"><strong>キーマップ</strong><span>レイヤー図・キー位置番号・コンボ・エンコーダの割り当て</span></a></li>
+<li><a href="settings.html"><strong>設定項目</strong><span>変えられる項目と現在値、変え方、ビルドの要否</span></a></li>
+<li><div class="todo"><strong>機能<small>準備中</small></strong><span>使っている機能と、ZMK で追加できる機能の候補</span></div></li>
+<li><div class="todo"><strong>ZMK リファレンス<small>準備中</small></strong><span>参照している ZMK と外部モジュールの仕様メモ</span></div></li>
+<li><a href="known-issues.html"><strong>既知の課題</strong><span>動作に影響しない不整合と、未解決の課題</span></a></li>
+<li><div class="todo"><strong>変更履歴<small>準備中</small></strong><span>カスタマイズの履歴と設計判断</span></div></li>
+</ul>
+<!-- /gen:page-cards -->
+</section>
+
+<section>
+<h2 id="how">この資料の仕組み</h2>
+<p>手書きの説明と、リポジトリ内のファイルから自動生成する部分でできています。自動生成の部分には「自動生成 · 元: …」と元ファイルが書いてあり、手で直しても次の生成で上書きされます。設定やスクリプトを変えたら、次のコマンドで作り直します。</p>
+<pre><code>python3 scripts/gen-docs.py</code></pre>
+<p>詳しくは <a href="workflow.html#docs">開発フロー › 資料の更新</a> を見てください。</p>
+</section>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# ローカルビルド成果物
+firmware/
+build/
+.west/
+
+# マシン固有の Claude 設定（共有しない）
+.claude/settings.local.json
+
+# Python のキャッシュ（scripts/ の import で作られる）
+__pycache__/
+
+# ZMK のソースと資料の調査用コピー（scripts/build-local.sh --ref が作る）
+.zmk-ref/
+
+# Claude Code のフックが使う状態ファイル
+.claude/state/

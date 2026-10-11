@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設定項目 — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="変えられる項目と現在値、変え方、ビルドの要否">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html" aria-current="page">設定項目</a></li>
+<li><span class="nav-todo">機能<small>準備中</small></span></li>
+<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+</ul>
+</nav>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>設定項目</h1>
+<p class="lead">何を変えたいときに、どのファイルのどこを触るかの一覧です。「いまの値」はファイルから自動で読み取っています。キー割り当て以外はビルドと書き込みが要ります。</p>
+</header>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#map">どこを触ると何が変わるか</a></li>
+<li><a href="#scroll">スクロール</a></li>
+<li><a href="#pointer">ポインタ</a></li>
+<li><a href="#encoder">エンコーダ</a></li>
+<li><a href="#kconfig">Kconfig</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="map">どこを触ると何が変わるか</h2>
+<p>この機体の書き込み先: <!-- gen:value of=my-targets -->
+右 <code>sosho_R_trackpad</code> ／ 左 <code>sosho_L_trackball</code>
+<!-- /gen:value --></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>変えたいこと</th><th>場所</th><th>いまの値</th><th>書き込む側</th></tr></thead>
+<tbody>
+<tr><td>キー割り当て・レイヤー</td><td>ZMK Studio（ビルド不要）、または <code>config/sosho.keymap</code></td><td><a href="keymap.html#layers">レイヤー図</a></td><td>右</td></tr>
+<tr><td>コンボ</td><td><code>config/sosho.keymap</code> の <code>combos</code></td><td><a href="keymap.html#combos">コンボ一覧</a></td><td>右</td></tr>
+<tr><td>エンコーダの割り当て</td><td><code>config/sosho.keymap</code> の <code>sensor-bindings</code></td><td><a href="keymap.html#encoder">エンコーダ</a></td><td>右</td></tr>
+<tr><td>エンコーダ 1 クリックで動く量</td><td><code>sosho.dtsi</code> の <code>sensors</code> の <code>triggers-per-rotation</code></td><td><!-- gen:value of=encoder-triggers -->
+<code>24</code>
+<!-- /gen:value --></td><td>左右とも</td></tr>
+<tr><td>ポインタの速さ・向き・スクロール化</td><td>右の overlay の <code>input-processors</code></td><td><a href="#pointer">ポインタ</a></td><td>右</td></tr>
+<tr><td>トラックボールの解像度 (CPI)</td><td><code>sosho.dtsi</code> の <code>trackball</code> の <code>cpi</code></td><td><!-- gen:value of=trackball-cpi -->
+<code>600</code>
+<!-- /gen:value --></td><td>トラックボールの側（この機体は左）</td></tr>
+<tr><td>トラックパッドの感度</td><td><code>sosho.dtsi</code> の <code>glidepoint</code> の <code>sensitivity</code></td><td><!-- gen:value of=trackpad-sensitivity -->
+<code>1x</code>
+<!-- /gen:value --></td><td>トラックパッドの側（この機体は右）</td></tr>
+<tr><td><code>&amp;msc</code> キーのスクロール量</td><td><code>config/sosho.keymap</code> の <code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code></td><td><!-- gen:value of=scrl-val -->
+<code>150</code>
+<!-- /gen:value -->（<a href="known-issues.html#issue-scrl-unused">いまは効いていない</a>）</td><td>右</td></tr>
+<tr><td>Bluetooth の接続パラメータ</td><td>各 <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
+<tr><td>LED の電池残量の色分け</td><td>各 <code>*.conf</code> の <code>RGBLED_WIDGET_BATTERY_LEVEL_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
+<tr><td>ビルドするターゲット</td><td><code>build.yaml</code></td><td><a href="workflow.html#targets">ターゲット一覧</a></td><td>—</td></tr>
+<tr><td>ZMK・外部モジュールの版</td><td><code>config/west.yml</code></td><td><a href="workflow.html#modules">モジュール一覧</a></td><td>左右とも</td></tr>
+</tbody>
+</table>
+</div>
+<p>「書き込む側」の考え方は <a href="workflow.html#flash">開発フロー › 書き込み</a> にあります。キーマップは右だけが処理するので、キーマップ関係は右だけで済みます。</p>
+</section>
+
+<section>
+<h2 id="scroll">スクロール</h2>
+<p>スクロールのしかたは 3 通りあり、それぞれ調整する場所が違います。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>スクロールのしかた</th><th>量を変える場所</th></tr></thead>
+<tbody>
+<tr><td>エンコーダを回す（<code>&amp;ec_ms_l</code> / <code>&amp;ec_ms_r</code>）</td><td>1 回の発火で 1 ノッチ。発火の回数は <code>triggers-per-rotation</code>（いま <!-- gen:value of=encoder-triggers -->
+<code>24</code>
+<!-- /gen:value -->、1 回転あたり）で決まる。音量など他のエンコーダ操作も同じ値を使う。細かい量は OS のスクロール設定で調整する</td></tr>
+<tr><td>ポインタの動きをスクロールに変える（<code>zip_xy_to_scroll_mapper</code>）</td><td>右の overlay の <code>input-processors</code> で、前に <code>zip_xy_scaler</code> を置いて速さを変える（例: <code>&lt;&amp;zip_xy_scaler 1 3&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code>）</td></tr>
+<tr><td>キーにスクロールを割り当てる（<code>&amp;msc</code>）</td><td><code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code>（最大の速さ。いま <!-- gen:value of=scrl-val -->
+<code>150</code>
+<!-- /gen:value -->）と、<code>&amp;msc</code> の <code>time-to-max-speed-ms</code>（いま <!-- gen:value of=msc-time-to-max -->
+<code>0</code>
+<!-- /gen:value -->）・<code>acceleration-exponent</code>（いま <!-- gen:value of=msc-accel -->
+<code>0</code>
+<!-- /gen:value -->）</td></tr>
+</tbody>
+</table>
+</div>
+<aside class="callout warn">
+<p><strong>キーマップ冒頭の「スクロール量の調整」は、いまのエンコーダには効きません。</strong> <code>zmk_encoder</code> モジュールは、受け取った値の向きだけを使い、量は常に 1 ノッチにそろえるためです（モジュールのソースで確認）。この値が効くのは <code>&amp;msc</code> を割り当てたキーだけで、いまのキーマップにはそのキーがありません。詳しくは <a href="known-issues.html#issue-scrl-unused">既知の課題</a>。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="pointer">ポインタ</h2>
+<p>ポインタの動きは、右の overlay にある<strong>リスナー</strong>（<code>*_listener</code>）を通って PC に届きます。リスナーに <code>input-processors</code> を書くと、速さや向きを加工できます。左の入力も右のリスナー（<code>*_split_listener</code>）を通るので、<strong>左のトラックボールの調整も右の overlay に書きます</strong>（<a href="hardware.html#split">仕組み</a>）。</p>
+<!-- gen:input-listeners -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>overlay</th><th>リスナー</th><th>受ける入力</th><th>input-processors（有効）</th><th>コメントアウト中の例</th></tr></thead>
+<tbody>
+<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_listener</code> <span class="badge ok">この機体</span></td><td>右のトラックパッド</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
+<tr class="dim"><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_split_listener</code></td><td>左のトラックパッド（左から届く）</td><td>なし（そのまま）</td><td>—</td></tr>
+<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>trackball_split_listener</code> <span class="badge ok">この機体</span></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 1 3&gt;,&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
+<tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>trackball_listener</code></td><td>右のトラックボール</td><td><code>&lt;&amp;zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)&gt;</code></td><td>—</td></tr>
+<tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>glidepoint_split_listener</code></td><td>左のトラックパッド（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
+<tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>trackball_split_listener</code></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/sosho_R_*.overlay</code></p>
+</div>
+<!-- /gen:input-listeners -->
+
+<h3 id="processors">よく使う input-processors</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>書き方</th><th>効果</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td><td>速さを 分子 / 分母 倍にする。<code>2 1</code> なら 2 倍、<code>1 3</code> なら 1/3</td></tr>
+<tr><td><code>&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td><td>ポインタの動きをスクロールに変える</td></tr>
+<tr><td><code>&lt;&amp;zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)&gt;</code></td><td>向きを反転する（X だけ・Y だけも可）</td></tr>
+<tr><td><code>&lt;&amp;zip_xy_scaler 1 3&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td><td>カンマで区切って並べると、順に適用される</td></tr>
+</tbody>
+</table>
+</div>
+<p>たとえば左のトラックボールを半分の速さにするなら、この機体の右の overlay（<code>sosho_R_trackpad.overlay</code>）の <code>trackball_split_listener</code> に次の 1 行を足して、右に書き込みます。</p>
+<pre><code>&amp;trackball_split_listener {
+    status = "okay";
+    input-processors = &lt;&amp;zip_xy_scaler 1 2&gt;;
+};</code></pre>
+<p>ほかの input-processors は ZMK の公式ドキュメント（<a href="https://zmk.dev/docs/keymaps/input-processors">Input Processors</a>）にあります。トラックパッドの上下左右の向きは、デバイス側の <code>invert-x</code> / <code>invert-y</code> でも変えられます（<a href="hardware.html#pointing">ハードウェア › ポインティングデバイス</a>）。</p>
+</section>
+
+<section>
+<h2 id="encoder">エンコーダ</h2>
+<ul>
+<li><code>steps</code>（1 回転のパルス数）: <!-- gen:value of=encoder-steps -->
+<code>96</code>
+<!-- /gen:value --></li>
+<li><code>triggers-per-rotation</code>（1 回転で割り当てが動く回数）: <!-- gen:value of=encoder-triggers -->
+<code>24</code>
+<!-- /gen:value --></li>
+</ul>
+<p>1 クリックで 2 ノッチ動かしたいなら <code>triggers-per-rotation</code> を 2 倍にします。値は左右のエンコーダで共通です。速く回したときに取りこぼす場合は、Kconfig の <code>ZMK_BEHAVIORS_QUEUE_SIZE</code>（下の一覧）を見直します。</p>
+</section>
+
+<section>
+<h2 id="kconfig">Kconfig</h2>
+<p>各シールドの <code>*.conf</code> に書いてある設定の一覧です。「この機体」の 2 つを左に並べ、使っていない 2 つは後ろにあります。左端に色の線がある行は、ファイルによって値が違うか、書いていないファイルがある設定です。</p>
+<!-- gen:kconfig-matrix -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>設定</th><th><code>sosho_R_trackpad</code> <span class="badge ok">この機体</span></th><th><code>sosho_L_trackball</code> <span class="badge ok">この機体</span></th><th><code>sosho_R_trackball</code></th><th><code>sosho_L_trackpad</code></th></tr></thead>
+<tbody>
+<tr class="group"><td colspan="5"><strong>基本</strong></td></tr>
+<tr><td><code>ZMK_KEYBOARD_NAME</code><span class="note">キーボードの名前（Bluetooth の一覧に出る）</span></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td></tr>
+<tr class="group"><td colspan="5"><strong>Bluetooth</strong></td></tr>
+<tr><td><code>ZMK_BLE</code><span class="note">Bluetooth を使う</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
+<tr><td><code>BT_PERIPHERAL_PREF_TIMEOUT</code><span class="note">切断とみなすまでの時間</span></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">接続間隔の希望の下限。右では PC との接続、左では右との接続に効く</span></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">接続間隔の希望の上限</span></td><td>—</td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
+<tr class="group"><td colspan="5"><strong>ZMK Studio</strong></td></tr>
+<tr class="diff"><td><code>ZMK_STUDIO</code><span class="note">ZMK Studio を有効にする</span></td><td><code>y</code></td><td>—</td><td><code>y</code></td><td>—</td></tr>
+<tr class="diff"><td><code>ZMK_STUDIO_LOCKING</code><span class="note">Studio の編集ロック（n = ロックしない。いつでも編集できる）</span></td><td><code>n</code></td><td>—</td><td><code>n</code></td><td>—</td></tr>
+<tr class="group"><td colspan="5"><strong>エンコーダ</strong></td></tr>
+<tr><td><code>EC11</code><span class="note">EC11 ロータリーエンコーダのドライバ</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>EC11_TRIGGER_GLOBAL_THREAD</code><span class="note">エンコーダの割り込みを共有のスレッドで処理する</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>ZMK_BEHAVIORS_QUEUE_SIZE</code><span class="note">behavior の待ち行列の長さ（既定 64）。エンコーダを速く回したときの取りこぼし対策</span></td><td><code>128</code></td><td><code>128</code></td><td><code>128</code></td><td><code>128</code></td></tr>
+<tr class="diff"><td><code>USB_HID_POLL_INTERVAL_MS</code><span class="note">USB HID の問い合わせ間隔 (ms)</span></td><td>—</td><td>—</td><td>—</td><td><code>1</code> <small>ms</small></td></tr>
+<tr class="group"><td colspan="5"><strong>ポインタ</strong></td></tr>
+<tr><td><code>ZMK_MOUSE</code><span class="note">マウス機能の旧名（非推奨。ZMK_POINTING と同じ意味）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>ZMK_POINTING</code><span class="note">マウス・ポインタ機能</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>SPI</code><span class="note">SPI バス（トラックパッド・トラックボールの接続に使う）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>INPUT</code><span class="note">Zephyr の入力サブシステム</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr class="diff"><td><code>INPUT_INIT_PRIORITY</code><span class="note">入力デバイスを初期化する順番（小さいほど先）</span></td><td><code>99</code></td><td><code>99</code></td><td><code>99</code></td><td><code>50</code></td></tr>
+<tr class="diff"><td><code>INPUT_PINNACLE</code><span class="note">Cirque Pinnacle（トラックパッド）のドライバ</span></td><td><code>y</code></td><td>—</td><td>—</td><td><code>y</code></td></tr>
+<tr class="diff"><td><code>PMW3610_ALT</code><span class="note">PMW3610（トラックボール）のドライバ</span></td><td>—</td><td><code>y</code></td><td><code>y</code></td><td>—</td></tr>
+<tr class="diff"><td><code>PMW3610_ALT_REPORT_INTERVAL_MIN</code><span class="note">トラックボールの報告間隔の下限（既定 0）。無線で送りきれるよう間引く</span></td><td>—</td><td><code>12</code> <small>ms</small></td><td><code>12</code> <small>ms</small></td><td>—</td></tr>
+<tr class="group"><td colspan="5"><strong>ハードウェア</strong></td></tr>
+<tr><td><code>NFCT_PINS_AS_GPIOS</code><span class="note">NFC 用のピン（P0.09・P0.10）を普通のピンとして使う。列のピンに使っているので必須</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr class="group"><td colspan="5"><strong>LED</strong></td></tr>
+<tr><td><code>RGBLED_WIDGET</code><span class="note">RGB LED で電池残量と接続状態を表示する</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>RGBLED_WIDGET_BATTERY_LEVEL_HIGH</code><span class="note">電池残量の色分けで「多い」とする下限 %（既定 80）</span></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td></tr>
+<tr><td><code>RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL</code><span class="note">電池残量の色分けで「危険」とする上限 %（既定 5）</span></td><td><code>10</code> <small>%</small></td><td><code>10</code> <small>%</small></td><td><code>10</code> <small>%</small></td><td><code>10</code> <small>%</small></td></tr>
+<tr class="group"><td colspan="5"><strong>電池・電源</strong></td></tr>
+<tr><td><code>ZMK_BATTERY_REPORTING</code><span class="note">電池残量を測って報告する</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>ZMK_SLEEP</code><span class="note">操作が無いと deep sleep に入る（既定 15 分）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>BT_BAS</code><span class="note">Bluetooth の電池残量サービス（PC に残量を見せる）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr class="diff"><td><code>ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_PROXY</code><span class="note">左の電池残量も PC に見せる</span></td><td><code>y</code></td><td>—</td><td><code>y</code></td><td>—</td></tr>
+<tr class="diff"><td><code>ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING</code><span class="note">左の電池残量を右が取得する</span></td><td><code>y</code></td><td>—</td><td><code>y</code></td><td>—</td></tr>
+<tr class="group"><td colspan="5"><strong>その他</strong></td></tr>
+<tr class="diff"><td><code>ZMK_USB_LOGGING</code><span class="note">USB 経由のログ出力</span></td><td><code>n</code></td><td>—</td><td><code>n</code></td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/*.conf</code>（CONFIG_ は省略）</p>
+</div>
+<!-- /gen:kconfig-matrix -->
+
+<h3 id="defconfig">シールドの既定値</h3>
+<p><code>Kconfig.defconfig</code> で、シールドごとに必ず入る既定値です。<code>*.conf</code> で上書きしない限りこの値になります。</p>
+<!-- gen:kconfig-defaults -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>側</th><th>設定</th><th>既定値</th><th>説明</th></tr></thead>
+<tbody>
+<tr><td>右</td><td><code>ZMK_KEYBOARD_NAME</code></td><td><code>&quot;sosho&quot;</code></td><td>キーボードの名前（Bluetooth の一覧に出る）</td></tr>
+<tr><td>右</td><td><code>ZMK_SPLIT</code></td><td><code>y</code></td><td>分割キーボードとして動く</td></tr>
+<tr><td>右</td><td><code>ZMK_SPLIT_ROLE_CENTRAL</code></td><td><code>y</code></td><td>セントラル（PC と繋がる側）として動く</td></tr>
+<tr><td>右</td><td><code>ZMK_POINTING</code></td><td><code>y</code></td><td>マウス・ポインタ機能</td></tr>
+<tr><td>右</td><td><code>SPI</code></td><td><code>y</code></td><td>SPI バス（トラックパッド・トラックボールの接続に使う）</td></tr>
+<tr><td>左</td><td><code>ZMK_KEYBOARD_NAME</code></td><td><code>&quot;sosho&quot;</code></td><td>キーボードの名前（Bluetooth の一覧に出る）</td></tr>
+<tr><td>左</td><td><code>ZMK_SPLIT</code></td><td><code>y</code></td><td>分割キーボードとして動く</td></tr>
+<tr><td>左</td><td><code>INPUT</code></td><td><code>y</code></td><td>Zephyr の入力サブシステム</td></tr>
+<tr><td>左</td><td><code>ZMK_POINTING</code></td><td><code>y</code></td><td>マウス・ポインタ機能</td></tr>
+<tr><td>左</td><td><code>SPI</code></td><td><code>y</code></td><td>SPI バス（トラックパッド・トラックボールの接続に使う）</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/Kconfig.defconfig</code></p>
+</div>
+<!-- /gen:kconfig-defaults -->
+</section>
+</main>
+</div>
+</body>
+</html>

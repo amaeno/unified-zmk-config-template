@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>キーマップ — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="レイヤー図・キー位置番号・コンボ・エンコーダの割り当て">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html" aria-current="page">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><span class="nav-todo">機能<small>準備中</small></span></li>
+<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+</ul>
+</nav>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>キーマップ</h1>
+<p class="lead"><code>config/sosho.keymap</code> の中身を図にしたものです。レイヤーごとの割り当て、コンボで使うキー位置番号、エンコーダの動きをまとめています。</p>
+</header>
+
+<aside class="callout warn">
+<p><strong>ZMK Studio で変えた割り当ては、この図に出ません。</strong> この図はファイルの内容です。Studio で変更した内容はキーボード側に保存され、ファイルより優先されます（<a href="workflow.html#decide">開発フロー › ビルドが要るか</a>）。</p>
+</aside>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#positions">キー位置番号</a></li>
+<li><a href="#layers">レイヤー</a></li>
+<li><a href="#combos">コンボ</a></li>
+<li><a href="#encoder">エンコーダ</a></li>
+<li><a href="#behaviors">キーマップで定義しているもの</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="positions">キー位置番号</h2>
+<p>コンボの <code>key-positions</code> などで使う番号です。キーの左上の小さい数字も同じ番号です。左手が 0〜5・12〜17・24〜29・36〜39、右手が 6〜11・18〜23・30〜35・40〜43 で、最下段は左右とも内側 2 キーぶんが欠けています。</p>
+<!-- gen:key-positions -->
+<div class="gen">
+<div class="kb-scroll">
+<div class="kb" role="img" aria-label="キー位置番号" style="aspect-ratio: 1300 / 400">
+<div class="key positions" style="left:0%;top:0%;width:7.692%;height:25%"><span class="pos">0</span><span class="main">0</span><span class="sub">Tab</span></div>
+<div class="key positions" style="left:7.692%;top:0%;width:7.692%;height:25%"><span class="pos">1</span><span class="main">1</span><span class="sub">Q</span></div>
+<div class="key positions" style="left:15.385%;top:0%;width:7.692%;height:25%"><span class="pos">2</span><span class="main">2</span><span class="sub">W</span></div>
+<div class="key positions" style="left:23.077%;top:0%;width:7.692%;height:25%"><span class="pos">3</span><span class="main">3</span><span class="sub">E</span></div>
+<div class="key positions" style="left:30.769%;top:0%;width:7.692%;height:25%"><span class="pos">4</span><span class="main">4</span><span class="sub">R</span></div>
+<div class="key positions" style="left:38.462%;top:0%;width:7.692%;height:25%"><span class="pos">5</span><span class="main">5</span><span class="sub">T</span></div>
+<div class="key positions" style="left:53.846%;top:0%;width:7.692%;height:25%"><span class="pos">6</span><span class="main">6</span><span class="sub">Y</span></div>
+<div class="key positions" style="left:61.538%;top:0%;width:7.692%;height:25%"><span class="pos">7</span><span class="main">7</span><span class="sub">U</span></div>
+<div class="key positions" style="left:69.231%;top:0%;width:7.692%;height:25%"><span class="pos">8</span><span class="main">8</span><span class="sub">I</span></div>
+<div class="key positions" style="left:76.923%;top:0%;width:7.692%;height:25%"><span class="pos">9</span><span class="main">9</span><span class="sub">O</span></div>
+<div class="key positions" style="left:84.615%;top:0%;width:7.692%;height:25%"><span class="pos">10</span><span class="main">10</span><span class="sub">P</span></div>
+<div class="key positions" style="left:92.308%;top:0%;width:7.692%;height:25%"><span class="pos">11</span><span class="main">11</span><span class="sub">BS</span></div>
+<div class="key positions" style="left:0%;top:25%;width:7.692%;height:25%"><span class="pos">12</span><span class="main">12</span><span class="sub">Ctrl</span></div>
+<div class="key positions" style="left:7.692%;top:25%;width:7.692%;height:25%"><span class="pos">13</span><span class="main">13</span><span class="sub">A</span></div>
+<div class="key positions" style="left:15.385%;top:25%;width:7.692%;height:25%"><span class="pos">14</span><span class="main">14</span><span class="sub">S</span></div>
+<div class="key positions" style="left:23.077%;top:25%;width:7.692%;height:25%"><span class="pos">15</span><span class="main">15</span><span class="sub">D</span></div>
+<div class="key positions" style="left:30.769%;top:25%;width:7.692%;height:25%"><span class="pos">16</span><span class="main">16</span><span class="sub">F</span></div>
+<div class="key positions" style="left:38.462%;top:25%;width:7.692%;height:25%"><span class="pos">17</span><span class="main">17</span><span class="sub">G</span></div>
+<div class="key positions" style="left:53.846%;top:25%;width:7.692%;height:25%"><span class="pos">18</span><span class="main">18</span><span class="sub">H</span></div>
+<div class="key positions" style="left:61.538%;top:25%;width:7.692%;height:25%"><span class="pos">19</span><span class="main">19</span><span class="sub">J</span></div>
+<div class="key positions" style="left:69.231%;top:25%;width:7.692%;height:25%"><span class="pos">20</span><span class="main">20</span><span class="sub">K</span></div>
+<div class="key positions" style="left:76.923%;top:25%;width:7.692%;height:25%"><span class="pos">21</span><span class="main">21</span><span class="sub">L</span></div>
+<div class="key positions" style="left:84.615%;top:25%;width:7.692%;height:25%"><span class="pos">22</span><span class="main">22</span><span class="sub">&#x27;</span></div>
+<div class="key positions" style="left:92.308%;top:25%;width:7.692%;height:25%"><span class="pos">23</span><span class="main">23</span><span class="sub">Enter</span></div>
+<div class="key positions" style="left:0%;top:50%;width:7.692%;height:25%"><span class="pos">24</span><span class="main">24</span><span class="sub">Shift</span></div>
+<div class="key positions" style="left:7.692%;top:50%;width:7.692%;height:25%"><span class="pos">25</span><span class="main">25</span><span class="sub">Z</span></div>
+<div class="key positions" style="left:15.385%;top:50%;width:7.692%;height:25%"><span class="pos">26</span><span class="main">26</span><span class="sub">X</span></div>
+<div class="key positions" style="left:23.077%;top:50%;width:7.692%;height:25%"><span class="pos">27</span><span class="main">27</span><span class="sub">C</span></div>
+<div class="key positions" style="left:30.769%;top:50%;width:7.692%;height:25%"><span class="pos">28</span><span class="main">28</span><span class="sub">V</span></div>
+<div class="key positions" style="left:38.462%;top:50%;width:7.692%;height:25%"><span class="pos">29</span><span class="main">29</span><span class="sub">B</span></div>
+<div class="key positions" style="left:53.846%;top:50%;width:7.692%;height:25%"><span class="pos">30</span><span class="main">30</span><span class="sub">N</span></div>
+<div class="key positions" style="left:61.538%;top:50%;width:7.692%;height:25%"><span class="pos">31</span><span class="main">31</span><span class="sub">M</span></div>
+<div class="key positions" style="left:69.231%;top:50%;width:7.692%;height:25%"><span class="pos">32</span><span class="main">32</span><span class="sub">,</span></div>
+<div class="key positions" style="left:76.923%;top:50%;width:7.692%;height:25%"><span class="pos">33</span><span class="main">33</span><span class="sub">.</span></div>
+<div class="key positions" style="left:84.615%;top:50%;width:7.692%;height:25%"><span class="pos">34</span><span class="main">34</span><span class="sub">/</span></div>
+<div class="key positions" style="left:92.308%;top:50%;width:7.692%;height:25%"><span class="pos">35</span><span class="main">35</span><span class="sub">Shift</span></div>
+<div class="key positions" style="left:0%;top:75%;width:7.692%;height:25%"><span class="pos">36</span><span class="main">36</span><span class="sub">Esc</span></div>
+<div class="key positions" style="left:7.692%;top:75%;width:7.692%;height:25%"><span class="pos">37</span><span class="main">37</span><span class="sub">Alt</span></div>
+<div class="key positions" style="left:30.769%;top:75%;width:7.692%;height:25%"><span class="pos">38</span><span class="main">38</span><span class="sub">L2</span></div>
+<div class="key positions" style="left:38.462%;top:75%;width:7.692%;height:25%"><span class="pos">39</span><span class="main">39</span><span class="sub">Space</span></div>
+<div class="key positions" style="left:53.846%;top:75%;width:7.692%;height:25%"><span class="pos">40</span><span class="main">40</span><span class="sub">L1</span></div>
+<div class="key positions" style="left:61.538%;top:75%;width:7.692%;height:25%"><span class="pos">41</span><span class="main">41</span><span class="sub">Alt+`</span></div>
+<div class="key positions" style="left:84.615%;top:75%;width:7.692%;height:25%"><span class="pos">42</span><span class="main">42</span><span class="sub">L3</span></div>
+<div class="key positions" style="left:92.308%;top:75%;width:7.692%;height:25%"><span class="pos">43</span><span class="main">43</span><span class="sub">GUI</span></div>
+</div>
+</div>
+<details>
+<summary>テキスト版（コピー用・AI 用）</summary>
+<pre><code>   0   1   2   3   4   5  │   6   7   8   9  10  11
+  12  13  14  15  16  17  │  18  19  20  21  22  23
+  24  25  26  27  28  29  │  30  31  32  33  34  35
+  36  37          38  39  │  40  41          42  43
+
+   Tab     Q     W     E     R     T  │     Y     U     I     O     P    BS
+  Ctrl     A     S     D     F     G  │     H     J     K     L     &#x27; Enter
+ Shift     Z     X     C     V     B  │     N     M     ,     .     / Shift
+   Esc   Alt                L2 Space  │    L1 Alt+`                L3   GUI</code></pre>
+</details>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/sosho-layouts.dtsi</code>、<code>config/sosho.keymap</code>（下段は L0 の割り当て）</p>
+</div>
+<!-- /gen:key-positions -->
+</section>
+
+<section>
+<h2 id="layers">レイヤー</h2>
+<ul class="legend">
+<li><span class="swatch"></span>通常のキー</li>
+<li><span class="swatch layer"></span>レイヤーの切り替え（L1 = レイヤー 1）</li>
+<li><span class="swatch mouse"></span>マウス操作</li>
+<li><span class="swatch system"></span>Bluetooth・出力先などのシステム操作</li>
+<li><span class="swatch trans"></span>透過（下のレイヤーと同じ。薄い文字が実際に効くキー）</li>
+</ul>
+<!-- gen:keymap-layers -->
+<div class="gen">
+<section class="layer" id="layer-0">
+<h3>L0 <code>default_layer</code></h3>
+<p class="layer-how">いちばん下のレイヤー（常に有効）</p>
+<div class="kb-scroll">
+<div class="kb" role="img" aria-label="レイヤー L0 default_layer" style="aspect-ratio: 1300 / 400">
+<div class="key" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;kp TAB"><span class="pos">0</span><span class="main">Tab</span></div>
+<div class="key" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;kp Q"><span class="pos">1</span><span class="main">Q</span></div>
+<div class="key" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;kp W"><span class="pos">2</span><span class="main">W</span></div>
+<div class="key" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;kp E"><span class="pos">3</span><span class="main">E</span></div>
+<div class="key" style="left:30.769%;top:0%;width:7.692%;height:25%" title="&amp;kp R"><span class="pos">4</span><span class="main">R</span></div>
+<div class="key" style="left:38.462%;top:0%;width:7.692%;height:25%" title="&amp;kp T"><span class="pos">5</span><span class="main">T</span></div>
+<div class="key" style="left:53.846%;top:0%;width:7.692%;height:25%" title="&amp;kp Y"><span class="pos">6</span><span class="main">Y</span></div>
+<div class="key" style="left:61.538%;top:0%;width:7.692%;height:25%" title="&amp;kp U"><span class="pos">7</span><span class="main">U</span></div>
+<div class="key" style="left:69.231%;top:0%;width:7.692%;height:25%" title="&amp;kp I"><span class="pos">8</span><span class="main">I</span></div>
+<div class="key" style="left:76.923%;top:0%;width:7.692%;height:25%" title="&amp;kp O"><span class="pos">9</span><span class="main">O</span></div>
+<div class="key" style="left:84.615%;top:0%;width:7.692%;height:25%" title="&amp;kp P"><span class="pos">10</span><span class="main">P</span></div>
+<div class="key" style="left:92.308%;top:0%;width:7.692%;height:25%" title="&amp;kp BSPC"><span class="pos">11</span><span class="main">BS</span></div>
+<div class="key" style="left:0%;top:25%;width:7.692%;height:25%" title="&amp;kp LCTRL"><span class="pos">12</span><span class="main">Ctrl</span></div>
+<div class="key" style="left:7.692%;top:25%;width:7.692%;height:25%" title="&amp;kp A"><span class="pos">13</span><span class="main">A</span></div>
+<div class="key" style="left:15.385%;top:25%;width:7.692%;height:25%" title="&amp;kp S"><span class="pos">14</span><span class="main">S</span></div>
+<div class="key" style="left:23.077%;top:25%;width:7.692%;height:25%" title="&amp;kp D"><span class="pos">15</span><span class="main">D</span></div>
+<div class="key" style="left:30.769%;top:25%;width:7.692%;height:25%" title="&amp;kp F"><span class="pos">16</span><span class="main">F</span></div>
+<div class="key" style="left:38.462%;top:25%;width:7.692%;height:25%" title="&amp;kp G"><span class="pos">17</span><span class="main">G</span></div>
+<div class="key" style="left:53.846%;top:25%;width:7.692%;height:25%" title="&amp;kp H"><span class="pos">18</span><span class="main">H</span></div>
+<div class="key" style="left:61.538%;top:25%;width:7.692%;height:25%" title="&amp;kp J"><span class="pos">19</span><span class="main">J</span></div>
+<div class="key" style="left:69.231%;top:25%;width:7.692%;height:25%" title="&amp;kp K"><span class="pos">20</span><span class="main">K</span></div>
+<div class="key" style="left:76.923%;top:25%;width:7.692%;height:25%" title="&amp;kp L"><span class="pos">21</span><span class="main">L</span></div>
+<div class="key" style="left:84.615%;top:25%;width:7.692%;height:25%" title="&amp;kp SQT"><span class="pos">22</span><span class="main">&#x27;</span></div>
+<div class="key" style="left:92.308%;top:25%;width:7.692%;height:25%" title="&amp;kp ENTER"><span class="pos">23</span><span class="main">Enter</span></div>
+<div class="key" style="left:0%;top:50%;width:7.692%;height:25%" title="&amp;kp LSHFT"><span class="pos">24</span><span class="main">Shift</span></div>
+<div class="key" style="left:7.692%;top:50%;width:7.692%;height:25%" title="&amp;kp Z"><span class="pos">25</span><span class="main">Z</span></div>
+<div class="key" style="left:15.385%;top:50%;width:7.692%;height:25%" title="&amp;kp X"><span class="pos">26</span><span class="main">X</span></div>
+<div class="key" style="left:23.077%;top:50%;width:7.692%;height:25%" title="&amp;kp C"><span class="pos">27</span><span class="main">C</span></div>
+<div class="key" style="left:30.769%;top:50%;width:7.692%;height:25%" title="&amp;kp V"><span class="pos">28</span><span class="main">V</span></div>
+<div class="key" style="left:38.462%;top:50%;width:7.692%;height:25%" title="&amp;kp B"><span class="pos">29</span><span class="main">B</span></div>
+<div class="key" style="left:53.846%;top:50%;width:7.692%;height:25%" title="&amp;kp N"><span class="pos">30</span><span class="main">N</span></div>
+<div class="key" style="left:61.538%;top:50%;width:7.692%;height:25%" title="&amp;kp M"><span class="pos">31</span><span class="main">M</span></div>
+<div class="key" style="left:69.231%;top:50%;width:7.692%;height:25%" title="&amp;kp COMMA"><span class="pos">32</span><span class="main">,</span></div>
+<div class="key" style="left:76.923%;top:50%;width:7.692%;height:25%" title="&amp;kp DOT"><span class="pos">33</span><span class="main">.</span></div>
+<div class="key" style="left:84.615%;top:50%;width:7.692%;height:25%" title="&amp;kp SLASH"><span class="pos">34</span><span class="main">/</span></div>
+<div class="key" style="left:92.308%;top:50%;width:7.692%;height:25%" title="&amp;kp LSHFT"><span class="pos">35</span><span class="main">Shift</span></div>
+<div class="key" style="left:0%;top:75%;width:7.692%;height:25%" title="&amp;kp ESC"><span class="pos">36</span><span class="main">Esc</span></div>
+<div class="key" style="left:7.692%;top:75%;width:7.692%;height:25%" title="&amp;kp LALT"><span class="pos">37</span><span class="main">Alt</span></div>
+<div class="key layer" style="left:30.769%;top:75%;width:7.692%;height:25%" title="&amp;mo 2"><span class="pos">38</span><span class="main">L2</span><span class="sub">押している間</span></div>
+<div class="key" style="left:38.462%;top:75%;width:7.692%;height:25%" title="&amp;kp SPACE"><span class="pos">39</span><span class="main">Space</span></div>
+<div class="key layer" style="left:53.846%;top:75%;width:7.692%;height:25%" title="&amp;mo 1"><span class="pos">40</span><span class="main">L1</span><span class="sub">押している間</span></div>
+<div class="key" style="left:61.538%;top:75%;width:7.692%;height:25%" title="&amp;kp LA(GRAVE)"><span class="pos">41</span><span class="main">Alt+`</span></div>
+<div class="key layer" style="left:84.615%;top:75%;width:7.692%;height:25%" title="&amp;mo 3"><span class="pos">42</span><span class="main">L3</span><span class="sub">押している間</span></div>
+<div class="key" style="left:92.308%;top:75%;width:7.692%;height:25%" title="&amp;kp LGUI"><span class="pos">43</span><span class="main">GUI</span></div>
+</div>
+</div>
+<ul class="sensors">
+<li>左エンコーダ: 時計回り → <strong>スクロール←</strong> ／ 反時計回り → <strong>スクロール→</strong> <small>&amp;ec_ms_l</small></li>
+<li>右エンコーダ: 時計回り → <strong>スクロール↓</strong> ／ 反時計回り → <strong>スクロール↑</strong> <small>&amp;ec_ms_r</small></li>
+</ul>
+</section>
+<section class="layer" id="layer-1">
+<h3>L1 <code>layer_1</code></h3>
+<p class="layer-how">L0 の 40 番（押している間）</p>
+<div class="kb-scroll">
+<div class="kb" role="img" aria-label="レイヤー L1 layer_1" style="aspect-ratio: 1300 / 400">
+<div class="key" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;kp GRAVE"><span class="pos">0</span><span class="main">`</span></div>
+<div class="key" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;kp N1"><span class="pos">1</span><span class="main">1</span></div>
+<div class="key" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;kp N2"><span class="pos">2</span><span class="main">2</span></div>
+<div class="key" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;kp N3"><span class="pos">3</span><span class="main">3</span></div>
+<div class="key" style="left:30.769%;top:0%;width:7.692%;height:25%" title="&amp;kp N4"><span class="pos">4</span><span class="main">4</span></div>
+<div class="key" style="left:38.462%;top:0%;width:7.692%;height:25%" title="&amp;kp N5"><span class="pos">5</span><span class="main">5</span></div>
+<div class="key" style="left:53.846%;top:0%;width:7.692%;height:25%" title="&amp;kp N6"><span class="pos">6</span><span class="main">6</span></div>
+<div class="key" style="left:61.538%;top:0%;width:7.692%;height:25%" title="&amp;kp N7"><span class="pos">7</span><span class="main">7</span></div>
+<div class="key" style="left:69.231%;top:0%;width:7.692%;height:25%" title="&amp;kp N8"><span class="pos">8</span><span class="main">8</span></div>
+<div class="key" style="left:76.923%;top:0%;width:7.692%;height:25%" title="&amp;kp N9"><span class="pos">9</span><span class="main">9</span></div>
+<div class="key" style="left:84.615%;top:0%;width:7.692%;height:25%" title="&amp;kp N0"><span class="pos">10</span><span class="main">0</span></div>
+<div class="key" style="left:92.308%;top:0%;width:7.692%;height:25%" title="&amp;kp DEL"><span class="pos">11</span><span class="main">Del</span></div>
+<div class="key trans" style="left:0%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LCTRL）"><span class="pos">12</span><span class="main">Ctrl</span></div>
+<div class="key trans" style="left:7.692%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp A）"><span class="pos">13</span><span class="main">A</span></div>
+<div class="key trans" style="left:15.385%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp S）"><span class="pos">14</span><span class="main">S</span></div>
+<div class="key trans" style="left:23.077%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp D）"><span class="pos">15</span><span class="main">D</span></div>
+<div class="key trans" style="left:30.769%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp F）"><span class="pos">16</span><span class="main">F</span></div>
+<div class="key trans" style="left:38.462%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp G）"><span class="pos">17</span><span class="main">G</span></div>
+<div class="key" style="left:53.846%;top:25%;width:7.692%;height:25%" title="&amp;kp PG_UP"><span class="pos">18</span><span class="main">PgUp</span></div>
+<div class="key" style="left:61.538%;top:25%;width:7.692%;height:25%" title="&amp;kp HOME"><span class="pos">19</span><span class="main">Home</span></div>
+<div class="key" style="left:69.231%;top:25%;width:7.692%;height:25%" title="&amp;kp UP"><span class="pos">20</span><span class="main">↑</span></div>
+<div class="key" style="left:76.923%;top:25%;width:7.692%;height:25%" title="&amp;kp END"><span class="pos">21</span><span class="main">End</span></div>
+<div class="key trans" style="left:84.615%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SQT）"><span class="pos">22</span><span class="main">&#x27;</span></div>
+<div class="key trans" style="left:92.308%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp ENTER）"><span class="pos">23</span><span class="main">Enter</span></div>
+<div class="key trans" style="left:0%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LSHFT）"><span class="pos">24</span><span class="main">Shift</span></div>
+<div class="key trans" style="left:7.692%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp Z）"><span class="pos">25</span><span class="main">Z</span></div>
+<div class="key trans" style="left:15.385%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp X）"><span class="pos">26</span><span class="main">X</span></div>
+<div class="key trans" style="left:23.077%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp C）"><span class="pos">27</span><span class="main">C</span></div>
+<div class="key trans" style="left:30.769%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp V）"><span class="pos">28</span><span class="main">V</span></div>
+<div class="key trans" style="left:38.462%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp B）"><span class="pos">29</span><span class="main">B</span></div>
+<div class="key" style="left:53.846%;top:50%;width:7.692%;height:25%" title="&amp;kp PG_DN"><span class="pos">30</span><span class="main">PgDn</span></div>
+<div class="key" style="left:61.538%;top:50%;width:7.692%;height:25%" title="&amp;kp LEFT"><span class="pos">31</span><span class="main">←</span></div>
+<div class="key" style="left:69.231%;top:50%;width:7.692%;height:25%" title="&amp;kp DOWN"><span class="pos">32</span><span class="main">↓</span></div>
+<div class="key" style="left:76.923%;top:50%;width:7.692%;height:25%" title="&amp;kp RIGHT"><span class="pos">33</span><span class="main">→</span></div>
+<div class="key trans" style="left:84.615%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SLASH）"><span class="pos">34</span><span class="main">/</span></div>
+<div class="key trans" style="left:92.308%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LSHFT）"><span class="pos">35</span><span class="main">Shift</span></div>
+<div class="key trans" style="left:0%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp ESC）"><span class="pos">36</span><span class="main">Esc</span></div>
+<div class="key trans" style="left:7.692%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LALT）"><span class="pos">37</span><span class="main">Alt</span></div>
+<div class="key trans" style="left:30.769%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 2）"><span class="pos">38</span><span class="main">L2</span></div>
+<div class="key trans" style="left:38.462%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SPACE）"><span class="pos">39</span><span class="main">Space</span></div>
+<div class="key trans" style="left:53.846%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 1）"><span class="pos">40</span><span class="main">L1</span></div>
+<div class="key trans" style="left:61.538%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LA(GRAVE)）"><span class="pos">41</span><span class="main">Alt+`</span></div>
+<div class="key trans" style="left:84.615%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 3）"><span class="pos">42</span><span class="main">L3</span></div>
+<div class="key trans" style="left:92.308%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LGUI）"><span class="pos">43</span><span class="main">GUI</span></div>
+</div>
+</div>
+<p class="sensors">エンコーダ: このレイヤーには割り当てなし（L0 の割り当てが効く）</p>
+</section>
+<section class="layer" id="layer-2">
+<h3>L2 <code>layer_2</code></h3>
+<p class="layer-how">L0 の 38 番（押している間）</p>
+<div class="kb-scroll">
+<div class="kb" role="img" aria-label="レイヤー L2 layer_2" style="aspect-ratio: 1300 / 400">
+<div class="key trans" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp TAB）"><span class="pos">0</span><span class="main">Tab</span></div>
+<div class="key" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;kp F1"><span class="pos">1</span><span class="main">F1</span></div>
+<div class="key" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;kp F2"><span class="pos">2</span><span class="main">F2</span></div>
+<div class="key" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;kp F3"><span class="pos">3</span><span class="main">F3</span></div>
+<div class="key" style="left:30.769%;top:0%;width:7.692%;height:25%" title="&amp;kp F4"><span class="pos">4</span><span class="main">F4</span></div>
+<div class="key" style="left:38.462%;top:0%;width:7.692%;height:25%" title="&amp;kp F5"><span class="pos">5</span><span class="main">F5</span></div>
+<div class="key trans" style="left:53.846%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp Y）"><span class="pos">6</span><span class="main">Y</span></div>
+<div class="key trans" style="left:61.538%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp U）"><span class="pos">7</span><span class="main">U</span></div>
+<div class="key" style="left:69.231%;top:0%;width:7.692%;height:25%" title="&amp;kp MINUS"><span class="pos">8</span><span class="main">-</span></div>
+<div class="key" style="left:76.923%;top:0%;width:7.692%;height:25%" title="&amp;kp EQUAL"><span class="pos">9</span><span class="main">=</span></div>
+<div class="key trans" style="left:84.615%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp P）"><span class="pos">10</span><span class="main">P</span></div>
+<div class="key trans" style="left:92.308%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp BSPC）"><span class="pos">11</span><span class="main">BS</span></div>
+<div class="key trans" style="left:0%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LCTRL）"><span class="pos">12</span><span class="main">Ctrl</span></div>
+<div class="key" style="left:7.692%;top:25%;width:7.692%;height:25%" title="&amp;kp F6"><span class="pos">13</span><span class="main">F6</span></div>
+<div class="key" style="left:15.385%;top:25%;width:7.692%;height:25%" title="&amp;kp F7"><span class="pos">14</span><span class="main">F7</span></div>
+<div class="key" style="left:23.077%;top:25%;width:7.692%;height:25%" title="&amp;kp F8"><span class="pos">15</span><span class="main">F8</span></div>
+<div class="key" style="left:30.769%;top:25%;width:7.692%;height:25%" title="&amp;kp F9"><span class="pos">16</span><span class="main">F9</span></div>
+<div class="key" style="left:38.462%;top:25%;width:7.692%;height:25%" title="&amp;kp F10"><span class="pos">17</span><span class="main">F10</span></div>
+<div class="key trans" style="left:53.846%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp H）"><span class="pos">18</span><span class="main">H</span></div>
+<div class="key" style="left:61.538%;top:25%;width:7.692%;height:25%" title="&amp;kp LBKT"><span class="pos">19</span><span class="main">[</span></div>
+<div class="key" style="left:69.231%;top:25%;width:7.692%;height:25%" title="&amp;kp RBKT"><span class="pos">20</span><span class="main">]</span></div>
+<div class="key" style="left:76.923%;top:25%;width:7.692%;height:25%" title="&amp;kp NUBS"><span class="pos">21</span><span class="main">ISO \</span></div>
+<div class="key trans" style="left:84.615%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SQT）"><span class="pos">22</span><span class="main">&#x27;</span></div>
+<div class="key trans" style="left:92.308%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp ENTER）"><span class="pos">23</span><span class="main">Enter</span></div>
+<div class="key trans" style="left:0%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LSHFT）"><span class="pos">24</span><span class="main">Shift</span></div>
+<div class="key" style="left:7.692%;top:50%;width:7.692%;height:25%" title="&amp;kp F11"><span class="pos">25</span><span class="main">F11</span></div>
+<div class="key" style="left:15.385%;top:50%;width:7.692%;height:25%" title="&amp;kp F12"><span class="pos">26</span><span class="main">F12</span></div>
+<div class="key" style="left:23.077%;top:50%;width:7.692%;height:25%" title="&amp;kp F13"><span class="pos">27</span><span class="main">F13</span></div>
+<div class="key" style="left:30.769%;top:50%;width:7.692%;height:25%" title="&amp;kp F14"><span class="pos">28</span><span class="main">F14</span></div>
+<div class="key" style="left:38.462%;top:50%;width:7.692%;height:25%" title="&amp;kp F15"><span class="pos">29</span><span class="main">F15</span></div>
+<div class="key trans" style="left:53.846%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp N）"><span class="pos">30</span><span class="main">N</span></div>
+<div class="key" style="left:61.538%;top:50%;width:7.692%;height:25%" title="&amp;kp SEMI"><span class="pos">31</span><span class="main">;</span></div>
+<div class="key" style="left:69.231%;top:50%;width:7.692%;height:25%" title="&amp;kp SQT"><span class="pos">32</span><span class="main">&#x27;</span></div>
+<div class="key trans" style="left:76.923%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp DOT）"><span class="pos">33</span><span class="main">.</span></div>
+<div class="key" style="left:84.615%;top:50%;width:7.692%;height:25%" title="&amp;kp QMARK"><span class="pos">34</span><span class="main">?</span></div>
+<div class="key" style="left:92.308%;top:50%;width:7.692%;height:25%" title="&amp;kp BSLH"><span class="pos">35</span><span class="main">\</span></div>
+<div class="key trans" style="left:0%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp ESC）"><span class="pos">36</span><span class="main">Esc</span></div>
+<div class="key trans" style="left:7.692%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LALT）"><span class="pos">37</span><span class="main">Alt</span></div>
+<div class="key trans" style="left:30.769%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 2）"><span class="pos">38</span><span class="main">L2</span></div>
+<div class="key trans" style="left:38.462%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SPACE）"><span class="pos">39</span><span class="main">Space</span></div>
+<div class="key trans" style="left:53.846%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 1）"><span class="pos">40</span><span class="main">L1</span></div>
+<div class="key trans" style="left:61.538%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LA(GRAVE)）"><span class="pos">41</span><span class="main">Alt+`</span></div>
+<div class="key trans" style="left:84.615%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 3）"><span class="pos">42</span><span class="main">L3</span></div>
+<div class="key trans" style="left:92.308%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LGUI）"><span class="pos">43</span><span class="main">GUI</span></div>
+</div>
+</div>
+<ul class="sensors">
+<li>左エンコーダ: 時計回り → <strong>音量−</strong> ／ 反時計回り → <strong>音量+</strong> <small>&amp;inc_dec_kp</small></li>
+<li>右エンコーダ: 時計回り → <strong>スクロール↓</strong> ／ 反時計回り → <strong>スクロール↑</strong> <small>&amp;ec_ms_r</small></li>
+</ul>
+</section>
+<section class="layer" id="layer-3">
+<h3>L3 <code>layer_3</code></h3>
+<p class="layer-how">L0 の 42 番（押している間）</p>
+<div class="kb-scroll">
+<div class="kb" role="img" aria-label="レイヤー L3 layer_3" style="aspect-ratio: 1300 / 400">
+<div class="key trans" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp TAB）"><span class="pos">0</span><span class="main">Tab</span></div>
+<div class="key trans" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp Q）"><span class="pos">1</span><span class="main">Q</span></div>
+<div class="key trans" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp W）"><span class="pos">2</span><span class="main">W</span></div>
+<div class="key trans" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp E）"><span class="pos">3</span><span class="main">E</span></div>
+<div class="key trans" style="left:30.769%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp R）"><span class="pos">4</span><span class="main">R</span></div>
+<div class="key trans" style="left:38.462%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp T）"><span class="pos">5</span><span class="main">T</span></div>
+<div class="key trans" style="left:53.846%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp Y）"><span class="pos">6</span><span class="main">Y</span></div>
+<div class="key system" style="left:61.538%;top:0%;width:7.692%;height:25%" title="&amp;bt BT_SEL 0"><span class="pos">7</span><span class="main">BT 0</span><span class="sub">接続先</span></div>
+<div class="key system" style="left:69.231%;top:0%;width:7.692%;height:25%" title="&amp;bt BT_SEL 1"><span class="pos">8</span><span class="main">BT 1</span><span class="sub">接続先</span></div>
+<div class="key system" style="left:76.923%;top:0%;width:7.692%;height:25%" title="&amp;bt BT_SEL 2"><span class="pos">9</span><span class="main">BT 2</span><span class="sub">接続先</span></div>
+<div class="key system" style="left:84.615%;top:0%;width:7.692%;height:25%" title="&amp;bt BT_SEL 3"><span class="pos">10</span><span class="main">BT 3</span><span class="sub">接続先</span></div>
+<div class="key system" style="left:92.308%;top:0%;width:7.692%;height:25%" title="&amp;bt BT_SEL 4"><span class="pos">11</span><span class="main">BT 4</span><span class="sub">接続先</span></div>
+<div class="key trans" style="left:0%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LCTRL）"><span class="pos">12</span><span class="main">Ctrl</span></div>
+<div class="key trans" style="left:7.692%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp A）"><span class="pos">13</span><span class="main">A</span></div>
+<div class="key trans" style="left:15.385%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp S）"><span class="pos">14</span><span class="main">S</span></div>
+<div class="key trans" style="left:23.077%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp D）"><span class="pos">15</span><span class="main">D</span></div>
+<div class="key trans" style="left:30.769%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp F）"><span class="pos">16</span><span class="main">F</span></div>
+<div class="key trans" style="left:38.462%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp G）"><span class="pos">17</span><span class="main">G</span></div>
+<div class="key trans" style="left:53.846%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp H）"><span class="pos">18</span><span class="main">H</span></div>
+<div class="key trans" style="left:61.538%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp J）"><span class="pos">19</span><span class="main">J</span></div>
+<div class="key trans" style="left:69.231%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp K）"><span class="pos">20</span><span class="main">K</span></div>
+<div class="key trans" style="left:76.923%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp L）"><span class="pos">21</span><span class="main">L</span></div>
+<div class="key trans" style="left:84.615%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SQT）"><span class="pos">22</span><span class="main">&#x27;</span></div>
+<div class="key trans" style="left:92.308%;top:25%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp ENTER）"><span class="pos">23</span><span class="main">Enter</span></div>
+<div class="key trans" style="left:0%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LSHFT）"><span class="pos">24</span><span class="main">Shift</span></div>
+<div class="key trans" style="left:7.692%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp Z）"><span class="pos">25</span><span class="main">Z</span></div>
+<div class="key trans" style="left:15.385%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp X）"><span class="pos">26</span><span class="main">X</span></div>
+<div class="key trans" style="left:23.077%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp C）"><span class="pos">27</span><span class="main">C</span></div>
+<div class="key trans" style="left:30.769%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp V）"><span class="pos">28</span><span class="main">V</span></div>
+<div class="key trans" style="left:38.462%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp B）"><span class="pos">29</span><span class="main">B</span></div>
+<div class="key trans" style="left:53.846%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp N）"><span class="pos">30</span><span class="main">N</span></div>
+<div class="key trans" style="left:61.538%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp M）"><span class="pos">31</span><span class="main">M</span></div>
+<div class="key trans" style="left:69.231%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp COMMA）"><span class="pos">32</span><span class="main">,</span></div>
+<div class="key trans" style="left:76.923%;top:50%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp DOT）"><span class="pos">33</span><span class="main">.</span></div>
+<div class="key system" style="left:84.615%;top:50%;width:7.692%;height:25%" title="&amp;bt BT_CLR_ALL"><span class="pos">34</span><span class="main">全消去</span><span class="sub">BT 全接続先</span></div>
+<div class="key system" style="left:92.308%;top:50%;width:7.692%;height:25%" title="&amp;bt BT_CLR"><span class="pos">35</span><span class="main">消去</span><span class="sub">BT いまの接続先</span></div>
+<div class="key trans" style="left:0%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp ESC）"><span class="pos">36</span><span class="main">Esc</span></div>
+<div class="key trans" style="left:7.692%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LALT）"><span class="pos">37</span><span class="main">Alt</span></div>
+<div class="key trans" style="left:30.769%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 2）"><span class="pos">38</span><span class="main">L2</span></div>
+<div class="key trans" style="left:38.462%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp SPACE）"><span class="pos">39</span><span class="main">Space</span></div>
+<div class="key trans" style="left:53.846%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 1）"><span class="pos">40</span><span class="main">L1</span></div>
+<div class="key system" style="left:61.538%;top:75%;width:7.692%;height:25%" title="&amp;out OUT_BLE"><span class="pos">41</span><span class="main">BLE</span><span class="sub">出力先</span></div>
+<div class="key trans" style="left:84.615%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;mo 3）"><span class="pos">42</span><span class="main">L3</span></div>
+<div class="key trans" style="left:92.308%;top:75%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp LGUI）"><span class="pos">43</span><span class="main">GUI</span></div>
+</div>
+</div>
+<p class="sensors">エンコーダ: このレイヤーには割り当てなし（L0 の割り当てが効く）</p>
+</section>
+<p class="reserved">L4 <code>scroll</code>、L5 <code>extra2</code> は <code>status = "reserved"</code> の空き枠（ZMK Studio でレイヤーを増やすときに使われる）。</p>
+<p class="gen-note">自動生成 · 元: <code>config/sosho.keymap</code>、<code>boards/shields/sosho/sosho-layouts.dtsi</code></p>
+</div>
+<!-- /gen:keymap-layers -->
+</section>
+
+<section>
+<h2 id="combos">コンボ</h2>
+<p>2 つ以上のキーを同時に押すと、別の動作になる設定です。判定時間（<code>timeout-ms</code>）の間に押せば同時とみなされます。</p>
+<!-- gen:combos -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>コンボ</th><th>キー位置</th><th>同時に押すキー（L0）</th><th>動作</th><th>判定時間</th></tr></thead>
+<tbody>
+<tr><td><code>combo_LCLK</code></td><td>19 20</td><td>J + K</td><td>左クリック <code>&amp;mkp LCLK</code></td><td>50 ms</td></tr>
+<tr><td><code>combo_RCLK</code></td><td>20 21</td><td>K + L</td><td>右クリック <code>&amp;mkp RCLK</code></td><td>50 ms</td></tr>
+<tr><td><code>combo_MCLK</code></td><td>19 21</td><td>J + L</td><td>中クリック <code>&amp;mkp MCLK</code></td><td>90 ms</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>config/sosho.keymap</code></p>
+</div>
+<!-- /gen:combos -->
+<p>増やすときは <code>config/sosho.keymap</code> の <code>combos</code> に同じ形で足します。位置は <a href="#positions">キー位置番号</a> で調べ、足したら <code>python3 scripts/lint-keymap.py</code> で範囲外や重複がないか確かめます。</p>
+<pre><code>combo_名前 {
+    timeout-ms = &lt;50&gt;;
+    key-positions = &lt;19 20&gt;;
+    bindings = &lt;&amp;mkp LCLK&gt;;
+};</code></pre>
+</section>
+
+<section>
+<h2 id="encoder">エンコーダ</h2>
+<p>エンコーダの割り当ては、各レイヤーの <code>sensor-bindings</code> に「時計回りのとき」「反時計回りのとき」の順で書きます（上の図の下にある一覧）。逆に感じるときは、2 つの引数を入れ替えます。</p>
+<ul>
+<li><strong>割り当ての無いレイヤーでは、下のレイヤーの割り当てが効きます。</strong> ZMK は有効なレイヤーを上から見ていき、割り当てのある最初のレイヤーを使います（ZMK 本体の <code>zmk_keymap_sensor_event</code> の動き）。</li>
+<li>スクロールには <code>zmk_encoder</code> モジュールの <code>&amp;ec_ms_l</code> / <code>&amp;ec_ms_r</code> を使っています。1 回の発火で 1 ノッチぶんのスクロールを送ります。</li>
+<li>音量など普通のキーを送るときは、ZMK 標準の <code>&amp;inc_dec_kp</code> を使います（L2 の左エンコーダ）。</li>
+</ul>
+<aside class="callout note">
+<p><strong>なぜ専用モジュールなのか:</strong> 以前（verB まで）は ZMK 標準の <code>zmk,behavior-sensor-rotate-var</code> と <code>&amp;msc</code> でスクロールさせていましたが、1 回のスクロールごとに「押す」「離す」の 2 つのイベントが出ます。負荷が高いと「離す」が落ちて、スクロールし続ける問題がありました。verB2 で入った <code>zmk_encoder</code> は 1 つのイベントで完結するので、この問題が起きません（本家の <code>memo.md</code> より）。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="behaviors">キーマップで定義しているもの</h2>
+<p>キーマップのファイルの中で、新しく定義したり上書きしたりしているものです。</p>
+<!-- gen:keymap-behaviors -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>種類</th><th>名前</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td>マクロ</td><td><code>ZMK_POINTING_DEFAULT_SCRL_VAL</code></td><td><code>150</code></td></tr>
+<tr><td>behavior の定義</td><td><code>&amp;ec_ms_l</code></td><td><code>zmk,behavior-encoder-mouse-scroll</code>（キーマップ内で 1 回使用）</td></tr>
+<tr><td>behavior の定義</td><td><code>&amp;ec_ms_r</code></td><td><code>zmk,behavior-encoder-mouse-scroll</code>（キーマップ内で 2 回使用）</td></tr>
+<tr><td>既存 behavior の上書き</td><td><code>&amp;msc</code></td><td><code>time-to-max-speed-ms = &lt;0&gt;</code><br><code>acceleration-exponent = &lt;0&gt;</code></td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>config/sosho.keymap</code></p>
+</div>
+<!-- /gen:keymap-behaviors -->
+</section>
+</main>
+</div>
+</body>
+</html>

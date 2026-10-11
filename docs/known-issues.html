@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>既知の課題 — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="動作に影響しない不整合と、未解決の課題">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><span class="nav-todo">機能<small>準備中</small></span></li>
+<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="known-issues.html" aria-current="page">既知の課題</a></li>
+<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+</ul>
+</nav>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>既知の課題</h1>
+<p class="lead">見つかっているけれど、いまの動作には影響しないので直していないものです。関係するファイルを触る前に目を通してください。状態はスクリプトがファイルを調べて自動で判定し、直すと「解消済み」に変わります。</p>
+</header>
+
+<!-- gen:issue-summary -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>課題</th><th>状態</th></tr></thead>
+<tbody>
+<tr><td><a href="#issue-transform0">物理レイアウトが存在しないラベルを参照している</a></td><td><span class="badge warn">未修正</span></td></tr>
+<tr><td><a href="#issue-scrl-unused">スクロール量と加速の設定が、いまは何にも効いていない</a></td><td><span class="badge warn">未修正</span></td></tr>
+<tr><td><a href="#issue-boot-delay">起動を 1 秒遅らせるコードがビルドに含まれていない</a></td><td><span class="badge warn">未修正</span></td></tr>
+<tr><td><a href="#issue-west-floating">ZMK と外部モジュールのバージョンが固定されていない</a></td><td><span class="badge warn">未修正</span> <small>zmk、zmk-rgbled-widget、zmk-pmw3610-driver、zmk_encoder</small></td></tr>
+<tr><td><a href="#issue-zmk-mouse">非推奨の CONFIG_ZMK_MOUSE が残っている</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
+<tr><td><a href="#issue-ec11-resolution">エンコーダの resolution が非推奨</a></td><td><span class="badge warn">未修正</span> <small>left_encoder、right_encoder</small></td></tr>
+<tr><td><a href="#issue-studio-dup">CONFIG_ZMK_STUDIO=y が 2 か所にある</a></td><td><span class="badge warn">未修正</span></td></tr>
+<tr><td><a href="#issue-pref-dup">左トラックパッド版の conf が接続パラメータを 2 回書いている</a></td><td><span class="badge warn">未修正</span> <small>2 回宣言</small></td></tr>
+<tr><td><a href="#issue-zmk-yml">シールドのメタ情報が古い</a></td><td><span class="badge warn">未修正</span></td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 状態は <code>scripts/docgen/issues.py</code> がファイルを調べて判定</p>
+</div>
+<!-- /gen:issue-summary -->
+
+<section>
+<h2 id="issue-transform0">物理レイアウトが存在しないラベルを参照している</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=transform0 -->
+<span class="badge warn">未修正</span>
+<!-- /gen:issue-status --></p>
+<p><code>sosho-layouts.dtsi</code> の <code>transform = &lt;&amp;default_transform0&gt;;</code> は、存在しないラベルを指しています。すぐ後に <code>sosho.dtsi</code> の冒頭が <code>&amp;physical_layout0 { transform = &lt;&amp;default_transform&gt;; };</code> で上書きしているので、動いています。</p>
+<aside class="callout warn">
+<p><strong>この上書きを消すとビルドが壊れます。</strong> 直すなら、先に <code>sosho-layouts.dtsi</code> の参照を <code>&amp;default_transform</code> に直してから上書きを消します。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="issue-scrl-unused">スクロール量と加速の設定が、いまは何にも効いていない</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=scrl-unused -->
+<span class="badge warn">未修正</span>
+<!-- /gen:issue-status --></p>
+<p><code>config/sosho.keymap</code> 冒頭の <code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code>（「スクロール量の調整」）と、<code>&amp;msc</code> の加速の上書きは、<code>&amp;msc</code> を割り当てたキーにしか効きません。いまのキーマップにはそのキーがありません。</p>
+<p>エンコーダのスクロールは <code>zmk_encoder</code> モジュールが受け持っていて、受け取った値の向きだけを使い、量は 1 回の発火につき 1 ノッチにそろえます（モジュールの <code>behavior_encoder_mouse_scroll.c</code> で確認）。verB まではエンコーダが <code>&amp;msc</code> 経由だったので効いていた設定が、verB2 でモジュールに変わったあとも残っていると考えられます。</p>
+<p>直すなら、<code>&amp;msc</code> を使う予定がなければ両方を消します。エンコーダのスクロール量を変えたいときは <a href="settings.html#encoder"><code>triggers-per-rotation</code></a> を変えます。</p>
+</section>
+
+<section>
+<h2 id="issue-boot-delay">起動を 1 秒遅らせるコードがビルドに含まれていない</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=boot-delay -->
+<span class="badge warn">未修正</span>
+<!-- /gen:issue-status --></p>
+<p><code>src/boot_delay_hack.c</code>（起動時に 1 秒待つ）は、ビルドに含まれていません。<code>zephyr/module.yml</code> の <code>cmake: .</code> がコメントアウトされているので、ルートの <code>CMakeLists.txt</code>（<code>zephyr_sources(src/boot_delay_hack.c)</code>）が読まれないためです。生成された <code>build.ninja</code> にも <code>zmk.elf</code> のシンボルにも <code>force_boot_delay</code> は出てきません（確認済み）。つまり、<strong>1 秒の起動遅延はすでに効いていません</strong>。</p>
+<p>復活させたいなら <code>cmake: .</code> を有効にします。なおファイル内のコメントには「PRE_KERNEL_2 で実行」とありますが、実際のコードは <code>POST_KERNEL</code> の優先度 10 です。</p>
+</section>
+
+<section>
+<h2 id="issue-west-floating">ZMK と外部モジュールのバージョンが固定されていない</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=west-floating -->
+<span class="badge warn">未修正</span> <small>zmk、zmk-rgbled-widget、zmk-pmw3610-driver、zmk_encoder</small>
+<!-- /gen:issue-status --></p>
+<p><code>config/west.yml</code> は ZMK 本体を含めて、すべて <code>revision: main</code>（ブランチの最新）です。バージョンが動くのは <code>./scripts/build-local.sh --update</code> を実行したときだけなので、普段のビルドは同じ版で再現できます。ただ <code>--update</code> した日に upstream の破壊的変更を取り込んで、突然ビルドが壊れることがあります。</p>
+<p>直すなら、動作を確認できたコミットかタグに <code>revision</code> を固定します。</p>
+</section>
+
+<section>
+<h2 id="issue-zmk-mouse">非推奨の CONFIG_ZMK_MOUSE が残っている</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=zmk-mouse -->
+<span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small>
+<!-- /gen:issue-status --></p>
+<p><code>CONFIG_ZMK_MOUSE=y</code> は、いまの <code>CONFIG_ZMK_POINTING=y</code> の旧名です。両方が並んで書いてあります。直すなら <code>CONFIG_ZMK_MOUSE=y</code> の行だけを消します。</p>
+</section>
+
+<section>
+<h2 id="issue-ec11-resolution">エンコーダの resolution が非推奨</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=ec11-resolution -->
+<span class="badge warn">未修正</span> <small>left_encoder、right_encoder</small>
+<!-- /gen:issue-status --></p>
+<p><code>sosho.dtsi</code> のエンコーダにある <code>resolution</code> は、ZMK では非推奨のプロパティです。<code>steps</code> が書いてあるときは使われません（ZMK の EC11 ドライバのソースで確認）。直すなら <code>resolution</code> の行を消します。動作は変わりません。</p>
+</section>
+
+<section>
+<h2 id="issue-studio-dup">CONFIG_ZMK_STUDIO=y が 2 か所にある</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=studio-dup -->
+<span class="badge warn">未修正</span>
+<!-- /gen:issue-status --></p>
+<p>ZMK Studio の有効化が、<code>build.yaml</code> の <code>cmake-args</code> と右の <code>*.conf</code> の両方に書いてあります。どちらか一方で足ります。</p>
+<aside class="callout warn">
+<p><strong>直すときも、どちらか一方は必ず残します。</strong> Studio を外すと、予約レイヤー（<code>scroll</code>・<code>extra2</code>）がレイヤーとして数えられなくなり、それを呼び出すキー（<code>&amp;mo 4</code> など）が効かなくなります。Studio の機能（<code>CONFIG_ZMK_STUDIO_RPC</code>）が有効なときだけ <code>status = "reserved"</code> のレイヤーも数えるためです（ZMK のソースの <code>src/studio/Kconfig</code> と <code>include/zmk/keymap.h</code> で確認）。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="issue-pref-dup">左トラックパッド版の conf が接続パラメータを 2 回書いている</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=pref-dup -->
+<span class="badge warn">未修正</span> <small>2 回宣言</small>
+<!-- /gen:issue-status --></p>
+<p><code>sosho_L_trackpad.conf</code> は <code>CONFIG_BT_PERIPHERAL_PREF_*</code> を 2 回宣言しています。前半の 6/12/0/400 は後半の「フリーズ対策」の 10/20/10/400 で上書きされるので、前半は意味がありません。この機体の左はトラックボール版なので影響しません。直すなら前半の 4 行を消します。</p>
+</section>
+
+<section>
+<h2 id="issue-zmk-yml">シールドのメタ情報が古い</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=zmk-yml -->
+<span class="badge warn">未修正</span>
+<!-- /gen:issue-status --></p>
+<p><code>sosho.zmk.yml</code> の <code>requires</code> が旧ボード名の <code>seeeduino_xiao_ble</code>、<code>url</code> が無関係な個人リポジトリのままです。ビルドには使われない情報なので、動作には影響しません。</p>
+</section>
+</main>
+</div>
+</body>
+</html>
