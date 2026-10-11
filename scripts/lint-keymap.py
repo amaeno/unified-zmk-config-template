@@ -17,6 +17,17 @@ import re
 import sys
 from pathlib import Path
 
+from zmk_dts import (
+    behaviors,
+    child_nodes,
+    find_node,
+    groups,
+    line_of,
+    prop_cells,
+    strip_comments,
+    strip_preprocessor,
+)
+
 REPO = Path(__file__).resolve().parent.parent
 KEYMAP = REPO / "config" / "sosho.keymap"
 LAYOUTS = REPO / "boards" / "shields" / "sosho" / "sosho-layouts.dtsi"
@@ -32,114 +43,6 @@ def err(m: str) -> None:
 
 def warn(m: str) -> None:
     WARNS.append(m)
-
-
-# ------------------------------------------------------------------ 字句処理
-
-
-def strip_comments(text: str) -> str:
-    """コメントを空白で潰す。行番号とオフセットは保つ。"""
-
-    def blank(m: re.Match[str]) -> str:
-        return re.sub(r"[^\n]", " ", m.group(0))
-
-    text = re.sub(r"/\*.*?\*/", blank, text, flags=re.S)
-    return re.sub(r"//[^\n]*", blank, text)
-
-
-def strip_preprocessor(text: str) -> str:
-    """#include <...> の山括弧が対応チェックを汚すので、# 行を落とす。"""
-    return "\n".join("" if l.lstrip().startswith("#") else l for l in text.split("\n"))
-
-
-def line_of(text: str, idx: int) -> int:
-    return text.count("\n", 0, idx) + 1
-
-
-def match_brace(text: str, open_idx: int) -> tuple[str | None, int | None]:
-    """text[open_idx] == '{' のとき (中身, 閉じ括弧の次の位置) を返す。"""
-    depth = 0
-    for i in range(open_idx, len(text)):
-        if text[i] == "{":
-            depth += 1
-        elif text[i] == "}":
-            depth -= 1
-            if depth == 0:
-                return text[open_idx + 1 : i], i + 1
-    return None, None
-
-
-def find_node(text: str, name: str) -> str | None:
-    """`name { ... }`（`label: name {` も可）を探して中身を返す。"""
-    for m in re.finditer(r"(?:^|[\s;{}])" + re.escape(name) + r"\s*\{", text):
-        return match_brace(text, text.index("{", m.start()))[0]
-    return None
-
-
-def child_nodes(body: str):
-    """直下の子ノードを (名前, 中身) で宣言順に返す。
-
-    素朴な正規表現だと `combos` / `keymap` 自身をレイヤーと誤認するため、
-    波括弧の対応を数えながら走査する。
-    """
-    i = 0
-    pat = re.compile(r"([A-Za-z_][\w-]*)\s*(?::\s*[A-Za-z_][\w-]*\s*)?\{")
-    while True:
-        m = pat.search(body, i)
-        if not m:
-            return
-        open_idx = body.index("{", m.start())
-        child, end = match_brace(body, open_idx)
-        if child is None or end is None:
-            err("波括弧が対応していません: %r 付近" % body[m.start() : m.start() + 40])
-            return
-        yield m.group(1), child
-        i = end
-
-
-def prop_cells(body: str, prop: str) -> list[str]:
-    """`prop = < ... >;` の中身を、出現順にすべて返す。
-
-    プロパティ名は完全一致させる。前方の境界を見ないと
-    `bindings` が `sensor-bindings` にも当たってしまう。
-    """
-    out: list[str] = []
-    for m in re.finditer(r"(?<![\w-])" + re.escape(prop) + r"\s*=\s*<", body):
-        start = body.index("<", m.start())
-        depth = 0
-        for i in range(start, len(body)):
-            if body[i] == "<":
-                depth += 1
-            elif body[i] == ">":
-                depth -= 1
-                if depth == 0:
-                    if not body[i + 1 :].lstrip().startswith(";"):
-                        err(
-                            "`%s` (%d 行目) が `>;` で終わっていません"
-                            % (prop, line_of(body, m.start()))
-                        )
-                    out.append(body[start + 1 : i])
-                    break
-        else:
-            err("`%s` (%d 行目) の `>` がありません" % (prop, line_of(body, m.start())))
-    return out
-
-
-def behaviors(payload: str) -> list[str]:
-    return re.findall(r"&[A-Za-z_]\w*", payload)
-
-
-def groups(payload: str) -> list[list[str]]:
-    """`&a X Y &b Z` を [['&a','X','Y'], ['&b','Z']] に割る。"""
-    out: list[list[str]] = []
-    cur: list[str] | None = None
-    for tok in payload.split():
-        if tok.startswith("&"):
-            cur = [tok]
-            out.append(cur)
-        elif cur is not None:
-            cur.append(tok)
-    return out
 
 
 # ------------------------------------------------------------------ 期待値
@@ -202,14 +105,14 @@ def main() -> int:
         err("`keymap { ... }` ノードが見つかりません")
         return report()
 
-    layers = list(child_nodes(km))
+    layers = list(child_nodes(km, err))
     if not layers:
         err("`keymap` ノードにレイヤーがありません")
 
     seen_reserved = False
     for idx, (name, lbody) in enumerate(layers):
         reserved = re.search(r'status\s*=\s*"reserved"', lbody) is not None
-        cells = prop_cells(lbody, "bindings")
+        cells = prop_cells(lbody, "bindings", err)
 
         if reserved:
             seen_reserved = True
@@ -231,7 +134,7 @@ def main() -> int:
         if got != n_keys:
             err("レイヤー %d `%s`: bindings が %d 個、期待は %d 個" % (idx, name, got, n_keys))
 
-        for payload in prop_cells(lbody, "sensor-bindings"):
+        for payload in prop_cells(lbody, "sensor-bindings", err):
             gs = groups(payload)
             if n_sens and len(gs) != n_sens:
                 err(
@@ -260,8 +163,8 @@ def main() -> int:
     # 4. コンボ
     combos = find_node(src, "combos")
     if combos:
-        for name, cbody in child_nodes(combos):
-            pos_cells = prop_cells(cbody, "key-positions")
+        for name, cbody in child_nodes(combos, err):
+            pos_cells = prop_cells(cbody, "key-positions", err)
             if not pos_cells:
                 err("コンボ `%s` に `key-positions` がありません" % name)
                 continue
@@ -280,7 +183,7 @@ def main() -> int:
                         "コンボ `%s`: key-position %d が範囲外です（0〜%d）"
                         % (name, p, n_keys - 1)
                     )
-            cb = prop_cells(cbody, "bindings")
+            cb = prop_cells(cbody, "bindings", err)
             if not cb:
                 err("コンボ `%s` に `bindings` がありません" % name)
             elif len(behaviors(cb[0])) != 1:

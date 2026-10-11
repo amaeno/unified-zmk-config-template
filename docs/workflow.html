@@ -15,12 +15,12 @@
 <ul>
 <li><a href="index.html">トップ</a></li>
 <li><a href="workflow.html" aria-current="page">開発フロー</a></li>
-<li><span class="nav-todo">ハードウェア<small>準備中</small></span></li>
-<li><span class="nav-todo">キーマップ<small>準備中</small></span></li>
-<li><span class="nav-todo">設定項目<small>準備中</small></span></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
 <li><span class="nav-todo">機能<small>準備中</small></span></li>
 <li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
-<li><span class="nav-todo">既知の課題<small>準備中</small></span></li>
+<li><a href="known-issues.html">既知の課題</a></li>
 <li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
 </ul>
 </nav>
@@ -81,7 +81,7 @@
 <pre><code>git switch -c feature/&lt;名前&gt; main</code></pre>
 </li>
 <li>
-<p><strong>編集する。</strong> どのファイルを触ると何が変わるかは、いまは <code>CLAUDE.md</code> の「どこを触ると何が変わるか」にあります（設定項目のページができたらそちらへ移します）。</p>
+<p><strong>編集する。</strong> どのファイルを触ると何が変わるかは <a href="settings.html#map">設定項目 › どこを触ると何が変わるか</a> にあります。触るファイルが <a href="known-issues.html">既知の課題</a> に載っていないかも確かめます。</p>
 </li>
 <li>
 <p><strong>lint を通す。</strong> ツールチェーン無しで数十 ms で終わります。<code>ok:</code> が出るまで直します。</p>
@@ -192,10 +192,10 @@ git switch main</code></pre>
 <table>
 <thead><tr><th>ターゲット</th><th>書き込む側</th><th>役割</th><th>ポインタ</th><th>Studio</th></tr></thead>
 <tbody>
-<tr><td><code>sosho_R_trackpad</code></td><td>右</td><td>セントラル</td><td>トラックパッド (Cirque)</td><td>有効</td></tr>
-<tr><td><code>sosho_R_trackball</code></td><td>右</td><td>セントラル</td><td>トラックボール (PMW3610)</td><td>有効</td></tr>
-<tr><td><code>sosho_L_trackpad</code></td><td>左</td><td>ペリフェラル</td><td>トラックパッド (Cirque)</td><td>—</td></tr>
-<tr><td><code>sosho_L_trackball</code></td><td>左</td><td>ペリフェラル</td><td>トラックボール (PMW3610)</td><td>—</td></tr>
+<tr><td><code>sosho_R_trackpad</code> <span class="badge ok">この機体</span></td><td>右</td><td>セントラル</td><td>トラックパッド (Cirque)</td><td>有効</td></tr>
+<tr class="dim"><td><code>sosho_R_trackball</code></td><td>右</td><td>セントラル</td><td>トラックボール (PMW3610)</td><td>有効</td></tr>
+<tr class="dim"><td><code>sosho_L_trackpad</code></td><td>左</td><td>ペリフェラル</td><td>トラックパッド (Cirque)</td><td>—</td></tr>
+<tr><td><code>sosho_L_trackball</code> <span class="badge ok">この機体</span></td><td>左</td><td>ペリフェラル</td><td>トラックボール (PMW3610)</td><td>—</td></tr>
 <tr><td><code>settings_reset</code></td><td>左右とも</td><td>設定の消去</td><td>—</td><td>—</td></tr>
 </tbody>
 </table>
@@ -255,7 +255,9 @@ git switch main</code></pre>
 <li><p><strong>再起動を待つ。</strong> 書き込みが終わると自動で再起動します。</p></li>
 </ol>
 <aside class="callout warn">
-<p><strong>左右で別の uf2 です。</strong> <code>sosho_L_*</code> は左、<code>sosho_R_*</code> は右に書き込みます。トラックパッド版とトラックボール版も取り違えないでください。</p>
+<p><strong>左右で別の uf2 です。</strong> <code>sosho_L_*</code> は左、<code>sosho_R_*</code> は右に書き込みます。トラックパッド版とトラックボール版も取り違えないでください。この機体の組み合わせは <!-- gen:value of=my-targets -->
+右 <code>sosho_R_trackpad</code> ／ 左 <code>sosho_L_trackball</code>
+<!-- /gen:value --> です。</p>
 </aside>
 <p>何を変えたかによって、書き込む側が変わります。</p>
 <div class="table-wrap">
@@ -347,6 +349,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <tr><td><code>scripts/build-local.sh</code></td><td>双掌 (sosho) のファームウェアを Docker でローカルビルドする。</td></tr>
 <tr><td><code>scripts/gen-docs.py</code></td><td>docs/*.html の自動生成ブロックを、リポジトリ内の元ファイルから作り直す。</td></tr>
 <tr><td><code>scripts/lint-keymap.py</code></td><td>双掌 (sosho) のキーマップをツールチェーン無しで検査する。</td></tr>
+<tr><td><code>scripts/zmk_dts.py</code></td><td>双掌 (sosho) の devicetree とキーマップを、ツールチェーン無しで読むための部品。</td></tr>
 </tbody>
 </table>
 </div>

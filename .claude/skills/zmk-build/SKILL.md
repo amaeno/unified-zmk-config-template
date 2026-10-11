@@ -23,6 +23,8 @@ disallowed-tools: Write Edit NotebookEdit
 - ビルドは Docker の中で動く `./scripts/build-local.sh`。成果物は `firmware/<ターゲット>.uf2`
 - ターゲットは `sosho_R_trackpad` `sosho_R_trackball` `sosho_L_trackpad` `sosho_L_trackball` `settings_reset`
   の 5 つ（正本は `build.yaml`）。`_R_` は右、`_L_` は左に書き込むもの
+- この機体で使うのは CLAUDE.md の「この機体」の表にある 2 つ（右 `sosho_R_trackpad`、左 `sosho_L_trackball`）。
+  それ以外のターゲットを指定されたら、そのままビルドしてよいが報告で「この機体では使っていない」と添える
 
 ## 手順
 

@@ -5,3 +5,6 @@ build/
 
 # マシン固有の Claude 設定（共有しない）
 .claude/settings.local.json
+
+# Python のキャッシュ（scripts/ の import で作られる）
+__pycache__/

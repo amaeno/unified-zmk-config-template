@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ハードウェア — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="マイコン・左右の役割・ピン配置・エンコーダ・ポインティングデバイス・ファイル構成">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html" aria-current="page">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><span class="nav-todo">機能<small>準備中</small></span></li>
+<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+</ul>
+</nav>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>ハードウェア</h1>
+<p class="lead">双掌の構成と配線です。ピン番号や設定値は、シールド定義（<code>boards/shields/sosho/</code>）から自動で作っています。</p>
+</header>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#mine">この機体</a></li>
+<li><a href="#overview">全体の構成</a></li>
+<li><a href="#matrix">キーマトリクス</a></li>
+<li><a href="#encoders">エンコーダ</a></li>
+<li><a href="#pointing">ポインティングデバイス</a></li>
+<li><a href="#split">左の入力が右に届くまで</a></li>
+<li><a href="#files">ファイル構成</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="mine">この機体</h2>
+<!-- gen:claude-md section=この機体 -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>側</th><th>ポインタ</th><th>ビルドターゲット</th></tr></thead>
+<tbody>
+<tr><td>右（セントラル。PC と繋がる側、ZMK Studio もここ）</td><td>トラックパッド (Cirque)</td><td><code>sosho_R_trackpad</code></td></tr>
+<tr><td>左（ペリフェラル）</td><td>トラックボール (PMW3610)</td><td><code>sosho_L_trackball</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>ビルド・書き込み・調査はこの 2 つを前提にする。<code>sosho_R_trackball</code> と <code>sosho_L_trackpad</code> は使っていないが、本家由来のターゲットとして <code>build.yaml</code> に残している。</p>
+<p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「この機体」節</p>
+</div>
+<!-- /gen:claude-md -->
+</section>
+
+<section>
+<h2 id="overview">全体の構成</h2>
+<ul>
+<li>左右それぞれに Seeed XIAO nRF52840 が載っていて、左右は Bluetooth で繋がります。</li>
+<li><strong>右がセントラル</strong>です。PC と Bluetooth（または USB）で繋がり、キーマップの処理もここで行います。ZMK Studio で USB 接続するのも右です。</li>
+<li><strong>左はペリフェラル</strong>です。キーが押された位置、エンコーダの回転、ポインタの動きを右へ送るだけで、キーマップは持ちません。</li>
+<li>状態表示の RGB LED は、ビルド時に一緒に指定する <code>rgbled_adapter</code> シールドと、<code>zmk-rgbled-widget</code> モジュールで動かします。使う LED は、<code>sosho.dtsi</code> の <code>aliases</code>（<code>led-red</code> = <code>led0</code> など）で XIAO 基板上の LED に割り当てています。</li>
+</ul>
+<aside class="callout note">
+<p><strong>ピンの表記:</strong> <code>P0.02</code> は nRF52840 のピン名（ポート 0 の 2 番）です。横の <code>D0</code> などは XIAO の基板に印刷されている名前です。D0〜D10 以外のピンは、XIAO nRF52840 Plus で増えた裏面のピンです。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="matrix">キーマトリクス</h2>
+<p>キーは行と列の格子（マトリクス）で読み取ります。行のピンは左右共通で <code>sosho.dtsi</code> に、列のピンは左右それぞれ <code>sosho_L.dtsi</code> / <code>sosho_R.dtsi</code> にあります。</p>
+<!-- gen:matrix-facts -->
+<div class="gen">
+<dl class="facts">
+<dt>ダイオードの向き</dt><dd><code>col2row</code></dd>
+<dt>マトリクスの大きさ</dt><dd>4 行 × 12 列（左右合わせて）</dd>
+<dt>キーの数</dt><dd>44</dd>
+<dt>右の列のずらし</dt><dd>col-offset 6（右の列 0〜5 がマトリクスの列 6〜 になる）</dd>
+</dl>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/sosho.dtsi</code>、<code>boards/shields/sosho/sosho_R.dtsi</code></p>
+</div>
+<!-- /gen:matrix-facts -->
+<!-- gen:matrix-pins -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>左</th><th>右</th></tr></thead>
+<tbody>
+<tr><td>行 0</td><td><code>P0.02</code><span class="tag">D0</span></td><td><code>P0.02</code><span class="tag">D0</span></td></tr>
+<tr><td>行 1</td><td><code>P0.15</code></td><td><code>P0.15</code></td></tr>
+<tr><td>行 2</td><td><code>P0.03</code><span class="tag">D1</span></td><td><code>P0.03</code><span class="tag">D1</span></td></tr>
+<tr><td>行 3</td><td><code>P0.19</code></td><td><code>P0.19</code></td></tr>
+<tr><td>列 0</td><td><code>P0.28</code><span class="tag">D2</span></td><td><code>P0.28</code><span class="tag">D2</span></td></tr>
+<tr><td>列 1</td><td><code>P1.01</code></td><td><code>P1.01</code></td></tr>
+<tr><td>列 2</td><td><code>P0.29</code><span class="tag">D3</span></td><td><code>P0.29</code><span class="tag">D3</span></td></tr>
+<tr><td>列 3</td><td><code>P0.09</code></td><td><code>P0.09</code></td></tr>
+<tr><td>列 4</td><td><code>P0.04</code><span class="tag">D4</span></td><td><code>P0.04</code><span class="tag">D4</span></td></tr>
+<tr><td>列 5</td><td><code>P0.10</code></td><td><code>P0.10</code></td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/sosho.dtsi</code>、<code>boards/shields/sosho/sosho_L.dtsi</code>、<code>boards/shields/sosho/sosho_R.dtsi</code></p>
+</div>
+<!-- /gen:matrix-pins -->
+<aside class="callout warn">
+<p><strong>NFC ピンを流用しています。</strong> 列 3 の <code>P0.09</code> と列 5 の <code>P0.10</code> は本来 NFC 用のピンです。普通のピンとして使うために、すべての <code>*.conf</code> に <code>CONFIG_NFCT_PINS_AS_GPIOS=y</code> が入っています。消すとその列のキーが反応しなくなります。</p>
+</aside>
+</section>
+
+<section>
+<h2 id="encoders">エンコーダ</h2>
+<p>左右に 1 個ずつ EC11 互換のロータリーエンコーダがあります。<code>sosho.dtsi</code> では両方とも同じピンで定義してあり（それぞれ別の XIAO に繋がっているので問題ない）、左右の <code>*.dtsi</code> で自分の側のものだけを有効にしています。</p>
+<!-- gen:encoders -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>ノード</th><th>有効にする側</th><th>A ピン</th><th>B ピン</th><th>steps</th><th>resolution</th></tr></thead>
+<tbody>
+<tr><td><code>left_encoder</code></td><td>左</td><td><code>P0.05</code><span class="tag">D5</span></td><td><code>P1.11</code><span class="tag">D6</span></td><td>96</td><td>4</td></tr>
+<tr><td><code>right_encoder</code></td><td>右</td><td><code>P0.05</code><span class="tag">D5</span></td><td><code>P1.11</code><span class="tag">D6</span></td><td>96</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<p>1 回転あたりの発火数（triggers-per-rotation）: <strong>24</strong></p>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/sosho.dtsi</code>、<code>boards/shields/sosho/sosho_L.dtsi</code>、<code>boards/shields/sosho/sosho_R.dtsi</code></p>
+</div>
+<!-- /gen:encoders -->
+<p><code>steps</code> は 1 回転あたりのパルス数、<code>triggers-per-rotation</code> は 1 回転で割り当て（<code>sensor-bindings</code>）が何回動くかです。回したときの動きは <a href="keymap.html#encoder">キーマップ › エンコーダ</a>、量の調整は <a href="settings.html#encoder">設定項目 › エンコーダ</a> を見てください。</p>
+</section>
+
+<section>
+<h2 id="pointing">ポインティングデバイス</h2>
+<p>トラックパッドとトラックボールは、どちらも SPI で繋がります。<code>sosho.dtsi</code> に両方の定義があり、ビルドするシールド（overlay）でどちらを有効にするかを選びます。</p>
+<!-- gen:pointing-devices -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>デバイス</th><th>ドライバ</th><th>バス</th><th>ピン</th><th>設定</th></tr></thead>
+<tbody>
+<tr><td>トラックパッド <code>glidepoint</code></td><td><code>cirque,pinnacle</code></td><td><code>spi0</code></td><td>SCK <code>P1.13</code><span class="tag">D8</span><br>MOSI <code>P1.15</code><span class="tag">D10</span><br>MISO <code>P1.14</code><span class="tag">D9</span><br>CS <code>P1.05</code><br>DR <code>P1.07</code></td><td>sensitivity <code>1x</code><br>最大 500,000 Hz</td></tr>
+<tr><td>トラックボール <code>trackball</code></td><td><code>pixart,pmw3610-alt</code></td><td><code>spi1</code></td><td>SCK <code>P1.13</code><span class="tag">D8</span><br>MOSI <code>P1.14</code><span class="tag">D9</span><br>MISO <code>P1.14</code><span class="tag">D9</span><br>CS <code>P1.03</code><br>IRQ <code>P1.07</code></td><td>cpi <code>600</code><br>x-input-code <code>INPUT_REL_Y</code><br>y-input-code <code>INPUT_REL_X</code><br>最大 2,000,000 Hz</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/sosho.dtsi</code></p>
+</div>
+<!-- /gen:pointing-devices -->
+<ul>
+<li>トラックパッドの SPI0 とトラックボールの SPI1 は、SCK などのピンを共有しています。1 つのファームウェアで有効にするのはどちらか一方だけなので、ぶつかりません。</li>
+<li>トラックボールは MOSI と MISO が同じピン（3 線式）です。</li>
+<li>トラックボールの <code>x-input-code</code> と <code>y-input-code</code> は X と Y を入れ替えています。センサーが 90 度回った向きで付いているためです。</li>
+</ul>
+<p>各 overlay で有効にしているデバイスと、向きの設定は次のとおりです。</p>
+<!-- gen:pointer-overlays -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>overlay</th><th>側</th><th>有効にするデバイス</th><th>向き・その他</th></tr></thead>
+<tbody>
+<tr><td><code>sosho_L_trackball.overlay</code> <span class="badge ok">この機体</span></td><td>左</td><td>トラックボール <code>trackball</code></td><td><code>trackball</code> の入力を右へ送る</td></tr>
+<tr><td><code>sosho_R_trackpad.overlay</code> <span class="badge ok">この機体</span></td><td>右</td><td>トラックパッド <code>glidepoint</code></td><td><code>invert-y</code></td></tr>
+<tr class="dim"><td><code>sosho_L_trackpad.overlay</code></td><td>左</td><td>トラックパッド <code>glidepoint</code></td><td><code>invert-x</code><br><code>glidepoint</code> の入力を右へ送る</td></tr>
+<tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td>右</td><td>トラックボール <code>trackball</code></td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>boards/shields/sosho/*.overlay</code></p>
+</div>
+<!-- /gen:pointer-overlays -->
+</section>
+
+<section>
+<h2 id="split">左の入力が右に届くまで</h2>
+<p>左のトラックボールの動きは、左で読み取ってから Bluetooth で右へ送られ、右で加工されて PC に届きます。速さや向きを変える <code>input-processors</code> は、<strong>右の overlay の受け口</strong>（<code>*_split_listener</code>）に書きます。</p>
+<ol class="steps">
+<li><p><strong>左で読む。</strong> トラックボール（<code>trackball</code>）が動きを読み取ります。</p></li>
+<li><p><strong>右へ送る。</strong> 左の overlay の <code>trackball_split</code>（<code>zmk,input-split</code>）が、Bluetooth で右へ送ります。</p></li>
+<li><p><strong>右で受ける。</strong> 右の <code>trackball_split</code> が同じ番号（<code>reg</code>）で受け取り、<code>trackball_split_listener</code> に渡します。</p></li>
+<li><p><strong>加工して PC へ。</strong> リスナーの <code>input-processors</code> で速さ・向き・スクロール化を加工してから、PC に送ります。</p></li>
+</ol>
+<p>キーの押下とエンコーダの回転も同じように右へ送られ、キーマップは右だけが処理します。そのため、キーマップやコンボを変えたときは右に書き込むだけで済みます。</p>
+</section>
+
+<section>
+<h2 id="files">ファイル構成</h2>
+<!-- gen:claude-md section=ファイル構成 -->
+<div class="gen">
+<pre><code>build.yaml                       ビルド対象 5 種の定義。全ての入口
+config/
+  west.yml                       ZMK 本体 + 外部モジュール 3 つ
+  sosho.keymap                   キーマップ・コンボ・エンコーダ挙動（普段触るのはここ）
+boards/shields/sosho/
+  Kconfig.shield                 4 つのシールド名の定義
+  Kconfig.defconfig              L/R 共通の必須 Kconfig（split の役割など）
+  sosho.dtsi                     共通ハード定義: マトリクス変換/kscan/エンコーダ/SPI/センサ
+  sosho-layouts.dtsi             物理レイアウト（ZMK Studio 用の 44 キー座標）
+  sosho_L.dtsi / sosho_R.dtsi    左右の列 GPIO と col-offset、エンコーダ有効化
+  sosho_{L,R}_{trackpad,trackball}.overlay   ポインタ有効化と input-processor
+  sosho_{L,R}_{trackpad,trackball}.conf      Kconfig（BLE/LED/電池/Studio 等）
+  sosho.zmk.yml                  シールドのメタ情報
+  sosho.layout.json              旧形式のレイアウト情報（どのビルドからも参照されていない）
+docs/                            人間向けの資料（HTML）。事実の正本
+  assets/style.css               全ページ共通のスタイル
+scripts/                         ビルド・lint・資料生成（一覧は docs/workflow.html#scripts）
+  docgen/                        資料の生成器。テーマ別のモジュール（一覧は docgen/__init__.py）
+src/boot_delay_hack.c            起動時 1 秒 busy-wait（ビルドに含まれていない。docs/known-issues.html）
+zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
+memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）</code></pre>
+<p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「ファイル構成」節</p>
+</div>
+<!-- /gen:claude-md -->
+</section>
+</main>
+</div>
+</body>
+</html>
