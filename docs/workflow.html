@@ -377,12 +377,23 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 </ul>
 
 <h3 id="docs-rules">決まりごと</h3>
+<p>資料の決まりごとは AI と共通で、正本は <code>CLAUDE.md</code> の「資料の規約」です（下はそれを自動で取り込んだもの）。skills とサブエージェントの手順にもこの決まりが組み込まれていて、レビュー役（<code>config-reviewer</code>）は資料の更新漏れや記述の食い違いを指摘します。</p>
+<!-- gen:claude-md section=資料の規約 -->
+<div class="gen">
 <ul>
-<li><strong>繰り返し変わる事実は手で書かない。</strong> ビルドターゲット、モジュール、キーマップ、設定値などは <code>scripts/gen-docs.py</code> に生成器を足して作ります。手書きは「なぜそうなっているか」「どう変えるか」の説明に使います。</li>
-<li><strong>同じ事実を 2 か所に書かない。</strong> 事実の正本は資料にあり、<code>CLAUDE.md</code> や skills からは資料へのリンクで済ませます。AI へのルールだけは <code>CLAUDE.md</code> が正本で、資料はそれを自動で取り込みます。</li>
-<li><strong>仕様を変えたら、資料も必ず同じコミットで更新する。</strong> 挙動・設定値・キー割り当て・手順・AI ツールの使い方が変わったら、生成部分は <code>python3 scripts/gen-docs.py</code> で作り直し、手書きの説明も直します。資料が古いままの変更はコミットしません。AI 側では、skills とサブエージェントの手順にもこの決まりが組み込まれていて、レビュー役は更新漏れを「要修正」として指摘します。</li>
-<li><strong>本家の資料はオリジナルのまま残す。</strong> <code>memo.md</code>（本家の verB2 リリースノート）は編集しません。</li>
+<li><strong>資料を更新するときは、ほかの記述と矛盾していないかを必ず確かめる（大前提）。</strong> 変えた事実・値・用語で <code>git grep -n --untracked</code> をかけ（資料・<code>CLAUDE.md</code>・<code>.claude/</code>・スクリプトや設定ファイルのコメントまで見る）、元ファイルとも突き合わせる。矛盾を見つけたら、どちらが正しいかを元ファイル・ZMK のソース（<code>.zmk-ref/</code>）・ユーザーの決定で確かめてから、誤っている方を直す（生成部分なら生成器を直す）。確かめられなければ推測で直さず、ユーザーに聞く。履歴の記録（<code>memo.md</code>、変更履歴、改善メモの「対応済み」）は当時の事実なので直さない</li>
+<li>資料は HTML（<code>docs/*.html</code>、共通スタイルは <code>docs/assets/style.css</code>）。ユーザーの読みやすさを最優先する</li>
+<li><code>&lt;!-- gen:… --&gt;</code> から <code>&lt;!-- /gen:… --&gt;</code> の中は <code>scripts/gen-docs.py</code> が上書きする。手で編集しない</li>
+<li>繰り返し変わる事実は手書きせず、<code>scripts/docgen/</code> に生成器を足す。本文中の 1 つの値は <code>gen:value</code> で埋め込む</li>
+<li>同じ事実を複数の場所に書かない。<code>CLAUDE.md</code> と skills は資料の節へのリンクで済ませる</li>
+<li><strong>仕様（挙動・設定値・キー割り当て・手順・AI ツールの使い方）を変えたら、資料を必ず同じコミットで更新する。</strong> 生成部分は <code>python3 scripts/gen-docs.py</code>、手書き部分は docs-sync か update-docs skill で直す。資料が古いままの変更はコミットしない</li>
+<li>新しいページは既存のページをひな形にし、<code>scripts/docgen/site.py</code> の <code>PAGES</code> に登録する</li>
+<li>既知の課題を直したら、<code>docs/known-issues.html</code> の表示が「解消済み」に変わるので、その節を消す</li>
+<li>本家由来の資料（<code>memo.md</code>）はオリジナルのまま残す</li>
 </ul>
+<p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「資料の規約」節</p>
+</div>
+<!-- /gen:claude-md -->
 
 <h3 id="scripts">スクリプト一覧</h3>
 <!-- gen:scripts -->
@@ -414,10 +425,10 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <ul class="item-list">
 <li><p class="item-head"><code>/add-feature</code> <span class="badge">skill</span> <span class="badge">opus</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) のファームウェアに機能を足す・設定を変える・不具合を直すときの一連の流れ（要否の判断 → 調査 → ブランチ → 編集 → lint・資料・ビルド → レビュー → コミット → 実機確認の依頼）。コンボ、behavior、マクロ、エンコーダの挙動、ポインタの速さや向き、Kconfig、外部モジュールの追加・変更を頼まれたら、作業を始める前にこれを使うこと。キー割り当てだけの変更なら ZMK Studio で済むので使わない。</p></li>
 <li><p class="item-head"><code>/retro</code> <span class="badge">skill</span> <span class="badge">opus</span> <span class="badge">メイン会話で実行</span></p><p>skills・サブエージェント・CLAUDE.md の改善案を出す振り返り。.claude/improvements.md の未対応メモと、このセッションで手順どおりに進まなかった出来事から「どのファイルをどう直すか」を提案し、ユーザーが承認したものだけを適用する。作業の区切りでフック（retro-nudge）から促されたとき、またはユーザーが振り返り・改善提案・skills の見直しを頼んだときに使う。</p></li>
-<li><p class="item-head"><code>/update-docs</code> <span class="badge">skill</span> <span class="badge">sonnet</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) の資料（docs/*.html）を書く・直すときの決まりごと。ページのひな形、使える CSS の部品、自動生成ブロックの扱い、生成器（scripts/docgen/）の足し方、文章の書き方、見た目の確かめ方。資料のページを足すとき、手書きの説明を直すとき、資料に新しい事実を載せるとき、生成器を足すときは、HTML を書き始める前に必ずこれを読むこと。</p></li>
+<li><p class="item-head"><code>/update-docs</code> <span class="badge">skill</span> <span class="badge">sonnet</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) の資料（docs/*.html）を書く・直すときの決まりごと。ページのひな形、使える CSS の部品、自動生成ブロックの扱い、生成器（scripts/docgen/）の足し方、文章の書き方、矛盾の確かめ方、見た目の確かめ方。資料のページを足すとき、手書きの説明を直すとき、資料に新しい事実を載せるとき、生成器を足すときは、HTML を書き始める前に必ずこれを読むこと。</p></li>
 <li><p class="item-head"><code>/zmk-build</code> <span class="badge">skill</span> <span class="badge">haiku</span> <span class="badge">fork で実行</span></p><p>双掌 (sosho) のファームウェアを lint してビルドし、結果を要約して返す。キーマップ・コンボ・エンコーダ挙動・ポインタ設定・Kconfig を変更した後の検証に使う。引数はターゲット名（複数可。省略時は sosho_R_trackpad、--all で全部）。書き込みはユーザーが行う。</p></li>
-<li><p class="item-head"><code>config-reviewer</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>双掌 (sosho) の設定変更（キーマップ・シールドの dtsi / overlay / conf・build.yaml・west.yml）を、コミットや書き込みの前にレビューする。lint と資料の生成チェックを実行し、ZMK の書き方の誤り、左右の書き込み先、既知の課題への抵触、資料の更新漏れを指摘する。設定ファイルを変更したら、コミットする前に必ずこのエージェントに見せること。指摘だけを返し、ファイルは直さない。</p></li>
-<li><p class="item-head"><code>docs-sync</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>設定やスクリプトを変えたあとに、docs/ の資料（HTML）を実態に合わせる。scripts/gen-docs.py で生成部分を作り直し、手書き部分の古くなった記述を直して、何を直したかを報告する。設定やスクリプトを変えて手書きの説明が古くなりそうなときや、資料の点検を頼まれたときに使う。</p></li>
+<li><p class="item-head"><code>config-reviewer</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>双掌 (sosho) の設定変更（キーマップ・シールドの dtsi / overlay / conf・build.yaml・west.yml）を、コミットや書き込みの前にレビューする。lint と資料の生成チェックを実行し、ZMK の書き方の誤り、左右の書き込み先、既知の課題への抵触、資料の更新漏れや記述どうしの矛盾を指摘する。設定ファイルを変更したら、コミットする前に必ずこのエージェントに見せること。指摘だけを返し、ファイルは直さない。</p></li>
+<li><p class="item-head"><code>docs-sync</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>設定やスクリプトを変えたあとに、docs/ の資料（HTML）を実態に合わせる。scripts/gen-docs.py で生成部分を作り直し、手書き部分の古くなった記述や、ほかの記述との矛盾を直して、何を直したかを報告する。設定やスクリプトを変えて手書きの説明が古くなりそうなときや、資料の点検を頼まれたときに使う。</p></li>
 <li><p class="item-head"><code>zmk-researcher</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>ZMK 本体・外部モジュール（zmk-rgbled-widget / zmk-pmw3610-driver / zmk_encoder）・XIAO のボード定義の仕様を、このリポジトリが実際に使っている版のソースとドキュメントで調べて答える。「ZMK で○○はできるか」「この behavior・Kconfig・devicetree プロパティの意味と書き方」「この挙動はどこで実装されているか」を確かめたいときは、記憶で答えずにこのエージェントに調べさせること。読み取り専用。</p></li>
 </ul>
 <p class="gen-note">自動生成 · 元: <code>.claude/skills/*/SKILL.md</code>・<code>.claude/agents/*.md</code> の frontmatter</p>
@@ -459,6 +470,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <div class="gen">
 <ul>
 <li>skills・サブエージェントが手順どおりに進まなかったとき（失敗、前提の不足、遠回り、ユーザーからの訂正、モデルの力不足や過剰）は、その場で <code>.claude/improvements.md</code> の「未対応」に 1 行書く。直すのは後でよい</li>
+<li>メモを書いたら <code>python3 scripts/gen-docs.py</code> も実行する（資料の改善メモ一覧がこのファイルから作られ、放っておくと <code>--check</code> が落ちるため）</li>
 <li>サブエージェントや fork の skill の報告に「改善メモ」があれば、メイン会話がそれを転記する</li>
 <li>作業の区切り（直近 30 分以内にコミットがあり、未コミットの変更が無い）で未対応のメモがあると、Stop フック（<code>.claude/hooks/retro-nudge.py</code>）が <code>/retro</code> での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 <code>SOSHO_RETRO_NUDGE=0</code></li>
 <li>改善案を適用するのは、ユーザーが承認したものだけ</li>
@@ -470,22 +482,15 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>5</strong> 件 ／ 対応済み 7 件</p>
-<ul>
-<li>2026-10-12 zmk-build: 報告の「資料: 最新」は gen-docs.py --check（生成ブロックだけ）の結果で、手書きの説明の古さは分からない。最新と読み違えやすい（haiku の改善メモ）→ 報告の欄を「資料（生成部分）」とし、手書き部分は対象外と明記するとよい</li>
-<li>2026-10-12 CLAUDE.md（改善メモ）: 改善メモを足すと、資料の改善メモ一覧（生成部分）が古くなり gen-docs.py --check が落ちる。レビュー役は「対象外」と伝えたファイルが原因と気づくまで手間取った → 改善メモを書いたら gen-docs.py も実行する、と決まりに足すとよい</li>
-<li>2026-10-12 add-feature: conf を Python で一括編集したら、CRLF の改行が LF に変わり全行が差分になった（read_text の改行変換。シールドの一部のファイルは CRLF）→ 手順 3 に「改行コードを変えない（一括編集は newline=&#x27;&#x27; で読み書き）」と足すとよい</li>
-<li>2026-10-12 zmk-build: 差分ビルドでは設定（Kconfig）の段階が走らず、その警告が出ないことがある。警告の有無を前と比べるときに食い違った → 警告を比べたいときはクリーンビルド（-p）にする、と前提に足すとよい</li>
-<li>2026-10-12 config-reviewer: 削除した設定シンボルの説明（scripts/docgen/shield.py の KCONFIG_NOTES）が残っていた（レビュー役の改善メモ）→ 観点に「削除した設定や値の説明・生成器が scripts/docgen/ に残っていないか」を足すとよい</li>
-</ul>
+<p>未対応 <strong>0</strong> 件 ／ 対応済み 13 件</p>
 <details>
 <summary>最近の対応済み（5 件）</summary>
 <ul>
-<li>2026-10-11 add-feature: ビルドとレビューを並行させ、レビュー役がビルド成功を知らずに要確認を出した → /retro で承認。「ビルドを済ませてからレビューに出し、ビルド結果を依頼文に含める」を手順 4 に明記した</li>
-<li>2026-10-11 config-reviewer: .zmk-ref/ の存在を知らず、zip_x_scaler の実在を確かめられなかった → /retro で承認。前提に .zmk-ref/ の場所と見る所、ビルド結果を根拠に使うことを足した</li>
-<li>2026-10-11 retro-nudge: 何も仕上げていない時点（設計の相談中）でも発火しうる → /retro で承認。「直近 30 分以内にコミットがある」を条件に足した（一時リポジトリで確認）。CLAUDE.md と開発フローのページも更新</li>
-<li>2026-10-11 zmk-researcher: 「zmk-docs/ は docs/docs/ の写し」が zmk-docs/docs/ と読まれやすい → /retro で承認。直下に keymaps/ などが並び docs/ フォルダは無いと明記した</li>
-<li>2026-10-11 lint-keymap: 参照ラベルの実在を調べていなかった → /retro で承認。.zmk-ref/ とリポジトリの定義に照らす検査を足した（架空のラベル 2 つで警告が出ることを確認）。CLAUDE.md と開発フローのページも更新</li>
+<li>2026-10-12 CLAUDE.md（改善メモ）: 改善メモを足すと、資料の改善メモ一覧（生成部分）が古くなり gen-docs.py --check が落ちる。レビュー役は「対象外」と伝えたファイルが原因と気づくまで手間取った → /retro で承認。CLAUDE.md の「改善メモと振り返り」に、メモを書いたら gen-docs.py も実行すると足した</li>
+<li>2026-10-12 add-feature: conf を Python で一括編集したら、CRLF の改行が LF に変わり全行が差分になった（read_text の改行変換。シールドの一部のファイルは CRLF）→ /retro で承認。add-feature に限らないため、CLAUDE.md の「規約」に「改行コードを変えない（一括編集は newline=&#x27;&#x27; で読み書き）」と CRLF のファイルを足した</li>
+<li>2026-10-12 zmk-build: 差分ビルドでは設定（Kconfig）の段階が走らず、その警告が出ないことがある。警告の有無を前と比べるときに食い違った → /retro で承認。警告を比べるときはクリーンビルド（-p）にする、と前提に足した</li>
+<li>2026-10-12 config-reviewer: 削除した設定シンボルの説明（scripts/docgen/shield.py の KCONFIG_NOTES）が残っていた（レビュー役の改善メモ）→ /retro で承認。観点に「消したもの（消した名前が scripts/docgen/ の説明や value のキー・資料・コメントに残っていないか）」を足した</li>
+<li>2026-10-12 資料全般（ユーザーの指示）: 資料を直すときに、ほかの記述との矛盾を確かめる決まりが無かった（1 か所だけ直して食い違いが残りうる）→ CLAUDE.md の「資料の規約」の先頭に大前提として「矛盾が無いかを必ず確かめ、見つけたら正しい方を確かめてから直す」を足し、update-docs・docs-sync・config-reviewer・add-feature・retro にも反映した。開発フローのページの「決まりごと」は CLAUDE.md の写しを手で書いていた（両方を直す必要があり、食い違いの元になる）ため、CLAUDE.md の節を自動で取り込む形に変えた</li>
 </ul>
 </details>
 <p class="gen-note">自動生成 · 元: <code>.claude/improvements.md</code></p>

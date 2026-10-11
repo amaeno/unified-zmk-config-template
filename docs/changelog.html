@@ -50,6 +50,17 @@
 <!-- gen:changelog -->
 <div class="gen">
 <ul class="item-list history">
+<li><p class="item-head"><code>2026-10-12</code> 振り返り（2 回目）: 改善メモ 5 件を反映し、資料の矛盾確認を大前提にする</p>
+<ul>
+<li>zmk-build: 報告の欄を「資料（生成部分）」にし、手書きの説明は確認の対象外と明記。警告を比べるときはクリーンビルド（-p）にする</li>
+<li>CLAUDE.md: 改善メモを書いたら gen-docs.py も実行する。改行コードを変えない（CRLF のファイルの一覧と newline=&#x27;&#x27; での読み書き）</li>
+<li>config-reviewer: 観点に「矛盾」と「消したもの（scripts/docgen/ などに残った説明）」を追加</li>
+<li>資料を更新するときは、ほかの記述との矛盾を必ず確かめ、正しい方を確かめてから直す決まりを CLAUDE.md の資料の規約の先頭に置き、update-docs・docs-sync・add-feature・retro にも組み込む</li>
+<li>開発フローのページの「決まりごと」を、CLAUDE.md の手書きの写しから自動取り込みに変える（両方を直す必要があり、食い違いの元だったため）</li>
+<li>改善メモの未対応 5 件を対応済みへ移す</li>
+</ul>
+<p>資料と AI ツールの変更だけで、ファームウェアは変わらない（書き込み不要）。</p>
+</li>
 <li><p class="item-head"><code>2026-10-12</code> 既知の課題をまとめて片付ける（9 件） <span class="badge ok">fw-2026-10-12.2</span> <small>R: sosho_R_trackpad / L: sosho_L_trackball（既知の課題の片付け。左右とも書き込み）</small></p>
 <ul>
 <li>物理レイアウトの参照を正しいラベルに直し、補っていた上書きを削除</li>
