@@ -41,6 +41,19 @@ https://zmk.dev/docs/keymaps/input-processors
 
 &trackball_split { status = "okay"; };
 &trackball_split_listener {
-	status = "okay"; 
+	status = "okay";
 	//input-processors = <&zip_xy_scaler 1 3>,<&zip_xy_to_scroll_mapper>;
+
+	/*
+	scroll レイヤー（L4）が有効なあいだだけ、左のトラックボールを縦スクロールにする。
+	L4 は config/sosho.keymap の 0 番キーの長押しで有効になる。
+	・横の動きは捨てる（zip_x_scaler 0 1）。横スクロールもしたいならこれを外す
+	・速さは 2 つの zip_xy_scaler の分母の積で決まる（いまは 8 × 4 = 32 カウントで 1 ノッチ）。
+	  遅くしたいなら分母を大きくする（1 つあたり 16 以下が ZMK のドキュメントの推奨。足りなければ段を増やす）
+	・向きが逆なら、mapper の前に <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT> を足す
+	*/
+	scroller {
+		layers = <4>;
+		input-processors = <&zip_x_scaler 0 1>, <&zip_xy_scaler 1 8>, <&zip_xy_scaler 1 4>, <&zip_xy_to_scroll_mapper>;
+	};
 };

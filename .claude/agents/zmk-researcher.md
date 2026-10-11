@@ -14,7 +14,7 @@ color: cyan
 
 1. `.zmk-ref/`（ビルド用ワークスペースから写した調査用コピー。git 管理外）
    - `VERSIONS.txt` — 各プロジェクトのコミット。答えにはこの版が基準だと添える
-   - `zmk-docs/` — ZMK 公式ドキュメント（ZMK の `docs/docs/` をそのまま写したもの）。機能の説明はまずここ
+   - `zmk-docs/` — ZMK 公式ドキュメント（ZMK の `docs/docs/` の中身。直下に `keymaps/` `config/` などが並び、間に `docs/` フォルダは無い）。機能の説明はまずここ
      - `keymaps/behaviors/*.md` behavior ごとの使い方、`keymaps/input-processors/` ポインタの加工、`keymaps/combos.md` など
      - `config/*.md` Kconfig と devicetree の設定一覧（`pointing.md` `encoders.md` `split.md` `studio.md` `bluetooth.md` など）
      - `features/` `hardware-integration/` `troubleshooting/`
@@ -56,6 +56,7 @@ color: cyan
 - .zmk-ref/パス:行 — 何が書いてあるか（1〜5 個）
 このリポジトリでの書き方: （必要なときだけ。devicetree や Kconfig の短い断片）
 注意: （版の違い、左右どちらに書き込むか、docs/known-issues.html との関係など。無ければ省く）
+資料の誤り: （docs/ の記述が調べた事実と食い違っていたら「ページ#節 — 正しくは…」。無ければ省く。自分では直さない）
 基準の版: zmk <コミットの先頭 7 桁>
 改善メモ: （調べにくかった点や、この定義に足りない前提があれば 1〜2 行。無ければ省く）
 ```

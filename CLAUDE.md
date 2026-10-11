@@ -86,7 +86,7 @@ memo.md                          本家の verB2 リリースノート（オリ�
 ## 開発ループ
 
 ```bash
-python3 scripts/lint-keymap.py              # キーマップの検査（数十 ms）。編集の前後に
+python3 scripts/lint-keymap.py              # キーマップの検査（1 秒未満）。編集の前後に
 python3 scripts/gen-docs.py                 # 資料の生成ブロックを更新（--check で確認だけ）
 ./scripts/build-local.sh sosho_R_trackpad   # ビルド（キーマップ変更なら約 14 秒）
 ```
@@ -98,6 +98,8 @@ python3 scripts/gen-docs.py                 # 資料の生成ブロックを更�
 レイヤーごとのバインド数、括弧の対応、存在しないレイヤーへの参照、コンボの位置の範囲、
 `sensor-bindings` の引数の数を検査する。期待キー数は 44 を決め打ちせず、
 物理レイアウトとマトリクス変換から導出して 3 者の食い違いも検出する。
+キーマップと overlay が参照するラベル（`&kp` や `&zip_*` など）が、ZMK・モジュール（`.zmk-ref/`）と
+このリポジトリに定義されているかも照らし、見つからなければ警告する（`.zmk-ref/` が無ければ飛ばす）。
 
 ---
 
@@ -119,7 +121,7 @@ python3 scripts/gen-docs.py                 # 資料の生成ブロックを更�
 - `<!-- gen:… -->` から `<!-- /gen:… -->` の中は `scripts/gen-docs.py` が上書きする。手で編集しない
 - 繰り返し変わる事実は手書きせず、`scripts/docgen/` に生成器を足す。本文中の 1 つの値は `gen:value` で埋め込む
 - 同じ事実を複数の場所に書かない。このファイルと skills は資料の節へのリンクで済ませる
-- コードや設定を変えたら `python3 scripts/gen-docs.py` を実行し、生成結果も同じコミットに含める。手書き部分が古くなったら合わせて直す
+- **仕様（挙動・設定値・キー割り当て・手順・AI ツールの使い方）を変えたら、資料を必ず同じコミットで更新する。** 生成部分は `python3 scripts/gen-docs.py`、手書き部分は docs-sync か update-docs skill で直す。資料が古いままの変更はコミットしない
 - 新しいページは既存のページをひな形にし、`scripts/docgen/site.py` の `PAGES` に登録する
 - 既知の課題を直したら、`docs/known-issues.html` の表示が「解消済み」に変わるので、その節を消す
 - 本家由来の資料（`memo.md`）はオリジナルのまま残す
@@ -146,7 +148,7 @@ python3 scripts/gen-docs.py                 # 資料の生成ブロックを更�
 
 - skills・サブエージェントが手順どおりに進まなかったとき（失敗、前提の不足、遠回り、ユーザーからの訂正、モデルの力不足や過剰）は、その場で `.claude/improvements.md` の「未対応」に 1 行書く。直すのは後でよい
 - サブエージェントや fork の skill の報告に「改善メモ」があれば、メイン会話がそれを転記する
-- 作業の区切り（未コミットの変更が無い）で未対応のメモがあると、Stop フック（`.claude/hooks/retro-nudge.py`）が `/retro` での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 `SOSHO_RETRO_NUDGE=0`
+- 作業の区切り（直近 30 分以内にコミットがあり、未コミットの変更が無い）で未対応のメモがあると、Stop フック（`.claude/hooks/retro-nudge.py`）が `/retro` での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 `SOSHO_RETRO_NUDGE=0`
 - 改善案を適用するのは、ユーザーが承認したものだけ
 
 ---

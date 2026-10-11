@@ -108,6 +108,29 @@ def labeled_nodes(body: str) -> Iterator[tuple[str | None, str, str]]:
         i = end
 
 
+def without_children(body: str) -> str:
+    """直下の子ノード（`name { ... };`）を取り除いた中身。親自身のプロパティだけを読むときに使う。
+
+    子ノードにも同じ名前のプロパティ（input-listener の子の input-processors など）があるので、
+    取り除かずに prop_raw すると子の値を親の値と取り違える。
+    """
+    out: list[str] = []
+    i = 0
+    pat = re.compile(r"(?:[A-Za-z_][\w-]*\s*:\s*)?[A-Za-z_][\w@,.-]*\s*\{")
+    while True:
+        m = pat.search(body, i)
+        if not m:
+            out.append(body[i:])
+            break
+        _, end = match_brace(body, body.index("{", m.start()))
+        if end is None:
+            out.append(body[i:])
+            break
+        out.append(body[i : m.start()])
+        i = end
+    return "".join(out)
+
+
 # ------------------------------------------------------------------ プロパティ
 
 

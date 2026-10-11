@@ -84,7 +84,7 @@
 <p><strong>編集する。</strong> どのファイルを触ると何が変わるかは <a href="settings.html#map">設定項目 › どこを触ると何が変わるか</a> にあります。触るファイルが <a href="known-issues.html">既知の課題</a> に載っていないかも確かめます。</p>
 </li>
 <li>
-<p><strong>lint を通す。</strong> ツールチェーン無しで数十 ms で終わります。<code>ok:</code> が出るまで直します。</p>
+<p><strong>lint を通す。</strong> ツールチェーン無しで 1 秒かからず終わります。<code>ok:</code> が出るまで直します。キーの数や括弧の対応に加えて、使っているラベル（<code>&amp;kp</code> や <code>&amp;zip_*</code> など）が ZMK に実在するかも確かめ、見つからなければ警告を出します。</p>
 <pre><code>python3 scripts/lint-keymap.py</code></pre>
 </li>
 <li>
@@ -335,7 +335,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <ul>
 <li><strong>繰り返し変わる事実は手で書かない。</strong> ビルドターゲット、モジュール、キーマップ、設定値などは <code>scripts/gen-docs.py</code> に生成器を足して作ります。手書きは「なぜそうなっているか」「どう変えるか」の説明に使います。</li>
 <li><strong>同じ事実を 2 か所に書かない。</strong> 事実の正本は資料にあり、<code>CLAUDE.md</code> や skills からは資料へのリンクで済ませます。AI へのルールだけは <code>CLAUDE.md</code> が正本で、資料はそれを自動で取り込みます。</li>
-<li><strong>設定を変えたら資料も作り直す。</strong> 生成結果も同じコミットに含めます。</li>
+<li><strong>仕様を変えたら、資料も必ず同じコミットで更新する。</strong> 挙動・設定値・キー割り当て・手順・AI ツールの使い方が変わったら、生成部分は <code>python3 scripts/gen-docs.py</code> で作り直し、手書きの説明も直します。資料が古いままの変更はコミットしません。AI 側では、skills とサブエージェントの手順にもこの決まりが組み込まれていて、レビュー役は更新漏れを「要修正」として指摘します。</li>
 <li><strong>本家の資料はオリジナルのまま残す。</strong> <code>memo.md</code>（本家の verB2 リリースノート）は編集しません。</li>
 </ul>
 
@@ -407,7 +407,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <p>skills やサブエージェントは、使って困ったところを直すことで良くなっていきます。困ったことは作業中にメモしておき、作業の区切りで Claude が改善案を出します。直すかどうかを決めるのは自分です。</p>
 <ol class="steps">
 <li><p><strong>メモする。</strong> 手順どおりに進まなかったことを、Claude が <code>.claude/improvements.md</code> に 1 行ずつ書きます。</p></li>
-<li><p><strong>区切りで提案する。</strong> 未コミットの変更が無いときに未対応のメモがあると、ターンの終わりに Stop フックが働き、Claude が <code>/retro</code> の手順で改善案を出します（1 セッション 1 回まで）。自分から <code>/retro</code> と頼むこともできます。</p></li>
+<li><p><strong>区切りで提案する。</strong> 何かを仕上げてコミットした直後（直近 30 分以内にコミットがあり、未コミットの変更が無いとき）に未対応のメモがあると、ターンの終わりに Stop フックが働き、Claude が <code>/retro</code> の手順で改善案を出します（1 セッション 1 回まで）。自分から <code>/retro</code> と頼むこともできます。</p></li>
 <li><p><strong>選んで直す。</strong> 適用する案を番号で選ぶと、その分だけ直して、メモを「対応済み」に移します。</p></li>
 </ol>
 <!-- gen:claude-md section=改善メモと振り返り -->
@@ -415,7 +415,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <ul>
 <li>skills・サブエージェントが手順どおりに進まなかったとき（失敗、前提の不足、遠回り、ユーザーからの訂正、モデルの力不足や過剰）は、その場で <code>.claude/improvements.md</code> の「未対応」に 1 行書く。直すのは後でよい</li>
 <li>サブエージェントや fork の skill の報告に「改善メモ」があれば、メイン会話がそれを転記する</li>
-<li>作業の区切り（未コミットの変更が無い）で未対応のメモがあると、Stop フック（<code>.claude/hooks/retro-nudge.py</code>）が <code>/retro</code> での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 <code>SOSHO_RETRO_NUDGE=0</code></li>
+<li>作業の区切り（直近 30 分以内にコミットがあり、未コミットの変更が無い）で未対応のメモがあると、Stop フック（<code>.claude/hooks/retro-nudge.py</code>）が <code>/retro</code> での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 <code>SOSHO_RETRO_NUDGE=0</code></li>
 <li>改善案を適用するのは、ユーザーが承認したものだけ</li>
 </ul>
 <p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「改善メモと振り返り」節</p>
@@ -425,12 +425,15 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>0</strong> 件 ／ 対応済み 2 件</p>
+<p>未対応 <strong>0</strong> 件 ／ 対応済み 7 件</p>
 <details>
-<summary>最近の対応済み（2 件）</summary>
+<summary>最近の対応済み（5 件）</summary>
 <ul>
-<li>2026-10-11 zmk-researcher: 試験で、検索ツール（Grep / Glob）が無い環境のため Read だけでパスを推測して調べ、約 23 万トークン・9 分かかった。`.zmk-ref/` の構成も分からなかった → Bash の grep / find を読み取り専用で使えるようにし、`.zmk-ref/` の地図と「該当箇所だけを読む」探し方を定義に足した（直したあとの本番では約 3.2 万トークン・32 秒）</li>
-<li>2026-10-11 zmk-researcher: 「メモリに記録する」と報告しながら、書く前に答えを返して作業を終えていた（メモリは空のまま）。また、この機体では使っていない overlay を例に挙げた → メモリへの記録を「答えを返す前に」行う順番を明記し、例は「この機体」を前提にするよう定義に足した（再試験でメモリに記録されることを確認）</li>
+<li>2026-10-11 add-feature: ビルドとレビューを並行させ、レビュー役がビルド成功を知らずに要確認を出した → /retro で承認。「ビルドを済ませてからレビューに出し、ビルド結果を依頼文に含める」を手順 4 に明記した</li>
+<li>2026-10-11 config-reviewer: .zmk-ref/ の存在を知らず、zip_x_scaler の実在を確かめられなかった → /retro で承認。前提に .zmk-ref/ の場所と見る所、ビルド結果を根拠に使うことを足した</li>
+<li>2026-10-11 retro-nudge: 何も仕上げていない時点（設計の相談中）でも発火しうる → /retro で承認。「直近 30 分以内にコミットがある」を条件に足した（一時リポジトリで確認）。CLAUDE.md と開発フローのページも更新</li>
+<li>2026-10-11 zmk-researcher: 「zmk-docs/ は docs/docs/ の写し」が zmk-docs/docs/ と読まれやすい → /retro で承認。直下に keymaps/ などが並び docs/ フォルダは無いと明記した</li>
+<li>2026-10-11 lint-keymap: 参照ラベルの実在を調べていなかった → /retro で承認。.zmk-ref/ とリポジトリの定義に照らす検査を足した（架空のラベル 2 つで警告が出ることを確認）。CLAUDE.md と開発フローのページも更新</li>
 </ul>
 </details>
 <p class="gen-note">自動生成 · 元: <code>.claude/improvements.md</code></p>

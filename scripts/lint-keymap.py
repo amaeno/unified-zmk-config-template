@@ -3,12 +3,16 @@
 
     python3 scripts/lint-keymap.py [--keys N] [--sensors N]
 
-終了コード 0 = 問題なし、1 = エラーあり。数十 ms で終わるので、
+終了コード 0 = 問題なし、1 = エラーあり。1 秒かからず終わるので、
 Docker ビルドを回す前の一次チェックとして使う。
 
 期待キー数は 44 をハードコードせず、物理レイアウト (sosho-layouts.dtsi) と
 マトリクス変換 (sosho.dtsi) から導出する。3 者が食い違えばそれ自体がエラー
 （キーマップとマトリクスの乖離は、ビルドは通るのに無反応キーができる)。
+
+キーマップと overlay が参照するラベル（&kp や &zip_* など）は、ZMK 本体・外部モジュールの
+調査用コピー（.zmk-ref/）とこのリポジトリの定義に照らし、見つからなければ警告する。
+.zmk-ref/ が無ければこの確認は飛ばす（scripts/build-local.sh --ref で作れる）。
 """
 from __future__ import annotations
 
@@ -30,8 +34,10 @@ from zmk_dts import (
 
 REPO = Path(__file__).resolve().parent.parent
 KEYMAP = REPO / "config" / "sosho.keymap"
-LAYOUTS = REPO / "boards" / "shields" / "sosho" / "sosho-layouts.dtsi"
-SHIELD = REPO / "boards" / "shields" / "sosho" / "sosho.dtsi"
+SHIELD_DIR = REPO / "boards" / "shields" / "sosho"
+LAYOUTS = SHIELD_DIR / "sosho-layouts.dtsi"
+SHIELD = SHIELD_DIR / "sosho.dtsi"
+REF = REPO / ".zmk-ref"
 
 ERRORS: list[str] = []
 WARNS: list[str] = []
@@ -194,7 +200,43 @@ def main() -> int:
             if "timeout-ms" not in cbody:
                 warn("コンボ `%s` に timeout-ms がありません（ZMK の既定値が使われます）" % name)
 
+    # 5. 参照しているラベルが実在するか（存在しないラベルは、今はビルドするまで気づけない）
+    if REF.is_dir():
+        known = defined_labels()
+        for label, where in referenced_labels(src):
+            if label not in known:
+                warn(
+                    "`&%s`（%s）の定義が、ZMK・モジュール（.zmk-ref/）にもこのリポジトリにも見つかりません"
+                    % (label, where)
+                )
+
     return report(n_keys, n_sens, n_layers)
+
+
+def defined_labels() -> set[str]:
+    """`label: node {` の形で定義されたラベル。ZMK 本体・外部モジュールとこのリポジトリから集める。"""
+    files = list(REF.rglob("*.dtsi")) + list(SHIELD_DIR.glob("*.dtsi")) + list(SHIELD_DIR.glob("*.overlay")) + [KEYMAP]
+    labels: set[str] = set()
+    for p in files:
+        try:
+            text = strip_comments(p.read_text("utf-8"))
+        except (OSError, UnicodeDecodeError):
+            continue
+        labels.update(re.findall(r"([A-Za-z_]\w*)\s*:\s*[\w@,.-]+\s*\{", text))
+    return labels
+
+
+def referenced_labels(keymap_src: str) -> list[tuple[str, str]]:
+    """キーマップのバインディングと overlay の input-processors が参照するラベルを (ラベル, 場所) で返す。"""
+    out: list[tuple[str, str]] = []
+    for prop in ("bindings", "sensor-bindings"):
+        for payload in prop_cells(keymap_src, prop):
+            out += [(b[1:], "キーマップの %s" % prop) for b in behaviors(payload)]
+    for p in sorted(SHIELD_DIR.glob("*.overlay")):
+        text = strip_comments(p.read_text("utf-8"))
+        for m in re.finditer(r"(?<![\w-])input-processors\s*=\s*([^;]+);", text):
+            out += [(l, "%s の input-processors" % p.name) for l in re.findall(r"&(\w+)", m.group(1))]
+    return sorted(set(out))
 
 
 def report(n_keys=None, n_sens=None, n_layers=None) -> int:

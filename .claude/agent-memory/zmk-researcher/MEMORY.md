@@ -1,1 +1,2 @@
 - 標準 behavior の定義は `.zmk-ref/zmk-app/dts/behaviors/<名前>.dtsi`、binding は `dts/bindings/behaviors/zmk,behavior-<名前>.yaml`、実装は `src/behaviors/behavior_<名前>.c`
+- input-processor の定義は `zmk-app/dts/input/processors/*.dtsi`、実装は `zmk-app/src/pointing/input_processor_*.c` と `input_listener.c`、docs は `zmk-docs/keymaps/input-processors/`。コンボは `zmk-app/src/combo.c`、docs は `zmk-docs/{keymaps,config}/combos.md`
