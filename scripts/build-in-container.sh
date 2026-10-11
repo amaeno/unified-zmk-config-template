@@ -85,6 +85,7 @@ sync_ref() {
   mkdir -p "$dst"
   tar -C "$WS" --exclude=.git -cf - \
       zmk/app zmk/docs/docs zmk-rgbled-widget zmk-pmw3610-driver modules/zmk_encoder \
+      zmk-input-processor-report-rate-limit \
       zephyr/boards/seeed/xiao_ble \
     | tar -C "$dst" -xf -
   # 階層を浅くして、パスを短くする

@@ -60,6 +60,7 @@
 <tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/caksoylar/zmk-rgbled-widget/commit/e6b467792a1dabef8cfa5c9fd26bfefc9c16662b"><code>e6b4677</code></a></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
 <tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/badjeff/zmk-pmw3610-driver/commit/44b4a76b74d293a93cec4ccb7e04cb8d29c10f93"><code>44b4a76</code></a></td><td>トラックボール (PMW3610) のドライバ</td></tr>
 <tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/elekit-official/zmk_encoder/commit/1a34a5561f08eb7130823760fe597458f477e6db"><code>1a34a55</code></a></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
+<tr><td><a href="https://github.com/badjeff/zmk-input-processor-report-rate-limit">zmk-input-processor-report-rate-limit</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/badjeff/zmk-input-processor-report-rate-limit/commit/b056cb135525933743e2627150fb390f9d4b2461"><code>b056cb1</code></a></td><td>ポインタのレポートの間引き（<code>&amp;zip_ble_report_rate_limit</code>。Bluetooth の送信詰まり対策）</td></tr>
 </tbody>
 </table>
 </div>
@@ -78,7 +79,7 @@
 <tbody>
 <tr><td><code>.zmk-ref/zmk-docs/</code></td><td>ZMK 公式ドキュメント（md）。<code>keymaps/behaviors/</code> に behavior ごとの使い方、<code>config/</code> に設定の一覧、<code>keymaps/input-processors/</code> にポインタの加工</td></tr>
 <tr><td><code>.zmk-ref/zmk-app/</code></td><td>ZMK 本体のソース。<code>dts/bindings/</code> に devicetree の仕様、<code>dts/behaviors/</code> に標準の behavior、<code>src/</code> に実装</td></tr>
-<tr><td><code>.zmk-ref/zmk-rgbled-widget/</code> ほか</td><td>外部モジュール（LED 表示、トラックボールのドライバ、エンコーダのスクロール）</td></tr>
+<tr><td><code>.zmk-ref/zmk-rgbled-widget/</code> ほか</td><td>外部モジュール（LED 表示、トラックボールのドライバ、エンコーダのスクロール、ポインタのレポートの間引き）</td></tr>
 <tr><td><code>.zmk-ref/zephyr-xiao_ble/</code></td><td>XIAO nRF52840 のボード定義（ピンの名前など）</td></tr>
 <tr><td><code>.zmk-ref/VERSIONS.txt</code></td><td>写したときの各プロジェクトの版</td></tr>
 </tbody>
@@ -128,6 +129,10 @@
 <li><p class="item-head">状態表示 LED の色</p><p>接続状態は 青 = つながっている、黄 = 待ち受け、赤 = 切れている。出典: <code>zmk-rgbled-widget/README.md</code></p></li>
 <li><p class="item-head">左右間の Bluetooth の接続条件は右が決め、左の <code>BT_PERIPHERAL_PREF_*</code> は使われない</p><p>右は接続するときに <code>ZMK_SPLIT_BLE_PREF_INT</code>（既定 6 = 7.5 ms）・<code>ZMK_SPLIT_BLE_PREF_LATENCY</code>（既定 30）で接続し、その後は変えない。左は <code>BT_GAP_AUTO_UPDATE_CONN_PARAMS</code> が切ってあり、自分から変更を要求しない（左のビルドの <code>.config</code> でも確認）。出典: <code>zmk-app/src/split/bluetooth/central.c</code>（<code>bt_conn_le_create</code>）、<code>zmk-app/src/split/bluetooth/Kconfig</code></p></li>
 <li><p class="item-head">右と PC の接続条件は、Zephyr が右の <code>BT_PERIPHERAL_PREF_*</code> で PC に要求する</p><p>ZMK 自身は要求を出さない（ZMK Studio の接続中に latency を変える場合を除く。右は latency 0 なのでこれも起きない）。右のビルドの <code>.config</code> で <code>BT_GAP_AUTO_UPDATE_CONN_PARAMS=y</code> を確認。最終的に決めるのは PC で、Mac に合う値は Apple の規定による（<a href="settings.html#bluetooth">設定項目 › Bluetooth の接続</a>。Mac が実際に何 ms を選んでいるかは未確認）。出典: <code>zmk-app/src/ble.c</code>、<code>zmk-app/src/studio/gatt_rpc_transport.c</code>、<code>zmk-app/Kconfig</code></p></li>
+<li><p class="item-head">Bluetooth で送りきれないマウスのレポートは溜まり、遅れが積み上がる</p><p>レポートは 1 つずつ送られ、送れない分は待ち行列（<code>ZMK_BLE_MOUSE_REPORT_QUEUE_SIZE</code>、既定 20）に溜まる。まとめて送る仕組みは無い。満杯になると、入力の処理が送信の空きを最大 100 ms 待つ。出典: <code>zmk-app/src/hog.c</code> の <code>zmk_hog_send_mouse_report</code></p></li>
+<li><p class="item-head">リスナーは sync のたびにマウスのレポートを送る（動きが 0 でも送る）</p><p>input-processors で値が 0 になっても送るので、スクロールに変えているあいだも、トラックボールの報告の回数だけレポートが出る。出典: <code>zmk-app/src/pointing/input_listener.c</code> の <code>input_handler</code></p></li>
+<li><p class="item-head">送信が詰まると、キーとエンコーダの処理まで止まる</p><p>トラックパッドのドライバは Zephyr 本体のもので、入力を「空くまで待つ」（<code>K_FOREVER</code>）で渡す。この処理は Zephyr の共有の作業スレッド（system workqueue）で動き、キーの読み取り（kscan）とエンコーダ（<code>EC11_TRIGGER_GLOBAL_THREAD</code>）も同じスレッドを使う。出典: Zephyr の <code>drivers/input/input_pinnacle.c</code>（<code>.zmk-ref/</code> には写していない）、<code>zmk-app/module/drivers/kscan/kscan_gpio_matrix.c</code>、<code>zmk-app/module/drivers/sensor/ec11/ec11_trigger.c</code></p></li>
+<li><p class="item-head"><code>&amp;zip_ble_report_rate_limit</code> は動きを捨てずに次のレポートに足す</p><p>引数の ms より短い間隔で来た X・Y の値は、送らずに溜めておき、次に通すイベントに足す。溜めたまま引数の 2 倍より長く止まると、その分は捨てる。<code>limit-ble-only</code> 付きなので、出力先が Bluetooth のときだけ効く。出典: <code>zmk-input-processor-report-rate-limit/src/pointing/input_processor_report_rate_limit.c</code></p></li>
 <li><p class="item-head"><code>CONFIG_NFCT_PINS_AS_GPIOS</code> は非推奨</p><p>後継は devicetree の <code>&amp;uicr { nfct-pins-as-gpios; }</code>（このリポジトリは 2026-10-12 に移行済み）。出典: Zephyr の <code>soc/nordic/Kconfig</code>（<code>.zmk-ref/</code> には写していない）</p></li>
 </ul>
 </section>

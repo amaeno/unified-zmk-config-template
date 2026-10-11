@@ -27,6 +27,7 @@ PROJECT_NOTES = {
     "zmk-rgbled-widget": "RGB LED による状態表示（電池残量・接続状態）",
     "zmk-pmw3610-driver": "トラックボール (PMW3610) のドライバ",
     "zmk_encoder": "エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）",
+    "zmk-input-processor-report-rate-limit": "ポインタのレポートの間引き（<code>&amp;zip_ble_report_rate_limit</code>。Bluetooth の送信詰まり対策）",
 }
 
 

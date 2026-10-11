@@ -191,7 +191,7 @@
 <li><p><strong>左で読む。</strong> トラックボール（<code>trackball</code>）が動きを読み取ります。</p></li>
 <li><p><strong>右へ送る。</strong> 左の overlay の <code>trackball_split</code>（<code>zmk,input-split</code>）が、Bluetooth で右へ送ります。</p></li>
 <li><p><strong>右で受ける。</strong> 右の <code>trackball_split</code> が同じ番号（<code>reg</code>）で受け取り、<code>trackball_split_listener</code> に渡します。</p></li>
-<li><p><strong>加工して PC へ。</strong> リスナーの <code>input-processors</code> で速さ・向き・スクロール化を加工してから、PC に送ります。</p></li>
+<li><p><strong>加工して PC へ。</strong> リスナーの <code>input-processors</code> で速さ・向き・スクロール化を加工し、Bluetooth で送りきれる回数に間引いてから、PC に送ります（<a href="settings.html#ble-backlog">設定項目 › 送りきれないレポートが溜まるとき</a>）。</p></li>
 </ol>
 <p>キーの押下とエンコーダの回転も同じように右へ送られ、キーマップは右だけが処理します。そのため、キーマップやコンボを変えたときは右に書き込むだけで済みます。</p>
 </section>
@@ -202,7 +202,7 @@
 <div class="gen">
 <pre><code>build.yaml                       ビルド対象 5 種の定義。全ての入口
 config/
-  west.yml                       ZMK 本体 + 外部モジュール 3 つ（動作を確かめたコミットで固定）
+  west.yml                       ZMK 本体 + 外部モジュール 4 つ（動作を確かめたコミットで固定）
   sosho.keymap                   キーマップ・コンボ・エンコーダ挙動（普段触るのはここ）
 boards/shields/sosho/
   Kconfig.shield                 4 つのシールド名の定義

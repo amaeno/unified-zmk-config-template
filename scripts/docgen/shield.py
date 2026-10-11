@@ -46,6 +46,7 @@ KCONFIG_NOTES = {
     "BT_PERIPHERAL_PREF_MAX_INT": ("Bluetooth", "PC との接続間隔の希望の上限。効くのは右だけ"),
     "BT_PERIPHERAL_PREF_LATENCY": ("Bluetooth", "応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる。効くのは右だけ"),
     "BT_PERIPHERAL_PREF_TIMEOUT": ("Bluetooth", "切断とみなすまでの時間"),
+    "BT_CTLR_TX_PWR_PLUS_8": ("Bluetooth", "送信出力を +8 dBm（最大）にする（既定 0 dBm）。再送を減らす。電池の減りは少し早くなる"),
     "ZMK_STUDIO": ("ZMK Studio", "ZMK Studio を有効にする"),
     "ZMK_STUDIO_LOCKING": ("ZMK Studio", "Studio の編集ロック（n = ロックしない。いつでも編集できる）"),
     "EC11": ("エンコーダ", "EC11 ロータリーエンコーダのドライバ"),

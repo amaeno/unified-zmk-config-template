@@ -11,6 +11,7 @@
 
 - 2026-10-12 zmk-researcher: Zephyr 本体のソースが .zmk-ref/ に無く、BLE の接続パラメータの自動更新の既定値などが推定どまりになった（並行した 1 本は Docker ボリューム sosho-zmk-ws の /ws/zephyr を自力で見つけて読めた。場所はエージェントのメモリに記録済み）→ 定義に Zephyr のある場所と読み取り用コマンドを書くか、build-local.sh --ref で Zephyr の subsys/bluetooth・drivers/input・dts/bindings/input も写すとよい（2 本の改善メモ）
 - 2026-10-12 config-reviewer: BLE の接続パラメータの変更で、Apple の規定を記憶で判断した（「上限 ≧ 下限 × 2」。一次資料の QA1931 とは違った）。メイン会話も最初は記憶で 15 ms 固定を選び、QA1931 の「15 ms 固定は 30 ms に広げられることがある」を見落としていた → 外部の規定（Apple・Bluetooth の仕様）が絡む変更は、一次資料を確かめるか「要確認」にする観点を足すとよい（レビュー役の改善メモ）
+- 2026-10-12 config-reviewer: 外部モジュールの input-processor を足したとき、ラベルの定義（type・codes）と置く位置（処理の順序。scroller の mapper より前か）の確認を、依頼文で頼まれてから行った → 観点に「外部モジュールを追加・更新したら、モジュールの .c とラベルの定義を読み、置く位置と処理の順序が合っているか確かめる」を足すとよい（レビュー役の改善メモ）
 
 ## 対応済み
 

@@ -1,6 +1,6 @@
 ---
 name: zmk-researcher
-description: ZMK 本体・外部モジュール（zmk-rgbled-widget / zmk-pmw3610-driver / zmk_encoder）・XIAO のボード定義の仕様を、このリポジトリが実際に使っている版のソースとドキュメントで調べて答える。「ZMK で○○はできるか」「この behavior・Kconfig・devicetree プロパティの意味と書き方」「この挙動はどこで実装されているか」を確かめたいときは、記憶で答えずにこのエージェントに調べさせること。読み取り専用。
+description: ZMK 本体・外部モジュール（zmk-rgbled-widget / zmk-pmw3610-driver / zmk_encoder / zmk-input-processor-report-rate-limit）・XIAO のボード定義の仕様を、このリポジトリが実際に使っている版のソースとドキュメントで調べて答える。「ZMK で○○はできるか」「この behavior・Kconfig・devicetree プロパティの意味と書き方」「この挙動はどこで実装されているか」を確かめたいときは、記憶で答えずにこのエージェントに調べさせること。読み取り専用。
 tools: Read, Grep, Glob, Bash
 model: sonnet
 effort: medium
@@ -25,7 +25,7 @@ color: cyan
      - `Kconfig` と各 `src/**/Kconfig` 設定項目と既定値
      - `include/dt-bindings/zmk/` キーコード（`keys.h`）やマウス操作（`pointing.h`）などの定数
      - `module/drivers/` ドライバ（`sensor/` に EC11、`input/` にトラックパッドなど）
-   - `zmk-rgbled-widget/` `zmk-pmw3610-driver/` `zmk_encoder/` — 外部モジュール
+   - `zmk-rgbled-widget/` `zmk-pmw3610-driver/` `zmk_encoder/` `zmk-input-processor-report-rate-limit/` — 外部モジュール
    - `zephyr-xiao_ble/` — XIAO nRF52840 のボード定義（ピン名など）
 2. このリポジトリの設定（`config/`、`boards/shields/sosho/`）と資料（`docs/*.html`）
 
