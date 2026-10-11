@@ -90,6 +90,23 @@ def _scrl_unused() -> tuple[bool, str]:
     return has_define and not bound, ""
 
 
+@check("nfct-deprecated")
+def _nfct_deprecated() -> tuple[bool, str]:
+    # Zephyr 4.1 で Kconfig は非推奨になり、後継は devicetree の &uicr { nfct-pins-as-gpios; }
+    in_conf = [p.name for p in sorted(SHIELD_DIR.glob("*.conf")) if active_lines(p, r"^CONFIG_NFCT_PINS_AS_GPIOS=y")]
+    in_dts = any(
+        "nfct-pins-as-gpios" in dts.strip_comments(read(p))
+        for p in list(SHIELD_DIR.glob("*.dtsi")) + list(SHIELD_DIR.glob("*.overlay"))
+    )
+    return bool(in_conf) and not in_dts, "、".join(in_conf)
+
+
+@check("pointer-sluggish")
+def _pointer_sluggish() -> tuple[bool, str]:
+    # 実機の操作感の課題なので、ファイルからは判定できない。解決したら節ごと消す
+    return True, "要調査（実機の操作感）"
+
+
 @check("ec11-resolution")
 def _ec11_resolution() -> tuple[bool, str]:
     src = dts.strip_comments(read(SHIELD_DIR / "sosho.dtsi"))

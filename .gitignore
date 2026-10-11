@@ -14,3 +14,6 @@ __pycache__/
 
 # Claude Code のフックが使う状態ファイル
 .claude/state/
+
+# macOS の Finder が作るファイル
+.DS_Store

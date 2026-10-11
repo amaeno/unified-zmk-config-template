@@ -37,9 +37,11 @@
 <table>
 <thead><tr><th>課題</th><th>状態</th></tr></thead>
 <tbody>
+<tr><td><a href="#issue-pointer-sluggish">トラックパッドとトラックボールの操作がもっさりする</a></td><td><span class="badge warn">未修正</span> <small>要調査（実機の操作感）</small></td></tr>
 <tr><td><a href="#issue-transform0">物理レイアウトが存在しないラベルを参照している</a></td><td><span class="badge warn">未修正</span></td></tr>
 <tr><td><a href="#issue-scrl-unused">スクロール量と加速の設定が、いまは何にも効いていない</a></td><td><span class="badge warn">未修正</span></td></tr>
 <tr><td><a href="#issue-boot-delay">起動を 1 秒遅らせるコードがビルドに含まれていない</a></td><td><span class="badge warn">未修正</span></td></tr>
+<tr><td><a href="#issue-nfct-deprecated">NFC ピンを普通のピンにする設定が非推奨</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
 <tr><td><a href="#issue-west-floating">ZMK と外部モジュールのバージョンが固定されていない</a></td><td><span class="badge warn">未修正</span> <small>zmk、zmk-rgbled-widget、zmk-pmw3610-driver、zmk_encoder</small></td></tr>
 <tr><td><a href="#issue-zmk-mouse">非推奨の CONFIG_ZMK_MOUSE が残っている</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
 <tr><td><a href="#issue-ec11-resolution">エンコーダの resolution が非推奨</a></td><td><span class="badge warn">未修正</span> <small>left_encoder、right_encoder</small></td></tr>
@@ -52,6 +54,23 @@
 <p class="gen-note">自動生成 · 状態は <code>scripts/docgen/issues.py</code> がファイルを調べて判定</p>
 </div>
 <!-- /gen:issue-summary -->
+
+<section>
+<h2 id="issue-pointer-sluggish">トラックパッドとトラックボールの操作がもっさりする</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=pointer-sluggish -->
+<span class="badge warn">未修正</span> <small>要調査（実機の操作感）</small>
+<!-- /gen:issue-status --></p>
+<p>実機で、トラックパッドとトラックボールの操作に「もっさり感」があります。L4 <code>scroll</code> でのスクロールも効きが悪く感じられます（2026-10-11 の報告）。動きの軸のずれなども含めて、原因はまだ調べていません。別のタスクとして調べます。</p>
+<p>調べる候補（どれも未確認。現在値は <a href="settings.html">設定項目</a> と <a href="hardware.html#pointing">ハードウェア › ポインティングデバイス</a>）:</p>
+<ul>
+<li>トラックボールの報告間隔の下限（<code>PMW3610_ALT_REPORT_INTERVAL_MIN</code>）と解像度（<code>cpi</code>）</li>
+<li>トラックボールの軸の入れ替え（<code>x-input-code</code> / <code>y-input-code</code>）と向きの反転</li>
+<li>Bluetooth の接続間隔（右は PC との接続、左は右との接続）</li>
+<li>トラックパッドの感度（<code>sensitivity</code>。上げると Bluetooth で問題が出るという本家のコメントあり）</li>
+<li>L4 のスクロール: 長押しの判定時間（既定で約 200 ms）と、1 ノッチに要るカウント数（<a href="settings.html#scroll">設定項目 › スクロール</a>）</li>
+</ul>
+<p>2026-10-11 時点で、左は以前のファームウェアのままで、右と ZMK の版がそろっていない可能性があります。調べる前に左右をそろえるかも決めます。</p>
+</section>
 
 <section>
 <h2 id="issue-transform0">物理レイアウトが存在しないラベルを参照している</h2>
@@ -81,6 +100,18 @@
 <!-- /gen:issue-status --></p>
 <p><code>src/boot_delay_hack.c</code>（起動時に 1 秒待つ）は、ビルドに含まれていません。<code>zephyr/module.yml</code> の <code>cmake: .</code> がコメントアウトされているので、ルートの <code>CMakeLists.txt</code>（<code>zephyr_sources(src/boot_delay_hack.c)</code>）が読まれないためです。生成された <code>build.ninja</code> にも <code>zmk.elf</code> のシンボルにも <code>force_boot_delay</code> は出てきません（確認済み）。つまり、<strong>1 秒の起動遅延はすでに効いていません</strong>。</p>
 <p>復活させたいなら <code>cmake: .</code> を有効にします。なおファイル内のコメントには「PRE_KERNEL_2 で実行」とありますが、実際のコードは <code>POST_KERNEL</code> の優先度 10 です。</p>
+</section>
+
+<section>
+<h2 id="issue-nfct-deprecated">NFC ピンを普通のピンにする設定が非推奨</h2>
+<p class="issue-status">状態: <!-- gen:issue-status id=nfct-deprecated -->
+<span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small>
+<!-- /gen:issue-status --></p>
+<p>列 3・列 5 のキーは NFC 用のピン（P0.09・P0.10）を使っていて、すべての <code>*.conf</code> の <code>CONFIG_NFCT_PINS_AS_GPIOS=y</code> で普通のピンに切り替えています。この Kconfig は Zephyr 4.1 で非推奨になり、ビルドのたびに警告が出ます（Zephyr のソースの <code>soc/nordic/Kconfig</code> で確認）。後継は devicetree の次の書き方です。</p>
+<pre><code>&amp;uicr {
+    nfct-pins-as-gpios;
+};</code></pre>
+<p>この設定は初回の起動時にチップへ書き込まれて残るので、すぐに壊れるわけではありません（同じく Zephyr の説明より）。直すなら、<code>sosho.dtsi</code> に上の 3 行を足し、<code>*.conf</code> から Kconfig の行を消して、左右とも書き込みます。</p>
 </section>
 
 <section>
