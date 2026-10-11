@@ -30,7 +30,10 @@ HTML は長いので、目的の節を `id="…"` で Grep してから、その
 | 構成、ピン配置、エンコーダ、ポインタの配線、ファイル構成 | `docs/hardware.html` |
 | レイヤー図（ファイル上の初期値）、**キー位置番号**（コンボの `key-positions` 用。テキスト版は `id="positions"`）、コンボ、エンコーダの割り当て | `docs/keymap.html` |
 | どこを触ると何が変わるか。スクロール・ポインタ・エンコーダ・Kconfig の現在値と変え方 | `docs/settings.html` |
-| 既知の不整合（消すとビルドが壊れるものを含む）。**関係するファイルを編集する前に確認する** | `docs/known-issues.html` |
+| 既知の不整合（消すとビルドが壊れるものを含む）と未解決の課題。**関係するファイルを編集する前に確認する** | `docs/known-issues.html` |
+| 使っている機能、ZMK の behavior 一覧、追加できる機能の候補 | `docs/features.html` |
+| 使っている ZMK の版、手元の ZMK ソース（`.zmk-ref/`）の構成、確かめた仕様のメモ（出典つき） | `docs/zmk-reference.html` |
+| main に取り込んだ変更の履歴と、書き込んだ版のタグ | `docs/changelog.html` |
 | ビルドが要るかの判断、開発の流れ、git の運用 | `docs/workflow.html` の `#decide` `#loop` `#git` |
 | ビルドのコマンド・ターゲット・仕組み、書き込み手順 | `docs/workflow.html` の `#build` `#flash` `#reset` |
 | うまくいかないとき、ビルドスクリプトの制約 | `docs/workflow.html` の `#trouble` `#internals` |

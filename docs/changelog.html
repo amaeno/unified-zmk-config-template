@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>変更履歴 — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="カスタマイズの履歴と、書き込んだ版">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><a href="features.html">機能</a></li>
+<li><a href="zmk-reference.html">ZMK リファレンス</a></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><a href="changelog.html" aria-current="page">変更履歴</a></li>
+</ul>
+</nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>変更履歴</h1>
+<p class="lead">このリポジトリでのカスタマイズの履歴です。<code>main</code> に取り込んだ単位で、新しい順に並べています。ファームウェアを書き込んだ版には <code>fw-日付</code> のタグが付いています。</p>
+</header>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#history">履歴</a></li>
+<li><a href="#upstream">本家（ELEKIT）の変更</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="history">履歴</h2>
+<p>前の版に戻したいときは、タグからビルドし直します（<a href="workflow.html#rollback">開発フロー › 前の版に戻す</a>）。</p>
+<!-- gen:changelog -->
+<div class="gen">
+<ul class="item-list history">
+<li><p class="item-head"><code>2026-10-11</code> 左トラックボールのスクロールと、AI 用の決まり・振り返りの改善を取り込む <span class="badge ok">fw-2026-10-11</span> <small>R: sosho_R_trackpad（左トラックボールのスクロールを追加）/ L: 更新なし（以前のファームのまま）</small></p>
+<ul>
+<li>L0 の 0 番の長押し（scroll レイヤー）のあいだ、左のトラックボールが縦スクロールになる</li>
+<li>仕様を変えたら資料を必ず更新する決まりを、skills とサブエージェントの手順に組み込んだ</li>
+<li>/retro で承認された改善案 5 件（ビルド後のレビュー、.zmk-ref の前提、振り返りの発火条件、lint のラベル確認など）</li>
+</ul>
+<p>実機（右）で動作を確認。スクロールの効きが悪い点は別の課題として扱う。</p>
+</li>
+<li><p class="item-head"><code>2026-10-11</code> カスタマイズ用の開発環境・資料・AI 用の設定を取り込む</p>
+<ul>
+<li>ローカルビルド（Docker）と lint</li>
+<li>docs/ の資料（HTML）と、元ファイルから作る生成スクリプト</li>
+<li>サブエージェント・skills と、使いながら直す仕組み</li>
+</ul>
+<p>ファームウェアの中身は変えていない。</p>
+</li>
+</ul>
+<p class="gen-note">自動生成 · 元: git の履歴（<code>main</code> に取り込んだ単位。<code>python3 scripts/gen-docs.py</code> を実行した時点）</p>
+</div>
+<!-- /gen:changelog -->
+</section>
+
+<section>
+<h2 id="upstream">本家（ELEKIT）の変更</h2>
+<p>フォーク元の最後の変更は verB2 です。エンコーダのスクロールを専用モジュール <code>zmk_encoder</code> に替え、スクロールが止まらなくなる問題を直しています。原文はリポジトリ直下の <code>memo.md</code>（本家のリリースノート。編集しない）にあります。</p>
+</section>
+</main>
+</div>
+</body>
+</html>

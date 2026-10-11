@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>機能 — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="使っている機能と、ZMK で追加できる機能の候補">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><a href="features.html" aria-current="page">機能</a></li>
+<li><a href="zmk-reference.html">ZMK リファレンス</a></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><a href="changelog.html">変更履歴</a></li>
+</ul>
+</nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>機能</h1>
+<p class="lead">この機体で使っている機能と、ZMK で追加できる機能の候補です。細かい設定値は各ページにあり、ここからリンクしています。</p>
+</header>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#in-use">使っている機能</a></li>
+<li><a href="#behaviors">ZMK の behavior 一覧</a></li>
+<li><a href="#candidates">追加できる機能の候補</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="in-use">使っている機能</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>機能</th><th>中身</th><th>詳しく</th></tr></thead>
+<tbody>
+<tr><td>分割キーボード</td><td>左右を Bluetooth でつなぐ。右がセントラル（PC とつながる側）、左がペリフェラル</td><td><a href="hardware.html#overview">ハードウェア › 全体の構成</a></td></tr>
+<tr><td>ZMK Studio</td><td>ビルドせずにキー割り当てを変える。キー割り当ての正本</td><td><a href="workflow.html#decide">開発フロー › ビルドが要るか</a></td></tr>
+<tr><td>Bluetooth の接続先</td><td>5 つまで覚えて切り替える。接続先の記録の消去、USB と Bluetooth の出力先の切り替えも</td><td><a href="workflow.html#pc-pairing">開発フロー › PC とつながらないとき</a></td></tr>
+<tr><td>エンコーダ</td><td>左右それぞれでスクロール（<code>zmk_encoder</code>）。レイヤー 2 では左が音量</td><td><a href="keymap.html#encoder">キーマップ › エンコーダ</a></td></tr>
+<tr><td>マウスのクリック</td><td>右手のコンボで左・右・中クリック</td><td><a href="keymap.html#combos">キーマップ › コンボ</a></td></tr>
+<tr><td>トラックボールのスクロール</td><td>0 番の長押し（レイヤー 4 <code>scroll</code>）のあいだ、左のトラックボールが縦スクロールになる</td><td><a href="settings.html#scroll">設定項目 › スクロール</a></td></tr>
+<tr><td>状態表示 LED</td><td>電池残量と接続状態を色で示す（<code>zmk-rgbled-widget</code>）</td><td><a href="workflow.html#pc-pairing">開発フロー › PC とつながらないとき</a></td></tr>
+<tr><td>電池と省電力</td><td>左右の電池残量を PC に報告する。操作が無いと deep sleep に入る</td><td><a href="settings.html#kconfig">設定項目 › Kconfig</a></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2 id="behaviors">ZMK の behavior 一覧</h2>
+<p>behavior は、キーに割り当てられる動作の部品です（<code>&amp;kp</code> がキー入力、<code>&amp;mo</code> がレイヤー切り替えなど）。この版の ZMK と外部モジュールにあるものと、キーマップのファイルで使っている回数の一覧です。Studio で割り当てたものは数えていません（キー割り当ての正本は Studio なので、実機ではこれ以外も使っている可能性があります）。</p>
+<!-- gen:zmk-behaviors -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>ラベル</th><th>compatible</th><th>ファイルでの使用</th><th>定義</th></tr></thead>
+<tbody>
+<tr><td><code>&amp;kp</code></td><td><code>zmk,behavior-key-press</code></td><td>84 回</td><td><code>zmk-app/dts/behaviors/key_press.dtsi</code></td></tr>
+<tr><td><code>&amp;trans</code></td><td><code>zmk,behavior-transparent</code></td><td>80 回</td><td><code>zmk-app/dts/behaviors/transparent.dtsi</code></td></tr>
+<tr><td><code>&amp;bt</code></td><td><code>zmk,behavior-bluetooth</code></td><td>7 回</td><td><code>zmk-app/dts/behaviors/bluetooth.dtsi</code></td></tr>
+<tr><td><code>&amp;mkp</code></td><td><code>zmk,behavior-mouse-key-press</code></td><td>3 回</td><td><code>zmk-app/dts/behaviors/mouse_key_press.dtsi</code></td></tr>
+<tr><td><code>&amp;mo</code></td><td><code>zmk,behavior-momentary-layer</code></td><td>3 回</td><td><code>zmk-app/dts/behaviors/momentary_layer.dtsi</code></td></tr>
+<tr><td><code>&amp;ec_ms_r</code></td><td><code>zmk,behavior-encoder-mouse-scroll</code></td><td>2 回</td><td><code>config/sosho.keymap</code></td></tr>
+<tr><td><code>&amp;ec_ms_l</code></td><td><code>zmk,behavior-encoder-mouse-scroll</code></td><td>1 回</td><td><code>config/sosho.keymap</code></td></tr>
+<tr><td><code>&amp;inc_dec_kp</code></td><td><code>zmk,behavior-sensor-rotate-var</code></td><td>1 回</td><td><code>zmk-app/dts/behaviors/sensor_rotate_key_press.dtsi</code></td></tr>
+<tr><td><code>&amp;lt</code></td><td><code>zmk,behavior-hold-tap</code></td><td>1 回</td><td><code>zmk-app/dts/behaviors/layer_tap.dtsi</code></td></tr>
+<tr><td><code>&amp;out</code></td><td><code>zmk,behavior-outputs</code></td><td>1 回</td><td><code>zmk-app/dts/behaviors/outputs.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;bl</code></td><td><code>zmk,behavior-backlight</code></td><td>—</td><td><code>zmk-app/dts/behaviors/backlight.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;bootloader</code></td><td><code>zmk,behavior-reset</code></td><td>—</td><td><code>zmk-app/dts/behaviors/reset.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;caps_word</code></td><td><code>zmk,behavior-caps-word</code></td><td>—</td><td><code>zmk-app/dts/behaviors/caps_word.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;ec_ms</code></td><td><code>zmk,behavior-encoder-mouse-scroll</code></td><td>—</td><td><code>zmk_encoder/dts/behaviors/encoder_mouse_scroll.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;ext_power</code></td><td><code>zmk,behavior-ext-power</code></td><td>—</td><td><code>zmk-app/dts/behaviors/ext_power.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;gresc</code></td><td><code>zmk,behavior-mod-morph</code></td><td>—</td><td><code>zmk-app/dts/behaviors/gresc.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;ind_bat</code></td><td><code>zmk,behavior-rgbled-widget</code></td><td>—</td><td><code>zmk-rgbled-widget/dts/behaviors/rgbled_widget.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;ind_con</code></td><td><code>zmk,behavior-rgbled-widget</code></td><td>—</td><td><code>zmk-rgbled-widget/dts/behaviors/rgbled_widget.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;ind_lyr</code></td><td><code>zmk,behavior-rgbled-widget</code></td><td>—</td><td><code>zmk-rgbled-widget/dts/behaviors/rgbled_widget.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;key_repeat</code></td><td><code>zmk,behavior-key-repeat</code></td><td>—</td><td><code>zmk-app/dts/behaviors/key_repeat.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;kt</code></td><td><code>zmk,behavior-key-toggle</code></td><td>—</td><td><code>zmk-app/dts/behaviors/key_toggle.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;mmv</code></td><td><code>zmk,behavior-input-two-axis</code></td><td>—</td><td><code>zmk-app/dts/behaviors/mouse_move.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;msc</code></td><td><code>zmk,behavior-input-two-axis</code></td><td>—</td><td><code>zmk-app/dts/behaviors/mouse_scroll.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;mt</code></td><td><code>zmk,behavior-hold-tap</code></td><td>—</td><td><code>zmk-app/dts/behaviors/mod_tap.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;name</code></td><td><code>zmk,behavior-macro</code></td><td>—</td><td><code>zmk-app/dts/behaviors/macros.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;name</code></td><td><code>zmk,behavior-macro-one-param</code></td><td>—</td><td><code>zmk-app/dts/behaviors/macros.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;name</code></td><td><code>zmk,behavior-macro-two-param</code></td><td>—</td><td><code>zmk-app/dts/behaviors/macros.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;none</code></td><td><code>zmk,behavior-none</code></td><td>—</td><td><code>zmk-app/dts/behaviors/none.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;rgb_ug</code></td><td><code>zmk,behavior-rgb-underglow</code></td><td>—</td><td><code>zmk-app/dts/behaviors/rgb_underglow.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;sk</code></td><td><code>zmk,behavior-sticky-key</code></td><td>—</td><td><code>zmk-app/dts/behaviors/sticky_key.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;sl</code></td><td><code>zmk,behavior-sticky-key</code></td><td>—</td><td><code>zmk-app/dts/behaviors/sticky_key.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;soft_off</code></td><td><code>zmk,behavior-soft-off</code></td><td>—</td><td><code>zmk-app/dts/behaviors/soft_off.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;studio_unlock</code></td><td><code>zmk,behavior-studio-unlock</code></td><td>—</td><td><code>zmk-app/dts/behaviors/studio_unlock.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;sys_reset</code></td><td><code>zmk,behavior-reset</code></td><td>—</td><td><code>zmk-app/dts/behaviors/reset.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;to</code></td><td><code>zmk,behavior-to-layer</code></td><td>—</td><td><code>zmk-app/dts/behaviors/to_layer.dtsi</code></td></tr>
+<tr class="dim"><td><code>&amp;tog</code></td><td><code>zmk,behavior-toggle-layer</code></td><td>—</td><td><code>zmk-app/dts/behaviors/toggle_layer.dtsi</code></td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>.zmk-ref/</code>（<code>./scripts/build-local.sh --ref</code> で作る） と <code>config/sosho.keymap</code>（使用回数はファイルの初期値で数える）</p>
+</div>
+<!-- /gen:zmk-behaviors -->
+<p>使い方は ZMK 公式ドキュメントの <a href="https://zmk.dev/docs/keymaps/behaviors">Behaviors</a> にあります。この版での仕様は <a href="zmk-reference.html#local">ZMK リファレンス › 手元の ZMK のソースと資料</a> で確かめられます。</p>
+</section>
+
+<section>
+<h2 id="candidates">追加できる機能の候補</h2>
+<p>このリポジトリで調べて分かったものです。作るときは <code>/add-feature</code> の流れで進めます。</p>
+<ul class="item-list">
+<li><p class="item-head"><code>&amp;caps_word</code> <span class="badge">Studio で割り当て</span></p><p>次の区切り（スペースなど）まで大文字で打つ機能。この版の ZMK にそのままあり、追加の設定は要りません。区切りとみなさない文字は <code>continue-list</code> で変えられます（変えるときは要ビルド）。</p></li>
+<li><p class="item-head">トラックボールの速さを切り替える <span class="badge build">要ビルド</span></p><p>トラックボールの解像度（CPI）は、この版のドライバではキー操作で切り替えられません。代わりに、スクロールと同じ仕組み（レイヤー別の <code>input-processors</code>）で、特定のレイヤーのあいだだけ <code>zip_xy_scaler</code> で遅く・速くできます。</p></li>
+<li><p class="item-head">コンボの誤爆を防ぐ <span class="badge build">要ビルド</span></p><p>コンボには、直前のキー入力から一定時間たっていないと発火しない <code>require-prior-idle-ms</code>、特定のレイヤーだけで有効にする <code>layers</code>、両方のキーを離すまで保つ <code>slow-release</code> があります。速く打ったときにコンボが誤って出るようなら使います。</p></li>
+<li><p class="item-head">スクロールモードの調整 <span class="badge build">要ビルド</span></p><p>0 番の長押しの判定時間（<code>&amp;lt</code> の <code>tapping-term-ms</code>）と、スクロールの速さ・向き。<a href="known-issues.html#issue-pointer-sluggish">ポインタのもっさり感</a>の調査とあわせて見直します。</p></li>
+<li><p class="item-head">実機の割り当てを資料に反映するツール <span class="badge">作業は大きめ</span></p><p>キー割り当ての正本を Studio にしたので、資料のレイヤー図（ファイルの初期値）と実機はずれていきます。Studio と同じ通信（USB 経由）で本体の割り当てを読み出せれば、レイヤー図を実機に合わせられます。通信の仕様はビルド環境の ZMK のモジュールにあります。</p></li>
+</ul>
+</section>
+</main>
+</div>
+</body>
+</html>

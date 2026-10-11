@@ -12,18 +12,21 @@
 <!-- gen:nav -->
 <nav class="site-nav" aria-label="資料の目次">
 <a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
 <ul>
 <li><a href="index.html">トップ</a></li>
 <li><a href="workflow.html" aria-current="page">開発フロー</a></li>
 <li><a href="hardware.html">ハードウェア</a></li>
 <li><a href="keymap.html">キーマップ</a></li>
 <li><a href="settings.html">設定項目</a></li>
-<li><span class="nav-todo">機能<small>準備中</small></span></li>
-<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="features.html">機能</a></li>
+<li><a href="zmk-reference.html">ZMK リファレンス</a></li>
 <li><a href="known-issues.html">既知の課題</a></li>
-<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+<li><a href="changelog.html">変更履歴</a></li>
 </ul>
 </nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
 <!-- /gen:nav -->
 <main>
 <header class="page-head">
@@ -348,15 +351,20 @@ git switch main</code></pre>
 
 <section>
 <h2 id="docs">資料の更新</h2>
-<p>資料は <code>docs/</code> の HTML です。<code>docs/index.html</code> をブラウザで開いて読みます。外部への依存は無いので、ファイルを直接開けば表示できます。</p>
+<p>資料は <code>docs/</code> の HTML です。<code>docs/index.html</code> をブラウザで開いて読みます。外部への依存は無いので、ファイルを直接開けば表示できます。左のナビの「資料を検索」（または入力欄の外で <kbd>/</kbd>）で、全ページをキーワードで探せます。スペースで区切ると、すべての語を含む節に絞り込みます。</p>
 
 <h3 id="docs-gen">手書きと自動生成</h3>
 <p>各ページは、手書きの説明と自動生成のブロックでできています。自動生成のブロックは HTML の中で次のように囲まれていて、<code>scripts/gen-docs.py</code> が中身を上書きします。</p>
 <pre><code>&lt;!-- gen:build-targets --&gt;
 （ここはスクリプトが上書きする）
 &lt;!-- /gen:build-targets --&gt;</code></pre>
-<pre><code>python3 scripts/gen-docs.py           # 生成ブロックを更新する
+<pre><code>python3 scripts/gen-docs.py           # 生成ブロックと検索の索引を更新する
 python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（要るなら終了コード 1）</code></pre>
+<ul>
+<li>検索の索引（<code>docs/assets/search-index.js</code>）も同時に作り直します。</li>
+<li>使っている ZMK の版や behavior の一覧は、git 管理外の <code>.zmk-ref/</code> から作ります。<code>.zmk-ref/</code> が無い環境では前の内容のまま残ります。</li>
+<li>変更履歴は git の履歴から作るので、実行したときの <code>main</code> の状態になります（<code>--check</code> では比べません）。</li>
+</ul>
 
 <h3 id="docs-rules">決まりごと</h3>
 <ul>

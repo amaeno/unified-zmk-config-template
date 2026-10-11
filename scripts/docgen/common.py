@@ -28,13 +28,21 @@ class Page:
 
 Generator = Callable[[Page, "dict[str, str]"], str]
 GENERATORS: dict[str, Generator] = {}
+# 作るたびに変わりうる生成器（git の履歴など）。--check では比べない
+VOLATILE: set[str] = set()
 
 
-def generator(name: str) -> Callable[[Generator], Generator]:
+class SourceMissing(Exception):
+    """生成の元（git 管理外の .zmk-ref/ など）が無い。ブロックは前の内容のまま残す。"""
+
+
+def generator(name: str, volatile: bool = False) -> Callable[[Generator], Generator]:
     """`<!-- gen:name -->` の中身を作る関数として登録する。"""
 
     def deco(fn: Generator) -> Generator:
         GENERATORS[name] = fn
+        if volatile:
+            VOLATILE.add(name)
         return fn
 
     return deco

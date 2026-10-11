@@ -51,10 +51,14 @@ def gen_nav(page: Page, args: dict[str, str]) -> str:
         [
             '<nav class="site-nav" aria-label="資料の目次">',
             '<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>',
+            '<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>',
             "<ul>",
             *items,
             "</ul>",
             "</nav>",
+            # 検索の索引と画面。ファイルを直接開いても動くよう、fetch ではなく script で読む
+            '<script src="assets/search-index.js" defer></script>',
+            '<script src="assets/search.js" defer></script>',
         ]
     )
 
