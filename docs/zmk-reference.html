@@ -48,18 +48,18 @@
 
 <section>
 <h2 id="versions">使っている版</h2>
-<p>ビルドに使っている版です。<code>config/west.yml</code> はブランチの最新を指していますが、実際に取り込まれる版が動くのは <code>./scripts/build-local.sh --update</code> を実行したときだけです（<a href="known-issues.html#issue-west-floating">既知の課題</a>）。</p>
+<p>ビルドに使っている版です。<code>config/west.yml</code> で、動作を確かめたコミットに固定しています。版を上げるときの手順は <a href="workflow.html#zmk-update">開発フロー › ZMK の版を上げる</a> にあります。</p>
 <!-- gen:zmk-versions -->
 <div class="gen">
 <div class="table-wrap">
 <table>
 <thead><tr><th>プロジェクト</th><th>revision</th><th>使っているコミット</th><th>用途</th></tr></thead>
 <tbody>
-<tr><td><a href="https://github.com/zmkfirmware/zmk">zmk</a></td><td><code>main</code></td><td><a href="https://github.com/zmkfirmware/zmk/commit/6e2ef41e022d555b10f116e395832913f71717b3"><code>6e2ef41</code></a></td><td>ZMK 本体</td></tr>
+<tr><td><a href="https://github.com/zmkfirmware/zmk">zmk</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/zmkfirmware/zmk/commit/4dd95d7840eb3d5a3f59bb29fbf1ab054715ef85"><code>4dd95d7</code></a></td><td>ZMK 本体</td></tr>
 <tr><td><a href="https://github.com/zmkfirmware/zephyr">zephyr</a></td><td><code>v4.1.0+zmk-fixes</code></td><td><a href="https://github.com/zmkfirmware/zephyr/commit/10ba6d0cb38bc3d258775d27982f707599320085"><code>10ba6d0</code></a></td><td>RTOS（ZMK 向けの修正入りのフォーク）</td></tr>
-<tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><code>main</code></td><td><a href="https://github.com/caksoylar/zmk-rgbled-widget/commit/e6b467792a1dabef8cfa5c9fd26bfefc9c16662b"><code>e6b4677</code></a></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
-<tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><code>main</code></td><td><a href="https://github.com/badjeff/zmk-pmw3610-driver/commit/44b4a76b74d293a93cec4ccb7e04cb8d29c10f93"><code>44b4a76</code></a></td><td>トラックボール (PMW3610) のドライバ</td></tr>
-<tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><code>main</code></td><td><a href="https://github.com/elekit-official/zmk_encoder/commit/1a34a5561f08eb7130823760fe597458f477e6db"><code>1a34a55</code></a></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
+<tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/caksoylar/zmk-rgbled-widget/commit/e6b467792a1dabef8cfa5c9fd26bfefc9c16662b"><code>e6b4677</code></a></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
+<tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/badjeff/zmk-pmw3610-driver/commit/44b4a76b74d293a93cec4ccb7e04cb8d29c10f93"><code>44b4a76</code></a></td><td>トラックボール (PMW3610) のドライバ</td></tr>
+<tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><span class="badge ok">コミットで固定</span></td><td><a href="https://github.com/elekit-official/zmk_encoder/commit/1a34a5561f08eb7130823760fe597458f477e6db"><code>1a34a55</code></a></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
 </tbody>
 </table>
 </div>
@@ -111,7 +111,7 @@
 <section>
 <h2 id="facts">このリポジトリで確かめた仕様</h2>
 <p>作業の中で、使っている版のソースやドキュメントで確かめたことです（基準: ZMK <!-- gen:zmk-commit -->
-<code>6e2ef41</code>
+<code>4dd95d7</code>
 <!-- /gen:zmk-commit -->）。出典は <code>.zmk-ref/</code> の中のパスです。版を上げたら、関係するものは確かめ直します。</p>
 <ul class="item-list">
 <li><p class="item-head">エンコーダの割り当ては「時計回り、反時計回り」の順</p><p><code>sensor-bindings</code> の第 1 引数が時計回り。出典: <code>zmk-docs/keymaps/behaviors/sensor-rotate.md</code></p></li>

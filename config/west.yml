@@ -1,3 +1,8 @@
+# ZMK 本体と外部モジュールの版。どれも動作を確かめたコミットに固定している。
+# 版を上げるときは、上げたいものの revision を main（またはタグ・新しいコミット）に書き換えて
+# ./scripts/build-local.sh --update を実行し、ビルド・実機確認のあと、.zmk-ref/VERSIONS.txt に
+# 記録されたコミットで固定し直す（手順は docs/workflow.html#zmk-update）。
+# Zephyr の版は ZMK 本体の app/west.yml が決めるので、zmk を固定すれば一緒に固定される。
 manifest:
   defaults:
     revision: main
@@ -13,17 +18,17 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: main
+      revision: 4dd95d7840eb3d5a3f59bb29fbf1ab054715ef85  # main（2026-10-09）
       import: app/west.yml
     - name: zmk-rgbled-widget
       remote: caksoylar
-      revision: main
+      revision: e6b467792a1dabef8cfa5c9fd26bfefc9c16662b  # main（2026-07-09）
     - name: zmk-pmw3610-driver
       remote: badjeff
-      revision: main
+      revision: 44b4a76b74d293a93cec4ccb7e04cb8d29c10f93  # main（2026-04-16）
     - name: zmk_encoder
       remote: elekit-official
-      revision: main
+      revision: 1a34a5561f08eb7130823760fe597458f477e6db  # main（2026-06-25）
       path: modules/zmk_encoder
   self:
     path: config

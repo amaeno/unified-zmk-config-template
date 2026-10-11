@@ -45,7 +45,6 @@
 <tr><td><a href="#issue-scrl-unused">スクロール量と加速の設定が、いまは何にも効いていない</a></td><td><span class="badge warn">未修正</span></td></tr>
 <tr><td><a href="#issue-boot-delay">起動を 1 秒遅らせるコードがビルドに含まれていない</a></td><td><span class="badge warn">未修正</span></td></tr>
 <tr><td><a href="#issue-nfct-deprecated">NFC ピンを普通のピンにする設定が非推奨</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
-<tr><td><a href="#issue-west-floating">ZMK と外部モジュールのバージョンが固定されていない</a></td><td><span class="badge warn">未修正</span> <small>zmk、zmk-rgbled-widget、zmk-pmw3610-driver、zmk_encoder</small></td></tr>
 <tr><td><a href="#issue-zmk-mouse">非推奨の CONFIG_ZMK_MOUSE が残っている</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
 <tr><td><a href="#issue-ec11-resolution">エンコーダの resolution が非推奨</a></td><td><span class="badge warn">未修正</span> <small>left_encoder、right_encoder</small></td></tr>
 <tr><td><a href="#issue-studio-dup">CONFIG_ZMK_STUDIO=y が 2 か所にある</a></td><td><span class="badge warn">未修正</span></td></tr>
@@ -72,7 +71,7 @@
 <li>トラックパッドの感度（<code>sensitivity</code>。上げると Bluetooth で問題が出るという本家のコメントあり）</li>
 <li>L4 のスクロール: 長押しの判定時間（既定で約 200 ms）と、1 ノッチに要るカウント数（<a href="settings.html#scroll">設定項目 › スクロール</a>）</li>
 </ul>
-<p>2026-10-11 時点で、左は以前のファームウェアのままで、右と ZMK の版がそろっていない可能性があります。調べる前に左右をそろえるかも決めます。</p>
+<p>2026-10-12 の土台固め（タグ <code>fw-2026-10-12</code> の版）から、左右とも同じ ZMK の版（分割の入力の処理が詰まる不具合の修正 #3110 を含む）を使います。そろえた状態でもっさり感が残るかを確かめてから調べます。</p>
 </section>
 
 <section>
@@ -115,15 +114,6 @@
     nfct-pins-as-gpios;
 };</code></pre>
 <p>この設定は初回の起動時にチップへ書き込まれて残るので、すぐに壊れるわけではありません（同じく Zephyr の説明より）。直すなら、<code>sosho.dtsi</code> に上の 3 行を足し、<code>*.conf</code> から Kconfig の行を消して、左右とも書き込みます。</p>
-</section>
-
-<section>
-<h2 id="issue-west-floating">ZMK と外部モジュールのバージョンが固定されていない</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=west-floating -->
-<span class="badge warn">未修正</span> <small>zmk、zmk-rgbled-widget、zmk-pmw3610-driver、zmk_encoder</small>
-<!-- /gen:issue-status --></p>
-<p><code>config/west.yml</code> は ZMK 本体を含めて、すべて <code>revision: main</code>（ブランチの最新）です。バージョンが動くのは <code>./scripts/build-local.sh --update</code> を実行したときだけなので、普段のビルドは同じ版で再現できます。ただ <code>--update</code> した日に upstream の破壊的変更を取り込んで、突然ビルドが壊れることがあります。</p>
-<p>直すなら、動作を確認できたコミットかタグに <code>revision</code> を固定します。</p>
 </section>
 
 <section>
