@@ -335,9 +335,19 @@ def gen_keymap_layers(page: Page, args: dict[str, str]) -> str:
     reserved = [l for l in ls if l.reserved]
     if reserved:
         out.append(
-            '<p class="reserved">%s は <code>status = "reserved"</code> の空き枠（ZMK Studio でレイヤーを増やすときに使われる）。</p>'
+            '<p class="reserved">%s は <code>status = "reserved"</code> の空き枠（ZMK Studio でレイヤーを増やすときに使われる）。'
+            "キーの割り当てが無いので、有効にしても下のレイヤーのキーがそのまま効く。</p>"
             % "、".join("L%d %s" % (l.index, code(l.name)) for l in reserved)
         )
+        reached = [(l, reach(ls, l.index)) for l in reserved if reach(ls, l.index)]
+        if reached:
+            out.append(
+                '<ul class="sensors">\n%s\n</ul>'
+                % "\n".join(
+                    "<li>L%d %s を有効にするキー: %s</li>" % (l.index, code(l.name), esc("、".join(how)))
+                    for l, how in reached
+                )
+            )
     out += [source_note(sources(KEYMAP, LAYOUTS)), "</div>"]
     return "\n".join(out)
 

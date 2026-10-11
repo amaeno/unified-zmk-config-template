@@ -20,7 +20,7 @@ from .common import (
     sources,
     table,
 )
-from .keymap import keymap_src
+from .keymap import keymap_src, layers
 
 SHIELD = SHIELD_DIR / "sosho.dtsi"
 SIDE_DTSI = {"左": SHIELD_DIR / "sosho_L.dtsi", "右": SHIELD_DIR / "sosho_R.dtsi"}
@@ -231,6 +231,7 @@ def gen_pointer_overlays(page: Page, args: dict[str, str]) -> str:
 @generator("input-listeners")
 def gen_input_listeners(page: Page, args: dict[str, str]) -> str:
     left_pointer = next(("trackball" if "trackball" in t else "trackpad" for t in my_targets() if "_L_" in t), "")
+    layer_names = [l.name for l in layers()]
     rows, classes = [], []
     for path in sorted(SHIELD_DIR.glob("sosho_R_*.overlay"), key=lambda p: (not is_mine(p), p.stem)):
         right_pointer = "trackball" if "trackball" in path.stem else "trackpad"
@@ -239,14 +240,25 @@ def gen_input_listeners(page: Page, args: dict[str, str]) -> str:
                 continue
             what, side, kind = LISTENERS[name]
             used = is_mine(path) and kind == (right_pointer if side == "R" else left_pointer)
-            procs = dts.prop_raw(body, "input-processors")
+            # 子ノードはレイヤー別の上書き。親の値と取り違えないよう、親は子を除いて読む
+            procs = dts.prop_raw(dts.without_children(body), "input-processors")
+            cell = code(procs) if procs else "なし（そのまま）"
+            for _, _, child in dts.labeled_nodes(body):
+                ids = [int(n) for n in re.findall(r"\d+", dts.prop_raw(child, "layers") or "")]
+                names = "・".join(
+                    "L%d %s" % (i, layer_names[i]) if i < len(layer_names) else "L%d" % i for i in ids
+                )
+                cell += '<span class="note">%s のとき:</span>%s' % (
+                    esc(names),
+                    code(dts.prop_raw(child, "input-processors") or "（なし）"),
+                )
             examples = re.findall(r"//\s*input-processors\s*=\s*(.+?);", raw)
             rows.append(
                 [
                     code(path.name),
                     code(name) + (" " + badge("この機体", "ok") if used else ""),
                     esc(what),
-                    code(procs) if procs else "なし（そのまま）",
+                    cell,
                     "<br>".join(code(e) for e in examples) or "—",
                 ]
             )
@@ -356,7 +368,27 @@ def _value(key: str) -> str:
         return s(dts.prop_int(dts.find_labeled(src, "left_encoder") or "", key.split("-")[1]))
     if key == "encoder-triggers":
         return s(dts.prop_int(dts.find_node(src, "sensors") or "", "triggers-per-rotation"))
+    if key == "scroll-counts":
+        return scroll_counts()
     raise ValueError("未知の値 %s" % key)
+
+
+def scroll_counts() -> str:
+    """左トラックボールのスクロール（この機体の右 overlay の trackball_split_listener の子ノード）で、
+    1 ノッチに要るカウント数。zip_xy_scaler の 分母/分子 の積。"""
+    right = next((t for t in my_targets() if "_R_" in t), "")
+    for name, body, _ in overlay_nodes(SHIELD_DIR / (right + ".overlay")):
+        if name != "trackball_split_listener":
+            continue
+        for _, _, child in dts.labeled_nodes(body):
+            procs = dts.prop_raw(child, "input-processors") or ""
+            if "zip_xy_to_scroll_mapper" not in procs:
+                continue
+            n = 1.0
+            for mul, div in re.findall(r"&zip_xy_scaler\s+(\d+)\s+(\d+)", procs):
+                n *= int(div) / int(mul)
+            return ("%.2f" % n).rstrip("0").rstrip(".")
+    return ""
 
 
 @generator("value")

@@ -134,7 +134,7 @@
 <p class="layer-how">いちばん下のレイヤー（常に有効）</p>
 <div class="kb-scroll">
 <div class="kb" role="img" aria-label="レイヤー L0 default_layer" style="aspect-ratio: 1300 / 400">
-<div class="key" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;kp TAB"><span class="pos">0</span><span class="main">Tab</span></div>
+<div class="key layer" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;lt 4 TAB"><span class="pos">0</span><span class="main">Tab</span><span class="sub">長押し L4</span></div>
 <div class="key" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;kp Q"><span class="pos">1</span><span class="main">Q</span></div>
 <div class="key" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;kp W"><span class="pos">2</span><span class="main">W</span></div>
 <div class="key" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;kp E"><span class="pos">3</span><span class="main">E</span></div>
@@ -243,7 +243,7 @@
 <p class="layer-how">L0 の 38 番（押している間）</p>
 <div class="kb-scroll">
 <div class="kb" role="img" aria-label="レイヤー L2 layer_2" style="aspect-ratio: 1300 / 400">
-<div class="key trans" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp TAB）"><span class="pos">0</span><span class="main">Tab</span></div>
+<div class="key trans" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;lt 4 TAB）"><span class="pos">0</span><span class="main">Tab</span></div>
 <div class="key" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;kp F1"><span class="pos">1</span><span class="main">F1</span></div>
 <div class="key" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;kp F2"><span class="pos">2</span><span class="main">F2</span></div>
 <div class="key" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;kp F3"><span class="pos">3</span><span class="main">F3</span></div>
@@ -299,7 +299,7 @@
 <p class="layer-how">L0 の 42 番（押している間）</p>
 <div class="kb-scroll">
 <div class="kb" role="img" aria-label="レイヤー L3 layer_3" style="aspect-ratio: 1300 / 400">
-<div class="key trans" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp TAB）"><span class="pos">0</span><span class="main">Tab</span></div>
+<div class="key trans" style="left:0%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;lt 4 TAB）"><span class="pos">0</span><span class="main">Tab</span></div>
 <div class="key trans" style="left:7.692%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp Q）"><span class="pos">1</span><span class="main">Q</span></div>
 <div class="key trans" style="left:15.385%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp W）"><span class="pos">2</span><span class="main">W</span></div>
 <div class="key trans" style="left:23.077%;top:0%;width:7.692%;height:25%" title="&amp;trans（下のレイヤーと同じ: &amp;kp E）"><span class="pos">3</span><span class="main">E</span></div>
@@ -347,7 +347,10 @@
 </div>
 <p class="sensors">エンコーダ: このレイヤーには割り当てなし（L0 の割り当てが効く）</p>
 </section>
-<p class="reserved">L4 <code>scroll</code>、L5 <code>extra2</code> は <code>status = "reserved"</code> の空き枠（ZMK Studio でレイヤーを増やすときに使われる）。</p>
+<p class="reserved">L4 <code>scroll</code>、L5 <code>extra2</code> は <code>status = "reserved"</code> の空き枠（ZMK Studio でレイヤーを増やすときに使われる）。キーの割り当てが無いので、有効にしても下のレイヤーのキーがそのまま効く。</p>
+<ul class="sensors">
+<li>L4 <code>scroll</code> を有効にするキー: L0 の 0 番（長押し）</li>
+</ul>
 <p class="gen-note">自動生成 · 元: <code>config/sosho.keymap</code>、<code>boards/shields/sosho/sosho-layouts.dtsi</code></p>
 </div>
 <!-- /gen:keymap-layers -->

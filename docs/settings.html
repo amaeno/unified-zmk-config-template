@@ -89,7 +89,7 @@
 <tr><td>エンコーダを回す（<code>&amp;ec_ms_l</code> / <code>&amp;ec_ms_r</code>）</td><td>1 回の発火で 1 ノッチ。発火の回数は <code>triggers-per-rotation</code>（いま <!-- gen:value of=encoder-triggers -->
 <code>24</code>
 <!-- /gen:value -->、1 回転あたり）で決まる。音量など他のエンコーダ操作も同じ値を使う。細かい量は OS のスクロール設定で調整する</td></tr>
-<tr><td>ポインタの動きをスクロールに変える（<code>zip_xy_to_scroll_mapper</code>）</td><td>右の overlay の <code>input-processors</code> で、前に <code>zip_xy_scaler</code> を置いて速さを変える（例: <code>&lt;&amp;zip_xy_scaler 1 3&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code>）</td></tr>
+<tr><td>ポインタの動きをスクロールに変える（<code>zip_xy_to_scroll_mapper</code>）</td><td>右の overlay の <code>input-processors</code> で、前に <code>zip_xy_scaler</code> を置いて速さを変える。この機体では、<strong>L4 <code>scroll</code> のあいだの左トラックボール</strong>がこの方法でスクロールになる（下の注記）</td></tr>
 <tr><td>キーにスクロールを割り当てる（<code>&amp;msc</code>）</td><td><code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code>（最大の速さ。いま <!-- gen:value of=scrl-val -->
 <code>150</code>
 <!-- /gen:value -->）と、<code>&amp;msc</code> の <code>time-to-max-speed-ms</code>（いま <!-- gen:value of=msc-time-to-max -->
@@ -100,6 +100,17 @@
 </tbody>
 </table>
 </div>
+<aside class="callout note">
+<p><strong>左トラックボールを縦スクロールにする（L4 scroll）:</strong> L0 の 0 番（<kbd>Tab</kbd>）を長押し（既定で約 200 ms）すると L4 <code>scroll</code> に入り、そのあいだだけ左のトラックボールが縦スクロールになります。タップなら通常の <kbd>Tab</kbd> です。設定は <code>sosho_R_trackpad.overlay</code> の <code>trackball_split_listener</code> の子ノード <code>scroller</code>（<code>layers = &lt;4&gt;</code>）にあります。書き込むのは右（<code>sosho_R_trackpad</code>）だけです。<code>input-processors</code>（いまの値は <a href="#pointer">ポインタ</a> の表の「L4 scroll のとき」）は、次の役割のものをこの順に並べています。</p>
+<ol>
+<li><code>&amp;zip_x_scaler 0 1</code> — 横の動きを捨てる</li>
+<li><code>&amp;zip_xy_scaler 分子 分母</code>（1 つ以上） — 動きを縮めて、スクロールの速さを決める</li>
+<li><code>&amp;zip_xy_to_scroll_mapper</code> — スクロールに変える</li>
+</ol>
+<p><strong>速さ</strong>は <code>zip_xy_scaler</code> の「分母 ÷ 分子」の積で決まります。いまは <!-- gen:value of=scroll-counts -->
+<code>32</code>
+<!-- /gen:value --> カウントで 1 ノッチで、大きくするほど遅くなります。<strong>向きが逆</strong>なら、mapper の前に <code>&lt;&amp;zip_xy_transform INPUT_TRANSFORM_Y_INVERT&gt;</code> を足します。実機での動作確認はまだです。</p>
+</aside>
 <aside class="callout warn">
 <p><strong>キーマップ冒頭の「スクロール量の調整」は、いまのエンコーダには効きません。</strong> <code>zmk_encoder</code> モジュールは、受け取った値の向きだけを使い、量は常に 1 ノッチにそろえるためです（モジュールのソースで確認）。この値が効くのは <code>&amp;msc</code> を割り当てたキーだけで、いまのキーマップにはそのキーがありません。詳しくは <a href="known-issues.html#issue-scrl-unused">既知の課題</a>。</p>
 </aside>
@@ -116,7 +127,7 @@
 <tbody>
 <tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_listener</code> <span class="badge ok">この機体</span></td><td>右のトラックパッド</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
 <tr class="dim"><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_split_listener</code></td><td>左のトラックパッド（左から届く）</td><td>なし（そのまま）</td><td>—</td></tr>
-<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>trackball_split_listener</code> <span class="badge ok">この機体</span></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 1 3&gt;,&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
+<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>trackball_split_listener</code> <span class="badge ok">この機体</span></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）<span class="note">L4 scroll のとき:</span><code>&lt;&amp;zip_x_scaler 0 1&gt;, &lt;&amp;zip_xy_scaler 1 8&gt;, &lt;&amp;zip_xy_scaler 1 4&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td><td><code>&lt;&amp;zip_xy_scaler 1 3&gt;,&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
 <tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>trackball_listener</code></td><td>右のトラックボール</td><td><code>&lt;&amp;zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)&gt;</code></td><td>—</td></tr>
 <tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>glidepoint_split_listener</code></td><td>左のトラックパッド（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
 <tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>trackball_split_listener</code></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
@@ -144,6 +155,9 @@
     status = "okay";
     input-processors = &lt;&amp;zip_xy_scaler 1 2&gt;;
 };</code></pre>
+<aside class="callout warn">
+<p><strong>子ノード（レイヤー別の上書き）があるときの注意:</strong> リスナーの子ノード（例: <code>scroller</code>）の <code>layers</code> に当てはまるあいだは、親の <code>input-processors</code> は使われず、子の設定に置き換わります（子に <code>process-next</code> を付けた場合を除く）。この機体では、L4 のあいだは上の半分の速さの例のような親への変更が<strong>効きません</strong>。L4 のあいだの動きを変えたいときは、子ノード <code>scroller</code> の <code>input-processors</code> を直します（<a href="#scroll">スクロール</a>）。</p>
+</aside>
 <p>ほかの input-processors は ZMK の公式ドキュメント（<a href="https://zmk.dev/docs/keymaps/input-processors">Input Processors</a>）にあります。トラックパッドの上下左右の向きは、デバイス側の <code>invert-x</code> / <code>invert-y</code> でも変えられます（<a href="hardware.html#pointing">ハードウェア › ポインティングデバイス</a>）。</p>
 </section>
 
