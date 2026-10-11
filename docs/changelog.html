@@ -50,6 +50,16 @@
 <!-- gen:changelog -->
 <div class="gen">
 <ul class="item-list history">
+<li><p class="item-head"><code>2026-10-12</code> Mac で Bluetooth のとき操作が 1 テンポ遅れる問題を直す <span class="badge ok">fw-2026-10-12.3</span> <small>R: sosho_R_trackpad（Mac での Bluetooth の遅れ対策。接続間隔・レポートの間引き・送信出力）/ L: 更新なし（fw-2026-10-12.2 のまま）</small></p>
+<ul>
+<li>右が Mac に要求する接続間隔を 11.25〜15 ms にする（ZMK の既定の 7.5〜15 ms は Apple の規定に合わない。15 ms 固定は 30 ms に広げられることがあるので避けた）</li>
+<li>外部モジュール zmk-input-processor-report-rate-limit を追加し、右のリスナー（トラックパッド・左のトラックボール・L4 のスクロール）でレポートを 16 ms に 1 回までにまとめる（Bluetooth のときだけ）</li>
+<li>右の送信出力を +8 dBm にする</li>
+<li>資料: 設定項目に「Bluetooth の接続」と「送りきれないレポートが溜まるとき」を足し、左の BT_PERIPHERAL_PREF_* が左右間の接続に効くという誤りを直す。ZMK リファレンスに確かめた仕様 6 件</li>
+<li>既知の課題「ポインタの操作がもっさりする」を閉じる</li>
+</ul>
+<p>USB では遅れないことから、右と Mac の接続が原因と切り分けた。接続間隔を直すと出だしは速くなったが、送りきれないマウスのレポートが溜まって遅れが積み上がり、キーとエンコーダの処理まで遅れていたため、レポートの間引きで防いだ。書き込みは右だけ。</p>
+</li>
 <li><p class="item-head"><code>2026-10-12</code> 回答と報告は日本語で書く、を明記する</p>
 <ul>
 <li>CLAUDE.md の規約の先頭に、メイン会話の回答もサブエージェント・fork の skill の報告も日本語で書くことを明記。組み込みのエージェントに頼むときは依頼文にも書く</li>

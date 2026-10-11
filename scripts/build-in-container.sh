@@ -83,17 +83,23 @@ sync_ref() {
   blue "ZMK のソースと資料を .zmk-ref/ に写す（調査用）"
   rm -rf "$dst"
   mkdir -p "$dst"
+  # Zephyr 本体は大きい（全体で数百 MB）ので、Bluetooth の host と設定、入力まわりだけを写す（約 3 MB）。
+  # ワイルドカードはワークスペースからの相対パスで展開する
+  local -a zephyr_parts
+  zephyr_parts=($(cd "$WS" && ls -d zephyr/subsys/bluetooth/Kconfig* zephyr/subsys/bluetooth/controller/Kconfig*))
   tar -C "$WS" --exclude=.git -cf - \
       zmk/app zmk/docs/docs zmk-rgbled-widget zmk-pmw3610-driver modules/zmk_encoder \
       zmk-input-processor-report-rate-limit \
       zephyr/boards/seeed/xiao_ble \
+      zephyr/subsys/bluetooth/host "${zephyr_parts[@]}" \
+      zephyr/subsys/input zephyr/drivers/input zephyr/dts/bindings/input \
     | tar -C "$dst" -xf -
   # 階層を浅くして、パスを短くする
   mv "$dst/zmk/app" "$dst/zmk-app"
   mv "$dst/zmk/docs/docs" "$dst/zmk-docs"
   mv "$dst/modules/zmk_encoder" "$dst/zmk_encoder"
   mv "$dst/zephyr/boards/seeed/xiao_ble" "$dst/zephyr-xiao_ble"
-  rm -rf "$dst/zmk" "$dst/modules" "$dst/zephyr"
+  rm -rf "$dst/zmk" "$dst/modules" "$dst/zephyr/boards"
   # マニフェスト（config/）はコンテナ内では git リポジトリではなく sha を取れないので外す
   local -a projects
   read -r -a projects <<<"$(west list -f '{name}' | grep -v '^manifest$' | tr '\n' ' ')"

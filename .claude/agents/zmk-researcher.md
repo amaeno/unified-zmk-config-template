@@ -26,15 +26,20 @@ color: cyan
      - `include/dt-bindings/zmk/` キーコード（`keys.h`）やマウス操作（`pointing.h`）などの定数
      - `module/drivers/` ドライバ（`sensor/` に EC11、`input/` にトラックパッドなど）
    - `zmk-rgbled-widget/` `zmk-pmw3610-driver/` `zmk_encoder/` `zmk-input-processor-report-rate-limit/` — 外部モジュール
+   - `zephyr/` — Zephyr 本体の一部。`subsys/bluetooth/host/` と Bluetooth の `Kconfig*`（`subsys/bluetooth/`・`subsys/bluetooth/controller/` の直下）、`subsys/input/`、`drivers/input/`（トラックパッドの `input_pinnacle.c` など）、`dts/bindings/input/`
    - `zephyr-xiao_ble/` — XIAO nRF52840 のボード定義（ピン名など）
-2. このリポジトリの設定（`config/`、`boards/shields/sosho/`）と資料（`docs/*.html`）
+2. ビルド用のワークスペース（Docker ボリューム `sosho-zmk-ws`）。`.zmk-ref/` に無いものだけここで見る
+   - `/ws/zephyr/` — Zephyr 本体の全体（Bluetooth のコントローラのソース、`soc/` など）
+   - `/ws/build/<ターゲット>/zephyr/.config` — 実際に効いている Kconfig の値（既定値・依存の結果を含む）。`zephyr.dts` は devicetree を合わせた結果。ビルドしたことのあるターゲットだけある
+3. このリポジトリの設定（`config/`、`boards/shields/sosho/`）と資料（`docs/*.html`）
 
 ## 探し方
 
 まず検索で当たりを付け、関係する数ファイルの該当箇所だけを読みます（ファイル全体を順に読むと時間もトークンも大きくかかるため）。
 
 - Grep / Glob が使える環境ではそれを使う。無い環境では Bash で `grep -rn 'キーワード' .zmk-ref/zmk-docs` や `find .zmk-ref/zmk-app -name '*input*'` を使う
-- Bash は読み取りのコマンド（`grep` `find` `ls` `head` `sed -n`）だけに使い、ファイルを書き換えたり消したりするコマンドは使わない
+- ワークスペース（調べる場所の 2）は、読み取り専用で開いて読む: `docker run --rm -v sosho-zmk-ws:/ws:ro zmkfirmware/zmk-build-arm:stable bash -c 'grep -n BT_PERIPHERAL_PREF /ws/build/sosho_R_trackpad/zephyr/.config'`。`:ro` を必ず付ける
+- Bash は読み取りのコマンド（`grep` `find` `ls` `head` `sed -n`、上の `docker run … :ro`）だけに使い、ファイルを書き換えたり消したりするコマンドは使わない
 - 読むときは、検索で見つかった行の前後だけを Read の `offset` / `limit` で読む
 
 `.zmk-ref/` が無いときは調べずに、「`./scripts/build-local.sh --ref` を実行してから、もう一度依頼してほしい」とだけ返します（コピーが無いまま推測で答えると、版違いの誤りを持ち込むため）。
