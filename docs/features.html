@@ -57,6 +57,7 @@
 <tr><td>エンコーダ</td><td>左右それぞれでスクロール（<code>zmk_encoder</code>）。レイヤー 2 では左が音量</td><td><a href="keymap.html#encoder">キーマップ › エンコーダ</a></td></tr>
 <tr><td>マウスのクリック</td><td>右手のコンボで左・右・中クリック</td><td><a href="keymap.html#combos">キーマップ › コンボ</a></td></tr>
 <tr><td>トラックボールのスクロール</td><td>0 番の長押し（レイヤー 4 <code>scroll</code>）のあいだ、左のトラックボールが縦スクロールになる</td><td><a href="settings.html#scroll">設定項目 › スクロール</a></td></tr>
+<tr><td>Bluetooth の送信の調整</td><td>Mac に合う接続間隔を要求し、ポインタのレポートを間引き（<code>zmk-input-processor-report-rate-limit</code>）、送信出力を上げる。操作の遅れを防ぐ</td><td><a href="settings.html#bluetooth">設定項目 › Bluetooth の接続</a></td></tr>
 <tr><td>状態表示 LED</td><td>電池残量と接続状態を色で示す（<code>zmk-rgbled-widget</code>）</td><td><a href="workflow.html#pc-pairing">開発フロー › PC とつながらないとき</a></td></tr>
 <tr><td>電池と省電力</td><td>左右の電池残量を PC に報告する。操作が無いと deep sleep に入る</td><td><a href="settings.html#kconfig">設定項目 › Kconfig</a></td></tr>
 </tbody>
@@ -125,7 +126,7 @@
 <li><p class="item-head"><code>&amp;caps_word</code> <span class="badge">Studio で割り当て</span></p><p>次の区切り（スペースなど）まで大文字で打つ機能。この版の ZMK にそのままあり、追加の設定は要りません。区切りとみなさない文字は <code>continue-list</code> で変えられます（変えるときは要ビルド）。</p></li>
 <li><p class="item-head">トラックボールの速さを切り替える <span class="badge build">要ビルド</span></p><p>トラックボールの解像度（CPI）は、この版のドライバではキー操作で切り替えられません。代わりに、スクロールと同じ仕組み（レイヤー別の <code>input-processors</code>）で、特定のレイヤーのあいだだけ <code>zip_xy_scaler</code> で遅く・速くできます。</p></li>
 <li><p class="item-head">コンボの誤爆を防ぐ <span class="badge build">要ビルド</span></p><p>コンボには、直前のキー入力から一定時間たっていないと発火しない <code>require-prior-idle-ms</code>、特定のレイヤーだけで有効にする <code>layers</code>、両方のキーを離すまで保つ <code>slow-release</code> があります。速く打ったときにコンボが誤って出るようなら使います。</p></li>
-<li><p class="item-head">スクロールモードの調整 <span class="badge build">要ビルド</span></p><p>0 番の長押しの判定時間（<code>&amp;lt</code> の <code>tapping-term-ms</code>）と、スクロールの速さ・向き。<a href="known-issues.html#issue-pointer-sluggish">ポインタのもっさり感</a>の調査とあわせて見直します。</p></li>
+<li><p class="item-head">スクロールモードの調整 <span class="badge build">要ビルド</span></p><p>0 番の長押しの判定時間（<code>&amp;lt</code> の <code>tapping-term-ms</code>）と、スクロールの速さ・向き。使ってみて合わなければ見直します。</p></li>
 <li><p class="item-head">実機の割り当てを資料に反映するツール <span class="badge">作業は大きめ</span></p><p>キー割り当ての正本を Studio にしたので、資料のレイヤー図（ファイルの初期値）と実機はずれていきます。Studio と同じ通信（USB 経由）で本体の割り当てを読み出せれば、レイヤー図を実機に合わせられます。通信の仕様はビルド環境の ZMK のモジュールにあります。</p></li>
 </ul>
 </section>

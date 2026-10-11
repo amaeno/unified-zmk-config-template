@@ -42,6 +42,7 @@
 <li><a href="#scroll">スクロール</a></li>
 <li><a href="#pointer">ポインタ</a></li>
 <li><a href="#encoder">エンコーダ</a></li>
+<li><a href="#bluetooth">Bluetooth の接続</a></li>
 <li><a href="#kconfig">Kconfig</a></li>
 </ol>
 </nav>
@@ -70,7 +71,7 @@
 <code>1x</code>
 <!-- /gen:value --></td><td>トラックパッドの側（この機体は右）</td></tr>
 <tr><td><code>&amp;msc</code>（キーに割り当てたスクロール）の加速</td><td><code>config/sosho.keymap</code> の <code>&amp;msc</code></td><td><a href="#scroll">スクロール</a></td><td>右</td></tr>
-<tr><td>Bluetooth の接続パラメータ</td><td>各 <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
+<tr><td>PC との Bluetooth の接続間隔</td><td>右の <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code>（左の値は使われない）</td><td><a href="#bluetooth">Bluetooth の接続</a></td><td>右</td></tr>
 <tr><td>LED の電池残量の色分け</td><td>各 <code>*.conf</code> の <code>RGBLED_WIDGET_BATTERY_LEVEL_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
 <tr><td>ビルドするターゲット</td><td><code>build.yaml</code></td><td><a href="workflow.html#targets">ターゲット一覧</a></td><td>—</td></tr>
 <tr><td>ZMK・外部モジュールの版</td><td><code>config/west.yml</code></td><td><a href="workflow.html#modules">モジュール一覧</a></td><td>左右とも</td></tr>
@@ -102,13 +103,14 @@
 <aside class="callout note">
 <p><strong>左トラックボールを縦スクロールにする（L4 scroll）:</strong> L0 の 0 番（<kbd>Tab</kbd>）を長押し（既定で約 200 ms）すると L4 <code>scroll</code> に入り、そのあいだだけ左のトラックボールが縦スクロールになります。タップなら通常の <kbd>Tab</kbd> です。設定は <code>sosho_R_trackpad.overlay</code> の <code>trackball_split_listener</code> の子ノード <code>scroller</code>（<code>layers = &lt;4&gt;</code>）にあります。書き込むのは右（<code>sosho_R_trackpad</code>）だけです。<code>input-processors</code>（いまの値は <a href="#pointer">ポインタ</a> の表の「L4 scroll のとき」）は、次の役割のものをこの順に並べています。</p>
 <ol>
+<li><code>&amp;zip_ble_report_rate_limit</code> — Bluetooth の送信を間引く（<a href="#ble-backlog">送りきれないレポートが溜まるとき</a>）</li>
 <li><code>&amp;zip_x_scaler 0 1</code> — 横の動きを捨てる</li>
 <li><code>&amp;zip_xy_scaler 分子 分母</code>（1 つ以上） — 動きを縮めて、スクロールの速さを決める</li>
 <li><code>&amp;zip_xy_to_scroll_mapper</code> — スクロールに変える</li>
 </ol>
 <p><strong>速さ</strong>は <code>zip_xy_scaler</code> の「分母 ÷ 分子」の積で決まります。いまは <!-- gen:value of=scroll-counts -->
 <code>32</code>
-<!-- /gen:value --> カウントで 1 ノッチで、大きくするほど遅くなります。<strong>向きが逆</strong>なら、mapper の前に <code>&lt;&amp;zip_xy_transform INPUT_TRANSFORM_Y_INVERT&gt;</code> を足します。スクロールに切り替わることは実機で確認済みです。横の動きが本当に捨てられているかと、速さの調整は、<a href="known-issues.html#issue-pointer-sluggish">もっさり感の調査</a>のときに見直します。</p>
+<!-- /gen:value --> カウントで 1 ノッチで、大きくするほど遅くなります。<strong>向きが逆</strong>なら、mapper の前に <code>&lt;&amp;zip_xy_transform INPUT_TRANSFORM_Y_INVERT&gt;</code> を足します。スクロールに切り替わることは実機で確認済みです。横の動きが本当に捨てられているかは、まだ確かめていません。速さは使いながら調整します。</p>
 </aside>
 </section>
 
@@ -121,9 +123,9 @@
 <table>
 <thead><tr><th>overlay</th><th>リスナー</th><th>受ける入力</th><th>input-processors（有効）</th><th>コメントアウト中の例</th></tr></thead>
 <tbody>
-<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_listener</code> <span class="badge ok">この機体</span></td><td>右のトラックパッド</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
+<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_listener</code> <span class="badge ok">この機体</span></td><td>右のトラックパッド</td><td><code>&lt;&amp;zip_ble_report_rate_limit 16&gt;</code></td><td><code>&lt;&amp;zip_ble_report_rate_limit 16&gt;, &lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
 <tr class="dim"><td><code>sosho_R_trackpad.overlay</code></td><td><code>glidepoint_split_listener</code></td><td>左のトラックパッド（左から届く）</td><td>なし（そのまま）</td><td>—</td></tr>
-<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>trackball_split_listener</code> <span class="badge ok">この機体</span></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）<span class="note">L4 scroll のとき:</span><code>&lt;&amp;zip_x_scaler 0 1&gt;, &lt;&amp;zip_xy_scaler 1 8&gt;, &lt;&amp;zip_xy_scaler 1 4&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td><td><code>&lt;&amp;zip_xy_scaler 1 3&gt;,&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
+<tr><td><code>sosho_R_trackpad.overlay</code></td><td><code>trackball_split_listener</code> <span class="badge ok">この機体</span></td><td>左のトラックボール（左から届く）</td><td><code>&lt;&amp;zip_ble_report_rate_limit 16&gt;</code><span class="note">L4 scroll のとき:</span><code>&lt;&amp;zip_ble_report_rate_limit 16&gt;, &lt;&amp;zip_x_scaler 0 1&gt;, &lt;&amp;zip_xy_scaler 1 8&gt;, &lt;&amp;zip_xy_scaler 1 4&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td><td><code>&lt;&amp;zip_ble_report_rate_limit 16&gt;, &lt;&amp;zip_xy_scaler 1 3&gt;, &lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
 <tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>trackball_listener</code></td><td>右のトラックボール</td><td><code>&lt;&amp;zip_xy_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)&gt;</code></td><td>—</td></tr>
 <tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>glidepoint_split_listener</code></td><td>左のトラックパッド（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_scaler 2 1&gt;</code></td></tr>
 <tr class="dim"><td><code>sosho_R_trackball.overlay</code></td><td><code>trackball_split_listener</code></td><td>左のトラックボール（左から届く）</td><td>なし（そのまま）</td><td><code>&lt;&amp;zip_xy_to_scroll_mapper&gt;</code></td></tr>
@@ -146,10 +148,10 @@
 </tbody>
 </table>
 </div>
-<p>たとえば左のトラックボールを半分の速さにするなら、この機体の右の overlay（<code>sosho_R_trackpad.overlay</code>）の <code>trackball_split_listener</code> に次の 1 行を足して、右に書き込みます。</p>
+<p>たとえば左のトラックボールを半分の速さにするなら、この機体の右の overlay（<code>sosho_R_trackpad.overlay</code>）の <code>trackball_split_listener</code> にある <code>input-processors</code> の行を次のように変えて、右に書き込みます。先頭の <code>&amp;zip_ble_report_rate_limit</code> は消さずに残します（<a href="#ble-backlog">送りきれないレポートが溜まるとき</a>）。</p>
 <pre><code>&amp;trackball_split_listener {
     status = "okay";
-    input-processors = &lt;&amp;zip_xy_scaler 1 2&gt;;
+    input-processors = &lt;&amp;zip_ble_report_rate_limit 16&gt;, &lt;&amp;zip_xy_scaler 1 2&gt;;
 };</code></pre>
 <aside class="callout warn">
 <p><strong>子ノード（レイヤー別の上書き）があるときの注意:</strong> リスナーの子ノード（例: <code>scroller</code>）の <code>layers</code> に当てはまるあいだは、親の <code>input-processors</code> は使われず、子の設定に置き換わります（子に <code>process-next</code> を付けた場合を除く）。この機体では、L4 のあいだは上の半分の速さの例のような親への変更が<strong>効きません</strong>。L4 のあいだの動きを変えたいときは、子ノード <code>scroller</code> の <code>input-processors</code> を直します（<a href="#scroll">スクロール</a>）。</p>
@@ -171,6 +173,37 @@
 </section>
 
 <section>
+<h2 id="bluetooth">Bluetooth の接続</h2>
+<p>Bluetooth の接続は 2 本あります。設定が効くのは、右と PC の接続だけです。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>接続</th><th>接続条件を決めるもの</th><th>いまの値</th></tr></thead>
+<tbody>
+<tr><td>右（セントラル）と PC</td><td>右の <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code> を、右が接続後に PC へ要求する。最終的に決めるのは PC</td><td><!-- gen:value of=host-interval -->
+11.25〜15 ms（<code>MIN_INT=9</code> ／ <code>MAX_INT=12</code>）
+<!-- /gen:value --></td></tr>
+<tr><td>左（ペリフェラル）と右</td><td>右が接続するときに決める（ZMK の既定で 7.5 ms・latency 30）。左の <code>BT_PERIPHERAL_PREF_*</code> は使われない</td><td>ZMK の既定のまま</td></tr>
+</tbody>
+</table>
+</div>
+<p>根拠は <a href="zmk-reference.html#facts">ZMK リファレンス › このリポジトリで確かめた仕様</a> にあります。左の conf に残っている「フリーズ対策」の 3 行は本家由来で、効いていません。</p>
+<aside class="callout warn"><p><strong>Mac には Apple の規定に合う値を要求する:</strong> ZMK の既定（7.5〜15 ms）のままだと、Mac で全部の入力が 1 テンポ遅れて見えました（2026-10-12）。そこで右の要求を、Apple の規定（<a href="https://developer.apple.com/library/archive/qa/qa1931/_index.html">QA1931</a>）に合う値（上の表。<code>*_INT</code> の単位は 1.25 ms）に変えています。規定の要点は次のとおりです。</p>
+<ul>
+<li>下限は 15 ms 以上（15 ms の倍数）が原則。ただし HID（キーボードやマウス）なら 11.25 ms まで受け付けることがある</li>
+<li>上限は「下限 + 15 ms」以上。ただし上限 15 ms は認められる</li>
+<li>15 ms 固定（<code>12</code> / <code>12</code>）を要求すると、30 ms に広げる Apple の機器がある</li>
+</ul></aside>
+<p>Mac で反応が遅いと感じたら、まず右を USB ケーブルでつないで比べます。USB で遅れが消えるなら、原因は右と PC の Bluetooth の接続です。</p>
+<h3 id="ble-backlog">送りきれないレポートが溜まるとき</h3>
+<p>操作を続けるほど遅れが積み上がり、手を止めてもカーソルが少し動き続けるなら、Bluetooth で送りきれないマウスのレポートが溜まっています（2026-10-12 に実機で確認）。手を止めて 1〜2 秒たつと元に戻ります。</p>
+<p>トラックパッドやトラックボールは、Bluetooth で送れる回数より多くレポートを作ることがあります。送れない分は待ち行列に溜まり、その分だけ遅れます。詰まると、キーとエンコーダの処理まで遅れます（仕組みは <a href="zmk-reference.html#facts">ZMK リファレンス › このリポジトリで確かめた仕様</a>）。この機体では、次の 2 つで防いでいます。</p>
+<ul class="item-list">
+<li><p class="item-head">レポートの間引き（<code>&amp;zip_ble_report_rate_limit</code>）</p><p>右の overlay のリスナー（<code>glidepoint_listener</code>、<code>trackball_split_listener</code> とその子 <code>scroller</code>）の <code>input-processors</code> の先頭にあります。引数の ms に 1 回までしかレポートを通さず、間引いた分の動きは次のレポートに足します。いまの値は <a href="#pointer">ポインタ</a> の表にあります。数字を小さくすると滑らかになりますが、溜まりやすくなります。出力先が USB のときは効きません。</p></li>
+<li><p class="item-head">送信出力の引き上げ（<code>BT_CTLR_TX_PWR_PLUS_8</code>）</p><p>右の送信出力を最大の +8 dBm にして、受信の取りこぼしによる再送を減らします。電池の減りは少し早くなります。</p></li>
+</ul>
+</section>
+
+<section>
 <h2 id="kconfig">Kconfig</h2>
 <p>各シールドの <code>*.conf</code> に書いてある設定の一覧です。「この機体」の 2 つを左に並べ、使っていない 2 つは後ろにあります。左端に色の線がある行は、ファイルによって値が違うか、書いていないファイルがある設定です。</p>
 <!-- gen:kconfig-matrix -->
@@ -183,10 +216,11 @@
 <tr><td><code>ZMK_KEYBOARD_NAME</code><span class="note">キーボードの名前（Bluetooth の一覧に出る）</span></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td></tr>
 <tr class="group"><td colspan="5"><strong>Bluetooth</strong></td></tr>
 <tr><td><code>ZMK_BLE</code><span class="note">Bluetooth を使う</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">PC との接続間隔の希望の下限。効くのは右だけ（左の値は使われない）。Mac に合う値は「設定項目 › Bluetooth の接続」</span></td><td><code>9</code> <small>11.25 ms</small></td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">PC との接続間隔の希望の上限。効くのは右だけ</span></td><td><code>12</code> <small>15 ms</small></td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる。効くのは右だけ</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code></td></tr>
 <tr><td><code>BT_PERIPHERAL_PREF_TIMEOUT</code><span class="note">切断とみなすまでの時間</span></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">接続間隔の希望の下限。右では PC との接続、左では右との接続に効く</span></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">接続間隔の希望の上限</span></td><td>—</td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small></td></tr>
+<tr class="diff"><td><code>BT_CTLR_TX_PWR_PLUS_8</code><span class="note">送信出力を +8 dBm（最大）にする（既定 0 dBm）。再送を減らす。電池の減りは少し早くなる</span></td><td><code>y</code></td><td>—</td><td>—</td><td>—</td></tr>
 <tr class="group"><td colspan="5"><strong>ZMK Studio</strong></td></tr>
 <tr class="diff"><td><code>ZMK_STUDIO</code><span class="note">ZMK Studio を有効にする</span></td><td><code>y</code></td><td>—</td><td><code>y</code></td><td>—</td></tr>
 <tr class="diff"><td><code>ZMK_STUDIO_LOCKING</code><span class="note">Studio の編集ロック（n = ロックしない。いつでも編集できる）</span></td><td><code>n</code></td><td>—</td><td><code>n</code></td><td>—</td></tr>

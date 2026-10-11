@@ -30,5 +30,9 @@ manifest:
       remote: elekit-official
       revision: 1a34a5561f08eb7130823760fe597458f477e6db  # main（2026-06-25）
       path: modules/zmk_encoder
+    # ポインタのレポートを間引いて動きを次に足す input-processor（Bluetooth の送信詰まり対策）
+    - name: zmk-input-processor-report-rate-limit
+      remote: badjeff
+      revision: b056cb135525933743e2627150fb390f9d4b2461  # main（2026-03-07）
   self:
     path: config
