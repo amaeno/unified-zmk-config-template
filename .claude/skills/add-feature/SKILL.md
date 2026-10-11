@@ -22,6 +22,7 @@ model: opus
 - 触るファイルと現在値: `docs/settings.html` の `id="map"`
 - 触るところが `docs/known-issues.html` の未解決の課題に関係しないか
 - ZMK の仕様が絡むなら **zmk-researcher** に聞く。記憶で書かない（版で書き方が変わるため）
+- ZMK の外のものも一次情報で確かめる。Apple や Bluetooth の規格などの規定は一次資料を読む（例: 接続間隔は Apple の QA1931）。外部モジュールはソースとラベルの定義（`type`・`codes` など）を読み、置く位置と処理の順序を決める（記憶や要約は誤ることがあるため。2026-10-12 に Apple の規定を記憶で判断し、値を誤りかけた）
 - キーの位置は `docs/keymap.html` の `id="positions"` のテキスト版
 
 ## 2. ブランチを切る
@@ -42,8 +43,9 @@ git switch -c feature/<名前> main   # 不具合なら fix/、ビルド環境�
 1. `python3 scripts/lint-keymap.py`
 2. `python3 scripts/gen-docs.py`（資料の生成部分を更新）
 3. `/zmk-build <ターゲット>` — 書き込む側のターゲットをビルドする（`docs/workflow.html` の `id="flash"` の表）。ビルドログはこの skill が要約して返す
-4. **config-reviewer** に変更を見せる。**ビルドが済んでから**頼み、ビルドの結果（成否と警告の要点）を依頼文に含める（レビュー役はビルドしないので、結果を知らないと、ビルドで裏付けられた点まで「要確認」にしてしまうため）。要修正なら直して 1 からやり直す
-5. **資料を必ず更新する。** 仕様（挙動・設定値・キー割り当て・手順）が変わったら、生成部分だけでなく手書きの説明も直す。**docs-sync** に頼むか、小さな修正なら update-docs skill に従って自分で直す（資料は事実の正本なので、実態とずれると次の作業を誤らせるため）。直したら、ほかの記述と矛盾していないかを確かめる（CLAUDE.md の「資料の規約」。docs-sync が「直さずに残した矛盾」を返したら、正しい方を確かめて直す）
+4. Kconfig や devicetree を変えたら、ビルド結果に値が実際に入ったかを確かめる（conf に書いても、依存や既定値の関係で効かないことがあるため）。Kconfig は `.config`、devicetree は `zephyr.dts` を読む: `docker run --rm -v sosho-zmk-ws:/ws:ro zmkfirmware/zmk-build-arm:stable bash -c 'grep -E "<設定名>" /ws/build/<ターゲット>/zephyr/.config'`
+5. **config-reviewer** に変更を見せる。**ビルドが済んでから**頼み、ビルドの結果（成否と警告の要点、上の 4 で確かめた値）を依頼文に含める（レビュー役はビルドしないので、結果を知らないと、ビルドで裏付けられた点まで「要確認」にしてしまうため）。要修正なら直して 1 からやり直す
+6. **資料を必ず更新する。** 仕様（挙動・設定値・キー割り当て・手順）が変わったら、生成部分だけでなく手書きの説明も直す。**docs-sync** に頼むか、小さな修正なら update-docs skill に従って自分で直す（資料は事実の正本なので、実態とずれると次の作業を誤らせるため）。直したら、ほかの記述と矛盾していないかを確かめる（CLAUDE.md の「資料の規約」。docs-sync が「直さずに残した矛盾」を返したら、正しい方を確かめて直す）
 
 調査は編集と並行してよいが、レビューは編集とビルドが終わってから走らせる。サブエージェントは同時 5 本・この流れ全体で延べ 10 本まで（CLAUDE.md）。
 
@@ -59,7 +61,7 @@ git switch -c feature/<名前> main   # 不具合なら fix/、ビルド環境�
 - 確かめてほしい動作と、うまくいかないときに見る場所（`docs/workflow.html` の `id="trouble"`）
 - 「確認できたら教えてください。main に取り込んでタグを打ちます」
 
-`main` への取り込み（`git merge --no-ff`）とタグ（`fw-YYYY-MM-DD`）は、ユーザーが確認したと言ってから行う（`docs/workflow.html` の `id="merge"`）。
+`main` への取り込み（`git merge --no-ff`）とタグ（`fw-YYYY-MM-DD`）は、ユーザーが確認したと言ってから行う（`docs/workflow.html` の `id="merge"`）。取り込みとタグは別々のコマンドで実行し、タグを打つ前に `git log -1 --oneline` で `main` の先頭が取り込みのコミットか確かめる（同じ節の注意）。
 
 ## 振り返り
 

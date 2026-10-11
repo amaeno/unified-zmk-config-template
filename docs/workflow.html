@@ -148,6 +148,7 @@
 <pre><code>git switch main
 git merge --no-ff feature/&lt;名前&gt;
 git tag -a fw-2026-10-11 -m "R: sosho_R_trackpad / L: sosho_L_trackpad"</code></pre>
+<aside class="callout warn"><p><strong>タグは取り込みを確かめてから打つ:</strong> 取り込みとタグは別々のコマンドで実行し、タグを打つ前に <code>git log -1 --oneline</code> で <code>main</code> の先頭が取り込みのコミットになっていることを確かめます。取り込みのメッセージは <a href="changelog.html">変更履歴</a> に載るので、長いときはファイルに書いて <code>git merge --no-ff -F &lt;ファイル&gt; &lt;ブランチ&gt;</code> で渡します（<code>git merge</code> は <code>-F -</code> で標準入力を読めません）。違うコミットに打ってしまったら、push する前に <code>git tag -d &lt;タグ&gt;</code> で消して打ち直します。</p></aside>
 
 <h3 id="rollback">前の版に戻す</h3>
 <p>書き込んだ版にはタグがあるので、そこからビルドし直せば戻せます。</p>
@@ -483,12 +484,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>3</strong> 件 ／ 対応済み 13 件</p>
-<ul>
-<li>2026-10-12 zmk-researcher: Zephyr 本体のソースが .zmk-ref/ に無く、BLE の接続パラメータの自動更新の既定値などが推定どまりになった（並行した 1 本は Docker ボリューム sosho-zmk-ws の /ws/zephyr を自力で見つけて読めた。場所はエージェントのメモリに記録済み）→ 定義に Zephyr のある場所と読み取り用コマンドを書くか、build-local.sh --ref で Zephyr の subsys/bluetooth・drivers/input・dts/bindings/input も写すとよい（2 本の改善メモ）</li>
-<li>2026-10-12 config-reviewer: BLE の接続パラメータの変更で、Apple の規定を記憶で判断した（「上限 ≧ 下限 × 2」。一次資料の QA1931 とは違った）。メイン会話も最初は記憶で 15 ms 固定を選び、QA1931 の「15 ms 固定は 30 ms に広げられることがある」を見落としていた → 外部の規定（Apple・Bluetooth の仕様）が絡む変更は、一次資料を確かめるか「要確認」にする観点を足すとよい（レビュー役の改善メモ）</li>
-<li>2026-10-12 config-reviewer: 外部モジュールの input-processor を足したとき、ラベルの定義（type・codes）と置く位置（処理の順序。scroller の mapper より前か）の確認を、依頼文で頼まれてから行った → 観点に「外部モジュールを追加・更新したら、モジュールの .c とラベルの定義を読み、置く位置と処理の順序が合っているか確かめる」を足すとよい（レビュー役の改善メモ）</li>
-</ul>
+<p>未対応 <strong>0</strong> 件 ／ 対応済み 19 件</p>
 <details>
 <summary>最近の対応済み（5 件）</summary>
 <ul>
@@ -504,7 +500,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <!-- /gen:improvements -->
 
 <h3 id="ai-ref">ZMK の調査用コピー</h3>
-<p>調査役の <code>zmk-researcher</code> は、記憶や Web ではなく、このリポジトリが使っている版の ZMK のソースと資料を読んで答えます。そのためのコピーが <code>.zmk-ref/</code>（git 管理外）にあります。<code>./scripts/build-local.sh --ref</code> で作り直せ、<code>--update</code> で版を上げたときは自動で作り直されます。どの版を写したかは <code>.zmk-ref/VERSIONS.txt</code> にあります。</p>
+<p>調査役の <code>zmk-researcher</code> は、記憶や Web ではなく、このリポジトリが使っている版の ZMK のソースと資料を読んで答えます。そのためのコピーが <code>.zmk-ref/</code>（git 管理外）にあります。<code>./scripts/build-local.sh --ref</code> で作り直せ、<code>--update</code> で版を上げたときは自動で作り直されます。どの版を写したかは <code>.zmk-ref/VERSIONS.txt</code> にあります。Zephyr 本体は大きいので、Bluetooth と入力まわりだけを写しています。ほかの部分とビルド結果（<code>.config</code>・<code>zephyr.dts</code>）は、ビルド用の Docker ボリュームを読み取り専用で開いて読みます（写している場所の一覧は <a href="zmk-reference.html#local">ZMK リファレンス › 手元の ZMK のソースと資料</a>）。</p>
 </section>
 </main>
 </div>
