@@ -2,13 +2,15 @@ file_format: "1"
 id: sosho
 name: sosho
 type: shield
-url: https://github.com/abababababababa/ZMK_sosho_test
-requires: [seeeduino_xiao_ble]
+url: https://github.com/elekit-official/unified-zmk-config-template
+requires: [xiao_ble]
 features:
   - keys
   - pointer
   - studio
   - encoder
 siblings:
-  - sosho_R
-  - sosho_L
+  - sosho_R_trackpad
+  - sosho_R_trackball
+  - sosho_L_trackpad
+  - sosho_L_trackball

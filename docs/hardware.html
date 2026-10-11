@@ -118,7 +118,7 @@
 </div>
 <!-- /gen:matrix-pins -->
 <aside class="callout warn">
-<p><strong>NFC ピンを流用しています。</strong> 列 3 の <code>P0.09</code> と列 5 の <code>P0.10</code> は本来 NFC 用のピンです。普通のピンとして使うために、すべての <code>*.conf</code> に <code>CONFIG_NFCT_PINS_AS_GPIOS=y</code> が入っています。消すとその列のキーが反応しなくなります。</p>
+<p><strong>NFC ピンを流用しています。</strong> 列 3 の <code>P0.09</code> と列 5 の <code>P0.10</code> は本来 NFC 用のピンです。普通のピンとして使うために、<code>sosho.dtsi</code> に <code>&amp;uicr { nfct-pins-as-gpios; };</code> を書いています（Zephyr 4.1 からの書き方。以前は Kconfig の <code>CONFIG_NFCT_PINS_AS_GPIOS</code>）。この設定は初回の起動時にチップへ書き込まれて残りますが、消すと、チップの設定を消したときなどにその列のキーが反応しなくなります。</p>
 </aside>
 </section>
 
@@ -129,10 +129,10 @@
 <div class="gen">
 <div class="table-wrap">
 <table>
-<thead><tr><th>ノード</th><th>有効にする側</th><th>A ピン</th><th>B ピン</th><th>steps</th><th>resolution</th></tr></thead>
+<thead><tr><th>ノード</th><th>有効にする側</th><th>A ピン</th><th>B ピン</th><th>steps</th></tr></thead>
 <tbody>
-<tr><td><code>left_encoder</code></td><td>左</td><td><code>P0.05</code><span class="tag">D5</span></td><td><code>P1.11</code><span class="tag">D6</span></td><td>96</td><td>4</td></tr>
-<tr><td><code>right_encoder</code></td><td>右</td><td><code>P0.05</code><span class="tag">D5</span></td><td><code>P1.11</code><span class="tag">D6</span></td><td>96</td><td>4</td></tr>
+<tr><td><code>left_encoder</code></td><td>左</td><td><code>P0.05</code><span class="tag">D5</span></td><td><code>P1.11</code><span class="tag">D6</span></td><td>96</td></tr>
+<tr><td><code>right_encoder</code></td><td>右</td><td><code>P0.05</code><span class="tag">D5</span></td><td><code>P1.11</code><span class="tag">D6</span></td><td>96</td></tr>
 </tbody>
 </table>
 </div>
@@ -223,7 +223,6 @@ scripts/                         ビルド・lint・資料生成（一覧は doc
   hooks/retro-nudge.py           作業の区切りで改善提案を促す Stop フック
   improvements.md                skills・エージェントの改善メモ（/retro が読む）
 .zmk-ref/                        ZMK のソースと資料の調査用コピー（git 管理外。build-local.sh --ref で作る）
-src/boot_delay_hack.c            起動時 1 秒 busy-wait（ビルドに含まれていない。docs/known-issues.html）
 zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
 memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）</code></pre>
 <p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「ファイル構成」節</p>

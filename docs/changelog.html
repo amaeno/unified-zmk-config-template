@@ -50,6 +50,16 @@
 <!-- gen:changelog -->
 <div class="gen">
 <ul class="item-list history">
+<li><p class="item-head"><code>2026-10-12</code> 既知の課題をまとめて片付ける（9 件） <span class="badge ok">fw-2026-10-12.2</span> <small>R: sosho_R_trackpad / L: sosho_L_trackball（既知の課題の片付け。左右とも書き込み）</small></p>
+<ul>
+<li>物理レイアウトの参照を正しいラベルに直し、補っていた上書きを削除</li>
+<li>NFC ピンを後継の書き方（&amp;uicr { nfct-pins-as-gpios; }）に移行</li>
+<li>非推奨・未使用の設定（CONFIG_ZMK_MOUSE、エンコーダの resolution、スクロール量の #define）を削除</li>
+<li>Studio の有効化の重複を右の conf にまとめ、死んでいた接続パラメータの宣言を削除</li>
+<li>ビルドに含まれていなかった起動遅延のコードを削除し、シールドのメタ情報を直す</li>
+</ul>
+<p>左右とも書き込み、実機で動作を確認。残る既知の課題はポインタのもっさり感（要調査）だけ。</p>
+</li>
 <li><p class="item-head"><code>2026-10-12</code> 土台固め: ZMK を最新にして左右の版をそろえ、版を固定する <span class="badge ok">fw-2026-10-12</span> <small>R: sosho_R_trackpad / L: sosho_L_trackball（ZMK 4dd95d7。左右とも書き込み）</small></p>
 <ul>
 <li>ZMK 本体を 6e2ef41 → 4dd95d7 に更新（分割の入力の処理が詰まる不具合の修正 #3110 ほか）</li>

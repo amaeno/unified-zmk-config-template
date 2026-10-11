@@ -6,15 +6,13 @@ include:
   # トラックパッド版
   - board: xiao_ble/nrf52840/zmk
     shield: sosho_R_trackpad rgbled_adapter
-    snippet: studio-rpc-usb-uart
-    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    snippet: studio-rpc-usb-uart  # Studio の有効化（CONFIG_ZMK_STUDIO=y）は右の conf にある
     artifact-name: sosho_R_trackpad
 
   # トラックボール版
   - board: xiao_ble/nrf52840/zmk
     shield: sosho_R_trackball rgbled_adapter
-    snippet: studio-rpc-usb-uart
-    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    snippet: studio-rpc-usb-uart  # Studio の有効化（CONFIG_ZMK_STUDIO=y）は右の conf にある
     artifact-name: sosho_R_trackball
 
   # ==============================

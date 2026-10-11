@@ -30,7 +30,7 @@ HTML は長いので、目的の節を `id="…"` で Grep してから、その
 | 構成、ピン配置、エンコーダ、ポインタの配線、ファイル構成 | `docs/hardware.html` |
 | レイヤー図（ファイル上の初期値）、**キー位置番号**（コンボの `key-positions` 用。テキスト版は `id="positions"`）、コンボ、エンコーダの割り当て | `docs/keymap.html` |
 | どこを触ると何が変わるか。スクロール・ポインタ・エンコーダ・Kconfig の現在値と変え方 | `docs/settings.html` |
-| 既知の不整合（消すとビルドが壊れるものを含む）と未解決の課題。**関係するファイルを編集する前に確認する** | `docs/known-issues.html` |
+| 既知の課題（未解決のもの）。**関係するファイルを編集する前に確認する** | `docs/known-issues.html` |
 | 使っている機能、ZMK の behavior 一覧、追加できる機能の候補 | `docs/features.html` |
 | 使っている ZMK の版、手元の ZMK ソース（`.zmk-ref/`）の構成、確かめた仕様のメモ（出典つき） | `docs/zmk-reference.html` |
 | main に取り込んだ変更の履歴と、書き込んだ版のタグ | `docs/changelog.html` |
@@ -81,7 +81,6 @@ scripts/                         ビルド・lint・資料生成（一覧は doc
   hooks/retro-nudge.py           作業の区切りで改善提案を促す Stop フック
   improvements.md                skills・エージェントの改善メモ（/retro が読む）
 .zmk-ref/                        ZMK のソースと資料の調査用コピー（git 管理外。build-local.sh --ref で作る）
-src/boot_delay_hack.c            起動時 1 秒 busy-wait（ビルドに含まれていない。docs/known-issues.html）
 zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
 memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）
 ```

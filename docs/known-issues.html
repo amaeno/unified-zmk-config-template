@@ -41,15 +41,6 @@
 <thead><tr><th>課題</th><th>状態</th></tr></thead>
 <tbody>
 <tr><td><a href="#issue-pointer-sluggish">トラックパッドとトラックボールの操作がもっさりする</a></td><td><span class="badge warn">未修正</span> <small>要調査（実機の操作感）</small></td></tr>
-<tr><td><a href="#issue-transform0">物理レイアウトが存在しないラベルを参照している</a></td><td><span class="badge warn">未修正</span></td></tr>
-<tr><td><a href="#issue-scrl-unused">スクロール量と加速の設定が、いまは何にも効いていない</a></td><td><span class="badge warn">未修正</span></td></tr>
-<tr><td><a href="#issue-boot-delay">起動を 1 秒遅らせるコードがビルドに含まれていない</a></td><td><span class="badge warn">未修正</span></td></tr>
-<tr><td><a href="#issue-nfct-deprecated">NFC ピンを普通のピンにする設定が非推奨</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
-<tr><td><a href="#issue-zmk-mouse">非推奨の CONFIG_ZMK_MOUSE が残っている</a></td><td><span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small></td></tr>
-<tr><td><a href="#issue-ec11-resolution">エンコーダの resolution が非推奨</a></td><td><span class="badge warn">未修正</span> <small>left_encoder、right_encoder</small></td></tr>
-<tr><td><a href="#issue-studio-dup">CONFIG_ZMK_STUDIO=y が 2 か所にある</a></td><td><span class="badge warn">未修正</span></td></tr>
-<tr><td><a href="#issue-pref-dup">左トラックパッド版の conf が接続パラメータを 2 回書いている</a></td><td><span class="badge warn">未修正</span> <small>2 回宣言</small></td></tr>
-<tr><td><a href="#issue-zmk-yml">シールドのメタ情報が古い</a></td><td><span class="badge warn">未修正</span></td></tr>
 </tbody>
 </table>
 </div>
@@ -74,90 +65,6 @@
 <p>2026-10-12 の土台固め（タグ <code>fw-2026-10-12</code> の版）から、左右とも同じ ZMK の版（分割の入力の処理が詰まる不具合の修正 #3110 を含む）を使います。そろえた状態でもっさり感が残るかを確かめてから調べます。</p>
 </section>
 
-<section>
-<h2 id="issue-transform0">物理レイアウトが存在しないラベルを参照している</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=transform0 -->
-<span class="badge warn">未修正</span>
-<!-- /gen:issue-status --></p>
-<p><code>sosho-layouts.dtsi</code> の <code>transform = &lt;&amp;default_transform0&gt;;</code> は、存在しないラベルを指しています。すぐ後に <code>sosho.dtsi</code> の冒頭が <code>&amp;physical_layout0 { transform = &lt;&amp;default_transform&gt;; };</code> で上書きしているので、動いています。</p>
-<aside class="callout warn">
-<p><strong>この上書きを消すとビルドが壊れます。</strong> 直すなら、先に <code>sosho-layouts.dtsi</code> の参照を <code>&amp;default_transform</code> に直してから上書きを消します。</p>
-</aside>
-</section>
-
-<section>
-<h2 id="issue-scrl-unused">スクロール量と加速の設定が、いまは何にも効いていない</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=scrl-unused -->
-<span class="badge warn">未修正</span>
-<!-- /gen:issue-status --></p>
-<p><code>config/sosho.keymap</code> 冒頭の <code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code>（「スクロール量の調整」）と、<code>&amp;msc</code> の加速の上書きは、<code>&amp;msc</code> を割り当てたキーにしか効きません。いまのキーマップにはそのキーがありません。</p>
-<p>エンコーダのスクロールは <code>zmk_encoder</code> モジュールが受け持っていて、受け取った値の向きだけを使い、量は 1 回の発火につき 1 ノッチにそろえます（モジュールの <code>behavior_encoder_mouse_scroll.c</code> で確認）。verB まではエンコーダが <code>&amp;msc</code> 経由だったので効いていた設定が、verB2 でモジュールに変わったあとも残っていると考えられます。</p>
-<p>直すなら、<code>&amp;msc</code> を使う予定がなければ両方を消します。エンコーダのスクロール量を変えたいときは <a href="settings.html#encoder"><code>triggers-per-rotation</code></a> を変えます。</p>
-</section>
-
-<section>
-<h2 id="issue-boot-delay">起動を 1 秒遅らせるコードがビルドに含まれていない</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=boot-delay -->
-<span class="badge warn">未修正</span>
-<!-- /gen:issue-status --></p>
-<p><code>src/boot_delay_hack.c</code>（起動時に 1 秒待つ）は、ビルドに含まれていません。<code>zephyr/module.yml</code> の <code>cmake: .</code> がコメントアウトされているので、ルートの <code>CMakeLists.txt</code>（<code>zephyr_sources(src/boot_delay_hack.c)</code>）が読まれないためです。生成された <code>build.ninja</code> にも <code>zmk.elf</code> のシンボルにも <code>force_boot_delay</code> は出てきません（確認済み）。つまり、<strong>1 秒の起動遅延はすでに効いていません</strong>。</p>
-<p>復活させたいなら <code>cmake: .</code> を有効にします。なおファイル内のコメントには「PRE_KERNEL_2 で実行」とありますが、実際のコードは <code>POST_KERNEL</code> の優先度 10 です。</p>
-</section>
-
-<section>
-<h2 id="issue-nfct-deprecated">NFC ピンを普通のピンにする設定が非推奨</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=nfct-deprecated -->
-<span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small>
-<!-- /gen:issue-status --></p>
-<p>列 3・列 5 のキーは NFC 用のピン（P0.09・P0.10）を使っていて、すべての <code>*.conf</code> の <code>CONFIG_NFCT_PINS_AS_GPIOS=y</code> で普通のピンに切り替えています。この Kconfig は Zephyr 4.1 で非推奨になり、ビルドのたびに警告が出ます（Zephyr のソースの <code>soc/nordic/Kconfig</code> で確認）。後継は devicetree の次の書き方です。</p>
-<pre><code>&amp;uicr {
-    nfct-pins-as-gpios;
-};</code></pre>
-<p>この設定は初回の起動時にチップへ書き込まれて残るので、すぐに壊れるわけではありません（同じく Zephyr の説明より）。直すなら、<code>sosho.dtsi</code> に上の 3 行を足し、<code>*.conf</code> から Kconfig の行を消して、左右とも書き込みます。</p>
-</section>
-
-<section>
-<h2 id="issue-zmk-mouse">非推奨の CONFIG_ZMK_MOUSE が残っている</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=zmk-mouse -->
-<span class="badge warn">未修正</span> <small>sosho_L_trackball.conf、sosho_L_trackpad.conf、sosho_R_trackball.conf、sosho_R_trackpad.conf</small>
-<!-- /gen:issue-status --></p>
-<p><code>CONFIG_ZMK_MOUSE=y</code> は、いまの <code>CONFIG_ZMK_POINTING=y</code> の旧名です。両方が並んで書いてあります。直すなら <code>CONFIG_ZMK_MOUSE=y</code> の行だけを消します。</p>
-</section>
-
-<section>
-<h2 id="issue-ec11-resolution">エンコーダの resolution が非推奨</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=ec11-resolution -->
-<span class="badge warn">未修正</span> <small>left_encoder、right_encoder</small>
-<!-- /gen:issue-status --></p>
-<p><code>sosho.dtsi</code> のエンコーダにある <code>resolution</code> は、ZMK では非推奨のプロパティです。<code>steps</code> が書いてあるときは使われません（ZMK の EC11 ドライバのソースで確認）。直すなら <code>resolution</code> の行を消します。動作は変わりません。</p>
-</section>
-
-<section>
-<h2 id="issue-studio-dup">CONFIG_ZMK_STUDIO=y が 2 か所にある</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=studio-dup -->
-<span class="badge warn">未修正</span>
-<!-- /gen:issue-status --></p>
-<p>ZMK Studio の有効化が、<code>build.yaml</code> の <code>cmake-args</code> と右の <code>*.conf</code> の両方に書いてあります。どちらか一方で足ります。</p>
-<aside class="callout warn">
-<p><strong>直すときも、どちらか一方は必ず残します。</strong> Studio を外すと、予約レイヤー（<code>scroll</code>・<code>extra2</code>）がレイヤーとして数えられなくなり、それを呼び出すキー（<code>&amp;mo 4</code> など）が効かなくなります。Studio の機能（<code>CONFIG_ZMK_STUDIO_RPC</code>）が有効なときだけ <code>status = "reserved"</code> のレイヤーも数えるためです（ZMK のソースの <code>src/studio/Kconfig</code> と <code>include/zmk/keymap.h</code> で確認）。</p>
-</aside>
-</section>
-
-<section>
-<h2 id="issue-pref-dup">左トラックパッド版の conf が接続パラメータを 2 回書いている</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=pref-dup -->
-<span class="badge warn">未修正</span> <small>2 回宣言</small>
-<!-- /gen:issue-status --></p>
-<p><code>sosho_L_trackpad.conf</code> は <code>CONFIG_BT_PERIPHERAL_PREF_*</code> を 2 回宣言しています。前半の 6/12/0/400 は後半の「フリーズ対策」の 10/20/10/400 で上書きされるので、前半は意味がありません。この機体の左はトラックボール版なので影響しません。直すなら前半の 4 行を消します。</p>
-</section>
-
-<section>
-<h2 id="issue-zmk-yml">シールドのメタ情報が古い</h2>
-<p class="issue-status">状態: <!-- gen:issue-status id=zmk-yml -->
-<span class="badge warn">未修正</span>
-<!-- /gen:issue-status --></p>
-<p><code>sosho.zmk.yml</code> の <code>requires</code> が旧ボード名の <code>seeeduino_xiao_ble</code>、<code>url</code> が無関係な個人リポジトリのままです。ビルドには使われない情報なので、動作には影響しません。</p>
-</section>
 </main>
 </div>
 </body>

@@ -79,7 +79,7 @@ model: sonnet
 ```
 
 - 中身は `python3 scripts/gen-docs.py` が上書きする。手で直さない
-- 本文中に 1 つの値を埋め込むときは `<!-- gen:value of=キー -->` と `<!-- /gen:value -->` を使う（例: `of=scrl-val`）
+- 本文中に 1 つの値を埋め込むときは `<!-- gen:value of=キー -->` と `<!-- /gen:value -->` を使う（例: `of=trackball-cpi`）
 - 使える生成器の一覧: `grep -rn '@generator(' scripts/docgen/`。`value` のキーは `scripts/docgen/shield.py` の `_value()`
 - 生成器の中身が変・古いと思ったら、HTML ではなく生成器を直す
 - `gen-docs.py` は検索の索引 `docs/assets/search-index.js` も作り直す（手で直さない）。`h2`・`h3` に付けた `id` が検索結果の飛び先になる
