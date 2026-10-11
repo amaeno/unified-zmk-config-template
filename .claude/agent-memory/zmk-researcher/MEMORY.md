@@ -1,0 +1,1 @@
+- 標準 behavior の定義は `.zmk-ref/zmk-app/dts/behaviors/<名前>.dtsi`、binding は `dts/bindings/behaviors/zmk,behavior-<名前>.yaml`、実装は `src/behaviors/behavior_<名前>.c`

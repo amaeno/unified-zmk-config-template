@@ -34,7 +34,8 @@ HTML は長いので、目的の節を `id="…"` で Grep してから、その
 | ビルドが要るかの判断、開発の流れ、git の運用 | `docs/workflow.html` の `#decide` `#loop` `#git` |
 | ビルドのコマンド・ターゲット・仕組み、書き込み手順 | `docs/workflow.html` の `#build` `#flash` `#reset` |
 | うまくいかないとき、ビルドスクリプトの制約 | `docs/workflow.html` の `#trouble` `#internals` |
-| 資料の仕組みと決まりごと | `docs/workflow.html` の `#docs` |
+| 資料の仕組みと決まりごと | `docs/workflow.html` の `#docs`（書き方は update-docs skill） |
+| skills・サブエージェントの一覧、改善メモの仕組み、ZMK の調査用コピー | `docs/workflow.html` の `#ai` |
 
 ---
 
@@ -70,6 +71,11 @@ docs/                            人間向けの資料（HTML）。事実の正�
   assets/style.css               全ページ共通のスタイル
 scripts/                         ビルド・lint・資料生成（一覧は docs/workflow.html#scripts）
   docgen/                        資料の生成器。テーマ別のモジュール（一覧は docgen/__init__.py）
+.claude/
+  agents/ skills/                サブエージェントと skills（一覧は docs/workflow.html#ai-tools）
+  hooks/retro-nudge.py           作業の区切りで改善提案を促す Stop フック
+  improvements.md                skills・エージェントの改善メモ（/retro が読む）
+.zmk-ref/                        ZMK のソースと資料の調査用コピー（git 管理外。build-local.sh --ref で作る）
 src/boot_delay_hack.c            起動時 1 秒 busy-wait（ビルドに含まれていない。docs/known-issues.html）
 zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
 memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）
@@ -133,6 +139,15 @@ python3 scripts/gen-docs.py                 # 資料の生成ブロックを更�
 | `haiku` | 手順が決まっている作業。ビルドの実行と結果の要約、生成スクリプトの実行、定型の確認 |
 | `sonnet` | 読んで判断する作業。ZMK のソースやドキュメントの調査、設定のレビュー、資料の執筆 |
 | `opus`（メイン会話） | 設計判断、新しい機能の設計、複数ファイルにまたがる変更 |
+
+---
+
+## 改善メモと振り返り
+
+- skills・サブエージェントが手順どおりに進まなかったとき（失敗、前提の不足、遠回り、ユーザーからの訂正、モデルの力不足や過剰）は、その場で `.claude/improvements.md` の「未対応」に 1 行書く。直すのは後でよい
+- サブエージェントや fork の skill の報告に「改善メモ」があれば、メイン会話がそれを転記する
+- 作業の区切り（未コミットの変更が無い）で未対応のメモがあると、Stop フック（`.claude/hooks/retro-nudge.py`）が `/retro` での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 `SOSHO_RETRO_NUDGE=0`
+- 改善案を適用するのは、ユーザーが承認したものだけ
 
 ---
 

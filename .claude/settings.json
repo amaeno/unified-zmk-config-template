@@ -2,6 +2,19 @@
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true
   },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/retro-nudge.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Edit(**)",

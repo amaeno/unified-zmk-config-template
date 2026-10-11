@@ -215,6 +215,11 @@ docs/                            人間向けの資料（HTML）。事実の正�
   assets/style.css               全ページ共通のスタイル
 scripts/                         ビルド・lint・資料生成（一覧は docs/workflow.html#scripts）
   docgen/                        資料の生成器。テーマ別のモジュール（一覧は docgen/__init__.py）
+.claude/
+  agents/ skills/                サブエージェントと skills（一覧は docs/workflow.html#ai-tools）
+  hooks/retro-nudge.py           作業の区切りで改善提案を促す Stop フック
+  improvements.md                skills・エージェントの改善メモ（/retro が読む）
+.zmk-ref/                        ZMK のソースと資料の調査用コピー（git 管理外。build-local.sh --ref で作る）
 src/boot_delay_hack.c            起動時 1 秒 busy-wait（ビルドに含まれていない。docs/known-issues.html）
 zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
 memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）</code></pre>

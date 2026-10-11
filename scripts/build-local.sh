@@ -7,6 +7,7 @@
 #   scripts/build-local.sh --list              ターゲット一覧
 #   scripts/build-local.sh -p sosho_R_trackpad クリーンビルド
 #   scripts/build-local.sh --update            west update をやり直す（west.yml を変えた後）
+#   scripts/build-local.sh --ref               ZMK のソースと資料を .zmk-ref/ に写す（調査用）
 #   scripts/build-local.sh --shell             ツールチェーンのコンテナ内シェル
 #
 # 初回は west ワークスペースの取得に 10〜15 分かかる。2 回目以降は

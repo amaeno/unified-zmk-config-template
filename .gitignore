@@ -8,3 +8,9 @@ build/
 
 # Python のキャッシュ（scripts/ の import で作られる）
 __pycache__/
+
+# ZMK のソースと資料の調査用コピー（scripts/build-local.sh --ref が作る）
+.zmk-ref/
+
+# Claude Code のフックが使う状態ファイル
+.claude/state/

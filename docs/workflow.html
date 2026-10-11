@@ -176,6 +176,7 @@ git switch main</code></pre>
 <tr><td><code>./scripts/build-local.sh --list</code></td><td>ターゲット一覧</td></tr>
 <tr><td><code>./scripts/build-local.sh -p sosho_R_trackpad</code></td><td>クリーンビルド</td></tr>
 <tr><td><code>./scripts/build-local.sh --update</code></td><td>west update をやり直す（west.yml を変えた後）</td></tr>
+<tr><td><code>./scripts/build-local.sh --ref</code></td><td>ZMK のソースと資料を .zmk-ref/ に写す（調査用）</td></tr>
 <tr><td><code>./scripts/build-local.sh --shell</code></td><td>ツールチェーンのコンテナ内シェル</td></tr>
 </tbody>
 </table>
@@ -360,13 +361,19 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 
 <section>
 <h2 id="ai">AI と進めるとき</h2>
-<p>Claude Code は毎回 <code>CLAUDE.md</code> を読み込み、そこから資料や skills をたどります。作業の型が決まっているものは skills やサブエージェントにして、手順と前提を書き込んであります。</p>
+<p>Claude Code は毎回 <code>CLAUDE.md</code> を読み込み、そこから資料や skills をたどります。作業の型が決まっているものは skills やサブエージェントにして、手順と前提を書き込んであります。頼み方は普段どおりで構いません。たとえば「左のトラックボールを少し遅くしたい」と頼めば、<code>/add-feature</code> の流れで調査・編集・ビルド・レビューまで進み、書き込みの手前で止まります。</p>
 
 <h3 id="ai-tools">skills とサブエージェント</h3>
 <!-- gen:ai-tools -->
 <div class="gen">
 <ul class="item-list">
+<li><p class="item-head"><code>/add-feature</code> <span class="badge">skill</span> <span class="badge">opus</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) のファームウェアに機能を足す・設定を変える・不具合を直すときの一連の流れ（要否の判断 → 調査 → ブランチ → 編集 → lint・資料・ビルド → レビュー → コミット → 実機確認の依頼）。コンボ、behavior、マクロ、エンコーダの挙動、ポインタの速さや向き、Kconfig、外部モジュールの追加・変更を頼まれたら、作業を始める前にこれを使うこと。キー割り当てだけの変更なら ZMK Studio で済むので使わない。</p></li>
+<li><p class="item-head"><code>/retro</code> <span class="badge">skill</span> <span class="badge">opus</span> <span class="badge">メイン会話で実行</span></p><p>skills・サブエージェント・CLAUDE.md の改善案を出す振り返り。.claude/improvements.md の未対応メモと、このセッションで手順どおりに進まなかった出来事から「どのファイルをどう直すか」を提案し、ユーザーが承認したものだけを適用する。作業の区切りでフック（retro-nudge）から促されたとき、またはユーザーが振り返り・改善提案・skills の見直しを頼んだときに使う。</p></li>
+<li><p class="item-head"><code>/update-docs</code> <span class="badge">skill</span> <span class="badge">sonnet</span> <span class="badge">メイン会話で実行</span></p><p>双掌 (sosho) の資料（docs/*.html）を書く・直すときの決まりごと。ページのひな形、使える CSS の部品、自動生成ブロックの扱い、生成器（scripts/docgen/）の足し方、文章の書き方、見た目の確かめ方。資料のページを足すとき、手書きの説明を直すとき、資料に新しい事実を載せるとき、生成器を足すときは、HTML を書き始める前に必ずこれを読むこと。</p></li>
 <li><p class="item-head"><code>/zmk-build</code> <span class="badge">skill</span> <span class="badge">haiku</span> <span class="badge">fork で実行</span></p><p>双掌 (sosho) のファームウェアを lint してビルドし、結果を要約して返す。キーマップ・コンボ・エンコーダ挙動・ポインタ設定・Kconfig を変更した後の検証に使う。引数はターゲット名（複数可。省略時は sosho_R_trackpad、--all で全部）。書き込みはユーザーが行う。</p></li>
+<li><p class="item-head"><code>config-reviewer</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>双掌 (sosho) の設定変更（キーマップ・シールドの dtsi / overlay / conf・build.yaml・west.yml）を、コミットや書き込みの前にレビューする。lint と資料の生成チェックを実行し、ZMK の書き方の誤り、左右の書き込み先、既知の課題への抵触、資料の更新漏れを指摘する。設定ファイルを変更したら、コミットする前に必ずこのエージェントに見せること。指摘だけを返し、ファイルは直さない。</p></li>
+<li><p class="item-head"><code>docs-sync</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>設定やスクリプトを変えたあとに、docs/ の資料（HTML）を実態に合わせる。scripts/gen-docs.py で生成部分を作り直し、手書き部分の古くなった記述を直して、何を直したかを報告する。設定やスクリプトを変えて手書きの説明が古くなりそうなときや、資料の点検を頼まれたときに使う。</p></li>
+<li><p class="item-head"><code>zmk-researcher</code> <span class="badge">サブエージェント</span> <span class="badge">sonnet</span> <span class="badge">effort: medium</span></p><p>ZMK 本体・外部モジュール（zmk-rgbled-widget / zmk-pmw3610-driver / zmk_encoder）・XIAO のボード定義の仕様を、このリポジトリが実際に使っている版のソースとドキュメントで調べて答える。「ZMK で○○はできるか」「この behavior・Kconfig・devicetree プロパティの意味と書き方」「この挙動はどこで実装されているか」を確かめたいときは、記憶で答えずにこのエージェントに調べさせること。読み取り専用。</p></li>
 </ul>
 <p class="gen-note">自動生成 · 元: <code>.claude/skills/*/SKILL.md</code>・<code>.claude/agents/*.md</code> の frontmatter</p>
 </div>
@@ -395,6 +402,43 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「エージェントとモデル」節</p>
 </div>
 <!-- /gen:claude-md -->
+
+<h3 id="ai-improve">使いながら直す仕組み</h3>
+<p>skills やサブエージェントは、使って困ったところを直すことで良くなっていきます。困ったことは作業中にメモしておき、作業の区切りで Claude が改善案を出します。直すかどうかを決めるのは自分です。</p>
+<ol class="steps">
+<li><p><strong>メモする。</strong> 手順どおりに進まなかったことを、Claude が <code>.claude/improvements.md</code> に 1 行ずつ書きます。</p></li>
+<li><p><strong>区切りで提案する。</strong> 未コミットの変更が無いときに未対応のメモがあると、ターンの終わりに Stop フックが働き、Claude が <code>/retro</code> の手順で改善案を出します（1 セッション 1 回まで）。自分から <code>/retro</code> と頼むこともできます。</p></li>
+<li><p><strong>選んで直す。</strong> 適用する案を番号で選ぶと、その分だけ直して、メモを「対応済み」に移します。</p></li>
+</ol>
+<!-- gen:claude-md section=改善メモと振り返り -->
+<div class="gen">
+<ul>
+<li>skills・サブエージェントが手順どおりに進まなかったとき（失敗、前提の不足、遠回り、ユーザーからの訂正、モデルの力不足や過剰）は、その場で <code>.claude/improvements.md</code> の「未対応」に 1 行書く。直すのは後でよい</li>
+<li>サブエージェントや fork の skill の報告に「改善メモ」があれば、メイン会話がそれを転記する</li>
+<li>作業の区切り（未コミットの変更が無い）で未対応のメモがあると、Stop フック（<code>.claude/hooks/retro-nudge.py</code>）が <code>/retro</code> での改善提案を促す。1 セッション 1 回まで。止めたいときは環境変数 <code>SOSHO_RETRO_NUDGE=0</code></li>
+<li>改善案を適用するのは、ユーザーが承認したものだけ</li>
+</ul>
+<p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「改善メモと振り返り」節</p>
+</div>
+<!-- /gen:claude-md -->
+
+<h4 id="ai-improve-log">いまの改善メモ</h4>
+<!-- gen:improvements -->
+<div class="gen">
+<p>未対応 <strong>0</strong> 件 ／ 対応済み 2 件</p>
+<details>
+<summary>最近の対応済み（2 件）</summary>
+<ul>
+<li>2026-10-11 zmk-researcher: 試験で、検索ツール（Grep / Glob）が無い環境のため Read だけでパスを推測して調べ、約 23 万トークン・9 分かかった。`.zmk-ref/` の構成も分からなかった → Bash の grep / find を読み取り専用で使えるようにし、`.zmk-ref/` の地図と「該当箇所だけを読む」探し方を定義に足した（直したあとの本番では約 3.2 万トークン・32 秒）</li>
+<li>2026-10-11 zmk-researcher: 「メモリに記録する」と報告しながら、書く前に答えを返して作業を終えていた（メモリは空のまま）。また、この機体では使っていない overlay を例に挙げた → メモリへの記録を「答えを返す前に」行う順番を明記し、例は「この機体」を前提にするよう定義に足した（再試験でメモリに記録されることを確認）</li>
+</ul>
+</details>
+<p class="gen-note">自動生成 · 元: <code>.claude/improvements.md</code></p>
+</div>
+<!-- /gen:improvements -->
+
+<h3 id="ai-ref">ZMK の調査用コピー</h3>
+<p>調査役の <code>zmk-researcher</code> は、記憶や Web ではなく、このリポジトリが使っている版の ZMK のソースと資料を読んで答えます。そのためのコピーが <code>.zmk-ref/</code>（git 管理外）にあります。<code>./scripts/build-local.sh --ref</code> で作り直せ、<code>--update</code> で版を上げたときは自動で作り直されます。どの版を写したかは <code>.zmk-ref/VERSIONS.txt</code> にあります。</p>
 </section>
 </main>
 </div>

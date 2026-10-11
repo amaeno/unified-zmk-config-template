@@ -114,6 +114,9 @@
 <span class="badge warn">未修正</span>
 <!-- /gen:issue-status --></p>
 <p>ZMK Studio の有効化が、<code>build.yaml</code> の <code>cmake-args</code> と右の <code>*.conf</code> の両方に書いてあります。どちらか一方で足ります。</p>
+<aside class="callout warn">
+<p><strong>直すときも、どちらか一方は必ず残します。</strong> Studio を外すと、予約レイヤー（<code>scroll</code>・<code>extra2</code>）がレイヤーとして数えられなくなり、それを呼び出すキー（<code>&amp;mo 4</code> など）が効かなくなります。Studio の機能（<code>CONFIG_ZMK_STUDIO_RPC</code>）が有効なときだけ <code>status = "reserved"</code> のレイヤーも数えるためです（ZMK のソースの <code>src/studio/Kconfig</code> と <code>include/zmk/keymap.h</code> で確認）。</p>
+</aside>
 </section>
 
 <section>

@@ -103,6 +103,32 @@ def gen_scripts(page: Page, args: dict[str, str]) -> str:
     return table(["ファイル", "内容"], rows, "<code>scripts/</code> の各ファイル冒頭")
 
 
+@generator("improvements")
+def gen_improvements(page: Page, args: dict[str, str]) -> str:
+    log = REPO / ".claude" / "improvements.md"
+    text = log.read_text("utf-8") if log.exists() else ""
+
+    def section(title: str) -> list[str]:
+        m = re.search(r"^## %s[ \t]*\n(.*?)(?=^## |\Z)" % re.escape(title), text, re.S | re.M)
+        return [l[2:].strip() for l in (m.group(1) if m else "").splitlines() if l.startswith("- ")]
+
+    pending, done = section("未対応"), section("対応済み")
+    out = ['<div class="gen">']
+    out.append(
+        "<p>未対応 <strong>%d</strong> 件 ／ 対応済み %d 件</p>" % (len(pending), len(done))
+    )
+    if pending:
+        out.append("<ul>\n%s\n</ul>" % "\n".join("<li>%s</li>" % esc(p) for p in pending))
+    if done:
+        recent = done[-5:]
+        out.append(
+            "<details>\n<summary>最近の対応済み（%d 件）</summary>\n<ul>\n%s\n</ul>\n</details>"
+            % (len(recent), "\n".join("<li>%s</li>" % esc(d) for d in recent))
+        )
+    out += [source_note("<code>.claude/improvements.md</code>"), "</div>"]
+    return "\n".join(out)
+
+
 @generator("ai-tools")
 def gen_ai_tools(page: Page, args: dict[str, str]) -> str:
     # 説明文が長いので表ではなくカード状の一覧にする（狭い画面で列が潰れるため）

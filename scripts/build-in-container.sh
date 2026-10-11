@@ -17,6 +17,7 @@ PRISTINE=0
 DO_UPDATE=0
 BUILD_ALL=0
 LIST_ONLY=0
+REF_ONLY=0
 TARGETS=()
 
 while [ $# -gt 0 ]; do
@@ -25,8 +26,9 @@ while [ $# -gt 0 ]; do
     --update)      DO_UPDATE=1 ;;
     --all)         BUILD_ALL=1 ;;
     --list)        LIST_ONLY=1 ;;
+    --ref)         REF_ONLY=1 ;;
     --shell)       exec bash ;;
-    -h|--help)     sed -n '2,15p' "$REPO/scripts/build-local.sh"; exit 0 ;;
+    -h|--help)     sed -n '2,16p' "$REPO/scripts/build-local.sh"; exit 0 ;;
     -*)            red "不明なオプション: $1"; exit 2 ;;
     *)             TARGETS+=("$1") ;;
   esac
@@ -71,6 +73,45 @@ if [ "$DO_UPDATE" = 1 ] || [ ! -d "$WS/zephyr" ] || [ ! -d "$WS/zmk" ]; then
 fi
 # --rm で /root が毎回消えるので、Zephyr の CMake パッケージ登録をやり直す。1 秒未満。
 west zephyr-export >/dev/null
+
+# ------------------------------------------------------------- 調査用のコピー
+# ワークスペースは名前付きボリュームの中にあり、ホストからは読めない。
+# AI の調査役（.claude/agents/zmk-researcher.md）が Read/Grep で読めるよう、
+# 調べることの多い部分だけを .zmk-ref/（git 管理外）に写す。.git は写さない。
+sync_ref() {
+  local dst="$REPO/.zmk-ref"
+  blue "ZMK のソースと資料を .zmk-ref/ に写す（調査用）"
+  rm -rf "$dst"
+  mkdir -p "$dst"
+  tar -C "$WS" --exclude=.git -cf - \
+      zmk/app zmk/docs/docs zmk-rgbled-widget zmk-pmw3610-driver modules/zmk_encoder \
+      zephyr/boards/seeed/xiao_ble \
+    | tar -C "$dst" -xf -
+  # 階層を浅くして、パスを短くする
+  mv "$dst/zmk/app" "$dst/zmk-app"
+  mv "$dst/zmk/docs/docs" "$dst/zmk-docs"
+  mv "$dst/modules/zmk_encoder" "$dst/zmk_encoder"
+  mv "$dst/zephyr/boards/seeed/xiao_ble" "$dst/zephyr-xiao_ble"
+  rm -rf "$dst/zmk" "$dst/modules" "$dst/zephyr"
+  # マニフェスト（config/）はコンテナ内では git リポジトリではなく sha を取れないので外す
+  local -a projects
+  read -r -a projects <<<"$(west list -f '{name}' | grep -v '^manifest$' | tr '\n' ' ')"
+  {
+    echo "# .zmk-ref/ の元になった各プロジェクトの版（scripts/build-local.sh --ref が作る）"
+    echo "# 名前 revision コミット"
+    west list -f "{name} {revision} {sha}" "${projects[@]}"
+  } > "$dst/VERSIONS.txt"
+  green ".zmk-ref/ を更新しました"
+}
+
+if [ "$REF_ONLY" = 1 ]; then
+  sync_ref
+  exit 0
+fi
+# 版を動かしたら、調査用のコピーも同じ版にそろえる
+if [ "$DO_UPDATE" = 1 ]; then
+  sync_ref
+fi
 
 # ------------------------------------------------------------- ビルド
 build_one() {
