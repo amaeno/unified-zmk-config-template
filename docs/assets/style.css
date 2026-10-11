@@ -1,0 +1,666 @@
+/* 双掌 (sosho) 資料の共通スタイル。
+   外部フォントやスクリプトに依存しない（file:// で開いても同じ見た目になる）。
+   色はすべて :root のトークンで持ち、ダークモードはトークンだけを差し替える。 */
+
+:root {
+  color-scheme: light;
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --surface-2: #eeece7;
+  --text: #1c2024;
+  --muted: #5a626e;
+  --border: #dcd8cf;
+  --accent: #245f9e;
+  --accent-soft: #e4edf7;
+  --note-fg: #1d5592;
+  --note-bg: #ebf3fb;
+  --note-bd: #b8d0ea;
+  --tip-fg: #1f6a3d;
+  --tip-bg: #eaf5ee;
+  --tip-bd: #b3d9c1;
+  --warn-fg: #8a4a00;
+  --warn-bg: #fcf2df;
+  --warn-bd: #ebcf98;
+  --code-bg: #efede8;
+  --kbd-bd: #c9c3b8;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono", monospace;
+  --radius: 8px;
+  --nav-w: 15.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #141619;
+    --surface: #1b1e22;
+    --surface-2: #23272c;
+    --text: #e3e5e8;
+    --muted: #9ea6b1;
+    --border: #343940;
+    --accent: #7cb0e9;
+    --accent-soft: #1d2b3b;
+    --note-fg: #9cc5f1;
+    --note-bg: #182433;
+    --note-bd: #2b4560;
+    --tip-fg: #8ed1a7;
+    --tip-bg: #15281d;
+    --tip-bd: #284a35;
+    --warn-fg: #efc27c;
+    --warn-bg: #2a2213;
+    --warn-bd: #564421;
+    --code-bg: #23272c;
+    --kbd-bd: #4a5058;
+  }
+}
+
+/* ------------------------------------------------------------ 基本 */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 1rem;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-feature-settings: "palt";
+  word-break: auto-phrase;
+}
+
+h2 {
+  margin: 3.25rem 0 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.45rem;
+  line-height: 1.4;
+}
+
+h3 {
+  margin: 2.25rem 0 0.75rem;
+  font-size: 1.12rem;
+  line-height: 1.5;
+}
+
+h4 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+p,
+ul,
+ol,
+dl {
+  margin: 0 0 1rem;
+}
+
+ul,
+ol {
+  padding-left: 1.5rem;
+}
+
+li + li {
+  margin-top: 0.3rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* ------------------------------------------------------------ 骨組み */
+
+.layout {
+  display: grid;
+  grid-template-columns: var(--nav-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 1.75rem 1rem 2rem;
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.site-nav .brand {
+  display: block;
+  padding: 0 0.6rem 1.25rem;
+  color: var(--text);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.site-nav .brand span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.site-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav li + li {
+  margin-top: 2px;
+}
+
+.site-nav a,
+.site-nav .nav-todo {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  background: var(--surface);
+}
+
+.site-nav a[aria-current="page"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.site-nav .nav-todo {
+  color: var(--muted);
+}
+
+small {
+  margin-left: 0.4em;
+  padding: 0 0.45em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+main {
+  width: 100%;
+  max-width: 54rem;
+  padding: 2.75rem clamp(1rem, 4vw, 3.5rem) 6rem;
+}
+
+.page-head {
+  margin-bottom: 2rem;
+}
+
+.page-head h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
+}
+
+.lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+/* ------------------------------------------------------------ ページ内目次 */
+
+.toc {
+  margin: 0 0 2.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
+
+.toc p {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.toc ol {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+@media (min-width: 64rem) {
+  .toc ol {
+    columns: 2;
+    column-gap: 2.5rem;
+  }
+
+  .toc li {
+    break-inside: avoid;
+  }
+}
+
+/* ------------------------------------------------------------ コード */
+
+code,
+kbd,
+pre {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+}
+
+code {
+  padding: 0.1em 0.38em;
+  background: var(--code-bg);
+  border-radius: 4px;
+  font-size: 0.86em;
+  overflow-wrap: anywhere;
+}
+
+pre {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1.1rem;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+  overflow-wrap: normal;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 0.4em;
+  background: var(--surface);
+  border: 1px solid var(--kbd-bd);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-size: 0.82em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------ 表 */
+
+.table-wrap {
+  margin: 0 0 1.25rem;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+th,
+td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  word-break: auto-phrase; /* 短い日本語を文節の途中で折らない */
+  min-width: 5.5em; /* 狭い画面で列が 1〜2 文字幅に潰れないよう、収まらなければ横スクロールさせる */
+}
+
+th {
+  background: var(--surface-2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+td code {
+  overflow-wrap: normal; /* 空白でだけ折り返し、パスやオプションの途中では折らない */
+}
+
+/* ------------------------------------------------------------ 説明の長い一覧（表より読みやすいもの） */
+
+.item-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 0.35rem;
+  padding: 0;
+  list-style: none;
+}
+
+.item-list > li {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.item-list .item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.3rem;
+}
+
+.item-list .item-head code {
+  font-weight: 600;
+}
+
+.item-list > li > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+/* ------------------------------------------------------------ 自動生成ブロック */
+
+.gen {
+  margin: 0 0 1.5rem;
+}
+
+.gen .table-wrap {
+  margin-bottom: 0.35rem;
+}
+
+.gen-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------ 注記・ラベル */
+
+.callout {
+  margin: 1.25rem 0;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout.note {
+  background: var(--note-bg);
+  border-color: var(--note-bd);
+  border-left-color: var(--note-fg);
+}
+
+.callout.tip {
+  background: var(--tip-bg);
+  border-color: var(--tip-bd);
+  border-left-color: var(--tip-fg);
+}
+
+.callout.warn {
+  background: var(--warn-bg);
+  border-color: var(--warn-bd);
+  border-left-color: var(--warn-fg);
+}
+
+.callout.note strong:first-child {
+  color: var(--note-fg);
+}
+
+.callout.tip strong:first-child {
+  color: var(--tip-fg);
+}
+
+.callout.warn strong:first-child {
+  color: var(--warn-fg);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0 0.55em;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.7;
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+
+.badge.ok {
+  background: var(--tip-bg);
+  border-color: var(--tip-bd);
+  color: var(--tip-fg);
+}
+
+.badge.build,
+.badge.warn {
+  background: var(--warn-bg);
+  border-color: var(--warn-bd);
+  color: var(--warn-fg);
+}
+
+/* ------------------------------------------------------------ 手順 */
+
+ol.steps {
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+ol.steps > li {
+  position: relative;
+  margin: 0 0 1.1rem;
+  padding-left: 2.6rem;
+  counter-increment: step;
+}
+
+ol.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  top: 0.2rem;
+  left: 0;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  background: var(--accent);
+  border-radius: 50%;
+  color: var(--surface);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+ol.steps > li > p {
+  margin-bottom: 0.4rem;
+}
+
+ol.steps > li > :last-child {
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------ トップページ */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.85rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cards li {
+  margin: 0;
+}
+
+.cards a,
+.cards .todo {
+  display: block;
+  height: 100%;
+  padding: 0.95rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: inherit;
+  line-height: 1.6;
+  text-decoration: none;
+}
+
+.cards a:hover {
+  border-color: var(--accent);
+}
+
+.cards strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--accent);
+}
+
+.cards span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.cards .todo {
+  background: transparent;
+  border-style: dashed;
+}
+
+.cards .todo strong {
+  color: var(--muted);
+}
+
+dl.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.45rem 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+dl.facts dt {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+dl.facts dd {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------ 狭い画面 */
+
+@media (max-width: 52rem) {
+  .layout {
+    display: block;
+  }
+
+  .site-nav {
+    position: static;
+    height: auto;
+    padding: 0.9rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .site-nav .brand {
+    padding: 0 0 0.5rem;
+  }
+
+  .site-nav .brand span {
+    display: inline;
+    margin-left: 0.6em;
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .site-nav li + li {
+    margin-top: 0;
+  }
+
+  .site-nav a {
+    padding: 0.2rem 0.6rem;
+  }
+
+  .site-nav li:has(.nav-todo) {
+    display: none;
+  }
+
+  main {
+    padding: 1.75rem 1rem 4rem;
+  }
+
+  .page-head h1 {
+    font-size: 1.6rem;
+  }
+
+  dl.facts {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  dl.facts dd + dt {
+    margin-top: 0.6rem;
+  }
+}
+
+@media print {
+  .site-nav,
+  .toc {
+    display: none;
+  }
+
+  .layout {
+    display: block;
+  }
+}

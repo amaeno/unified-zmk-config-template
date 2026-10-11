@@ -1,26 +1,34 @@
 # 双掌 (sosho) ZMK ファームウェア設定
 
-ELEKIT 製分割キーボード **双掌 (sosho)** の ZMK 設定リポジトリ。
-Seeed Xiao nRF52840 を左右に載せた 44 キー分割キーボードで、
+ELEKIT 製分割キーボード **双掌 (sosho)** の ZMK 設定リポジトリ。**自分専用のカスタマイズ用**で、
+本家 upstream の追従・push・PR は行わない。
+Seeed XIAO nRF52840 を左右に載せた 44 キー分割キーボードで、
 各半分にロータリーエンコーダ 1 個と、ポインティングデバイス（トラックパッドまたはトラックボール）を持つ。
 
-このリポジトリは **自分専用のカスタマイズ用**。本家 upstream の追従は行わない。
+---
+
+## 資料（事実の正本）
+
+人間向けの資料は `docs/` の HTML で、**事実の正本はそちら**。このファイルは AI 向けの入口とルールだけを持つ。
+HTML は長いので、目的の節を `id="…"` で Grep してから、その範囲だけを Read する。
+
+| 知りたいこと | 場所 |
+|---|---|
+| ビルドが要るかの判断、開発の流れ、git の運用 | `docs/workflow.html` の `#decide` `#loop` `#git` |
+| ビルドのコマンド・ターゲット・仕組み、書き込み手順 | `docs/workflow.html` の `#build` `#flash` `#reset` |
+| うまくいかないとき、ビルドスクリプトの制約 | `docs/workflow.html` の `#trouble` `#internals` |
+| 資料の仕組みと決まりごと | `docs/workflow.html` の `#docs` |
 
 ---
 
 ## まず: ビルドが必要か判断する
 
-R 側（セントラル）は **ZMK Studio が有効** (`CONFIG_ZMK_STUDIO=y`, `CONFIG_ZMK_STUDIO_LOCKING=n`)。
-単純なキー割り当ての変更なら [zmk.studio](https://zmk.studio) に USB 接続するだけで済み、
-**ビルドも書き込みも不要**。
-
-| やりたいこと | 手段 |
-|---|---|
-| キー割り当てを変える / レイヤーを使い分ける | **ZMK Studio**（ビルド不要） |
-| コンボ・エンコーダ挙動・新しい behavior・Kconfig・ポインタ感度 | ファイルを編集 → ビルド |
+R 側（セントラル）は **ZMK Studio が有効**。単純なキー割り当ての変更なら [zmk.studio](https://zmk.studio) に
+USB 接続するだけで済み、**ビルドも書き込みも不要**。コンボ・エンコーダ挙動・behavior・Kconfig・
+ポインタ感度はファイルを編集してビルドする。詳細は `docs/workflow.html#decide`。
 
 キーマップ末尾の `scroll` / `extra2` (`status = "reserved"`) は、Studio でレイヤーを増やせるようにするための
-予約枠。Studio で使うぶんには再ビルドしなくてよい。
+予約枠。一度 Studio でキーマップを変えると、`.keymap` を書き換えても「Restore Stock Settings」するまで反映されない。
 
 ---
 
@@ -96,65 +104,80 @@ boards/shields/sosho/
   sosho_{L,R}_{trackpad,trackball}.conf      Kconfig（BLE/LED/電池/Studio 等）
   sosho.zmk.yml                  シールドのメタ情報
   sosho.layout.json              旧形式のレイアウト情報（どのビルドからも参照されていない）
+docs/                            人間向けの資料（HTML）。事実の正本
+  assets/style.css               全ページ共通のスタイル
 src/boot_delay_hack.c            起動時 1 秒 busy-wait（下記の注意を参照）
 zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
-scripts/                         ローカルビルドと lint（下記）
-memo.md                          verB2 のリリースノート
+scripts/                         ローカルビルド・lint・資料生成（docs/workflow.html#scripts）
+memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）
 ```
 
-### ビルドターゲット
-
-board は全て `xiao_ble/nrf52840/zmk`。
-
-| artifact | shield | 役割 |
-|---|---|---|
-| `sosho_R_trackpad` | `sosho_R_trackpad rgbled_adapter` | 右 = **セントラル**、Cirque トラックパッド、Studio 有効 |
-| `sosho_R_trackball` | `sosho_R_trackball rgbled_adapter` | 右 = セントラル、PMW3610 トラックボール、Studio 有効 |
-| `sosho_L_trackpad` | `sosho_L_trackpad rgbled_adapter` | 左 = ペリフェラル、Cirque |
-| `sosho_L_trackball` | `sosho_L_trackball rgbled_adapter` | 左 = ペリフェラル、PMW3610 |
-| `settings_reset` | `settings_reset` | ペアリング情報のリセット（ZMK 標準） |
-
-**右がセントラル**（PC と繋がる側。Studio もここ）、**左がペリフェラル**。
-左右で異なる uf2 を書き込む。トラックパッド版とトラックボール版は排他。
+右がセントラル（PC と繋がる側。Studio もここ）、左がペリフェラル。左右で異なる uf2 を書き込む。
+トラックパッド版とトラックボール版は排他。ターゲットの一覧は `docs/workflow.html#targets`。
 
 ### 外部モジュール (`config/west.yml`)
 
-| モジュール | 用途 |
-|---|---|
-| `zmkfirmware/zmk` | ZMK 本体 |
-| `caksoylar/zmk-rgbled-widget` | RGB LED による状態表示（電池残量・接続状態） |
-| `badjeff/zmk-pmw3610-driver` | トラックボール (PMW3610) ドライバ |
-| `elekit-official/zmk_encoder` | `zmk,behavior-encoder-mouse-scroll`。エンコーダのスクロール |
-
-`zmk_encoder` は verB2 で導入されたもの。従来の `zmk,behavior-sensor-rotate-var` + `&msc` は
-1 スクロールにつき press と release の 2 イベントを発行し、負荷時に release が落ちて
-スクロールが固まることがあった。この モジュールは 1 イベントで完結する。詳細は `memo.md`。
+一覧は `docs/workflow.html#modules`。`zmk_encoder` は verB2 で導入されたもの。従来の
+`zmk,behavior-sensor-rotate-var` + `&msc` は 1 スクロールにつき press と release の 2 イベントを発行し、
+負荷時に release が落ちてスクロールが固まることがあった。このモジュールは 1 イベントで完結する。詳細は `memo.md`。
 
 ---
 
 ## 開発ループ
 
 ```bash
-# 1. 編集前に確認したければ
-python3 scripts/lint-keymap.py
-
-# 2. 編集後、まず lint（数十 ms）
-python3 scripts/lint-keymap.py
-
-# 3. ビルド（普段は 1 ターゲットだけ。キーマップ変更なら約 14 秒）
-./scripts/build-local.sh sosho_R_trackpad
-
-# 4. firmware/sosho_R_trackpad.uf2 を書き込む
+python3 scripts/lint-keymap.py              # キーマップの検査（数十 ms）。編集の前後に
+python3 scripts/gen-docs.py                 # 資料の生成ブロックを更新（--check で確認だけ）
+./scripts/build-local.sh sosho_R_trackpad   # ビルド（キーマップ変更なら約 14 秒）
 ```
 
-初回のみ Docker イメージと west ワークスペースの取得で約 6 分かかる。以降は再利用される。
+成果物は `firmware/<ターゲット>.uf2`。書き込みはユーザーが行う（`docs/workflow.html#flash`）。
+ビルドは `/zmk-build` skill に任せると、ビルドログを読まずに結果の要約だけが返る。
 
 `scripts/lint-keymap.py` はツールチェーン不要でホストの python3 だけで動く。
 レイヤーごとのバインド数、括弧の対応、存在しないレイヤーへの参照、コンボの位置の範囲、
 `sensor-bindings` の引数の数を検査する。期待キー数は 44 を決め打ちせず、
 物理レイアウトとマトリクス変換から導出して 3 者の食い違いも検出する。
 
-ビルドの詳細と書き込み手順は `.claude/skills/zmk-build/SKILL.md` を参照。
+---
+
+## リポジトリ運用
+
+詳細は `docs/workflow.html#git`。AI が守ること:
+
+- 作業はトピックブランチ（`feature/` `fix/` `build/` `docs/`）で行う。`main` は実機に書き込んで常用している状態
+- `main` への取り込み（`git merge --no-ff`）とタグ付け（`fw-YYYY-MM-DD`）は、ユーザーが実機で確かめたと言ってから行う
+- `git push` はしない（`.claude/settings.json` で deny 済み。push はユーザーが手動で行う）
+- リモートは `origin`（ユーザーのフォーク。バックアップ用）だけ。upstream は登録しない。PR は作らない
+- ビルドはローカル（Docker）だけで行う。GitHub Actions は使わない
+
+---
+
+## 資料の規約
+
+- 資料は HTML（`docs/*.html`、共通スタイルは `docs/assets/style.css`）。ユーザーの読みやすさを最優先する
+- `<!-- gen:… -->` から `<!-- /gen:… -->` の中は `scripts/gen-docs.py` が上書きする。手で編集しない
+- 繰り返し変わる事実は手書きせず、`scripts/gen-docs.py` に生成器を足す
+- 同じ事実を複数の場所に書かない。このファイルと skills は資料の節へのリンクで済ませる
+- コードや設定を変えたら `python3 scripts/gen-docs.py` を実行し、生成結果も同じコミットに含める。手書き部分が古くなったら合わせて直す
+- 新しいページは既存のページをひな形にし、`scripts/gen-docs.py` の `PAGES` に登録する
+- 本家由来の資料（`memo.md`）はオリジナルのまま残す
+
+---
+
+## エージェントとモデル
+
+- サブエージェントの**同時起動は最大 5 本**、1 つの依頼で起動する延べ数は**最大 10 本**。超えそうなときは先にユーザーに確認する
+- Workflow（多数のエージェントを束ねる仕組み）は、ユーザーが明示的に頼んだときだけ使う
+- 場所の分かっている数ファイルを読むだけなら、エージェントを使わず直接読む
+- 長い出力が出る作業（ビルドログなど）は、`context: fork` の skill かサブエージェントに任せ、メイン会話には要約だけを戻す
+- skills とサブエージェントは frontmatter の `model` でモデルを指定する。低いモデルに任せるものほど、前提・手順・完了条件・やってはいけないことを本文に明記する
+
+| モデル | 任せる作業 |
+|---|---|
+| `haiku` | 手順が決まっている作業。ビルドの実行と結果の要約、生成スクリプトの実行、定型の確認 |
+| `sonnet` | 読んで判断する作業。ZMK のソースやドキュメントの調査、設定のレビュー、資料の執筆 |
+| `opus`（メイン会話） | 設計判断、新しい機能の設計、複数ファイルにまたがる変更 |
 
 ---
 
