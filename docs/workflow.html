@@ -233,7 +233,7 @@ git switch main</code></pre>
 <li>ビルドは Docker イメージ <code>zmkfirmware/zmk-build-arm:stable</code> の中で動きます。</li>
 <li>west ワークスペース（ZMK 本体と依存一式）と ccache は、名前付きボリューム <code>sosho-zmk-ws</code> に置きます。初回に取得したものを以降ずっと再利用します。</li>
 <li>ディスク使用量はイメージ 2.2GB とワークスペース 3.2GB です。捨てるときは <code>docker volume rm sosho-zmk-ws</code>。</li>
-<li>ZMK や外部モジュールのバージョンが動くのは <code>--update</code> を実行したときだけです。通常のビルドは同じ版を使い続けます。</li>
+<li>ZMK や外部モジュールの版は、<code>config/west.yml</code> で動作を確かめたコミットに固定しています。<code>--update</code> しても固定した版を取り直すだけで、版は動きません。</li>
 </ul>
 
 <h3 id="modules">取り込んでいるモジュール</h3>
@@ -243,17 +243,27 @@ git switch main</code></pre>
 <table>
 <thead><tr><th>プロジェクト</th><th>revision</th><th>置き場所</th><th>用途</th></tr></thead>
 <tbody>
-<tr><td><a href="https://github.com/zmkfirmware/zmk">zmk</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>zmk</code></td><td>ZMK 本体</td></tr>
-<tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>zmk-rgbled-widget</code></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
-<tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>zmk-pmw3610-driver</code></td><td>トラックボール (PMW3610) のドライバ</td></tr>
-<tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><code>main</code> <span class="badge warn">ブランチ追従</span></td><td><code>modules/zmk_encoder</code></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
+<tr><td><a href="https://github.com/zmkfirmware/zmk">zmk</a></td><td><code>4dd95d7</code> <span class="badge ok">固定</span></td><td><code>zmk</code></td><td>ZMK 本体</td></tr>
+<tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><code>e6b4677</code> <span class="badge ok">固定</span></td><td><code>zmk-rgbled-widget</code></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
+<tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><code>44b4a76</code> <span class="badge ok">固定</span></td><td><code>zmk-pmw3610-driver</code></td><td>トラックボール (PMW3610) のドライバ</td></tr>
+<tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><code>1a34a55</code> <span class="badge ok">固定</span></td><td><code>modules/zmk_encoder</code></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
 </tbody>
 </table>
 </div>
 <p class="gen-note">自動生成 · 元: <code>config/west.yml</code></p>
 </div>
-<aside class="callout warn"><p><strong>バージョンが固定されていません。</strong><code>zmk</code>、<code>zmk-rgbled-widget</code>、<code>zmk-pmw3610-driver</code>、<code>zmk_encoder</code> は revision がブランチ名なので、<code>./scripts/build-local.sh --update</code> を実行するたびにその時点の最新を取り込みます（通常のビルドでは動きません）。安定させたいならコミットかタグに固定します。</p></aside>
 <!-- /gen:west-projects -->
+
+<h3 id="zmk-update">ZMK の版を上げる</h3>
+<p>ZMK 本体や外部モジュールの修正を取り込みたいときの手順です。版を上げるとビルドが壊れたり挙動が変わったりすることがあるので、専用のブランチで試し、実機で確かめてから固定し直します。左右は必ず同じ版にそろえます。</p>
+<ol class="steps">
+<li><p><strong>ブランチを切る。</strong> <code>git switch -c build/update-zmk main</code></p></li>
+<li><p><strong>上げたいものの revision を書き換える。</strong> <code>config/west.yml</code> の該当プロジェクトを <code>main</code>（最新）か、タグ・新しいコミットにします。</p></li>
+<li><p><strong>取得する。</strong> <code>./scripts/build-local.sh --update</code>。調査用コピー（<code>.zmk-ref/</code>）も新しい版で作り直されます。</p></li>
+<li><p><strong>何が変わったかを見る。</strong> 新旧の <code>.zmk-ref/VERSIONS.txt</code> を比べ、ZMK の変更履歴を読みます（AI に頼めば要点をまとめます）。</p></li>
+<li><p><strong>ビルドして、左右とも書き込んで確かめる。</strong> 左右のつながりがおかしくなったら <a href="#reset">接続がおかしいとき</a> の手順で直します。</p></li>
+<li><p><strong>固定し直す。</strong> 問題が無ければ、<code>.zmk-ref/VERSIONS.txt</code> に記録されたコミットで <code>config/west.yml</code> の revision を固定し、コミットして <code>main</code> に取り込み、タグを打ちます。</p></li>
+</ol>
 </section>
 
 <section>
@@ -322,7 +332,7 @@ git switch main</code></pre>
 <tr><td><code>ninja: build stopped</code>、またはビルドが唐突に終わる</td><td>Docker のメモリ不足。Docker Desktop → Settings → Resources → Memory を 8GB に上げる（現状 4.1GB）。上げたくなければ <code>west build</code> に <code>-j4</code> を足して並列度を下げる</td></tr>
 <tr><td><code>west init</code> が「already initialized」</td><td>ワークスペースが壊れている。<code>docker volume rm sosho-zmk-ws</code> で作り直す</td></tr>
 <tr><td><code>config/west.yml</code> を変えたのに反映されない</td><td><code>./scripts/build-local.sh --update</code></td></tr>
-<tr><td>何も変えていないのにビルドが壊れた</td><td><code>config/west.yml</code> はすべてブランチ追従。<code>--update</code> を実行したときだけ版が動くので、直前に <code>--update</code> したなら upstream の破壊的変更を疑う</td></tr>
+<tr><td>ZMK の版を上げたら、ビルドが壊れた・動きが変わった</td><td>上げた版での変更（名前の変わった設定や behavior）を疑う。新旧の <code>.zmk-ref/VERSIONS.txt</code> と ZMK の変更履歴を比べる。戻すなら <code>config/west.yml</code> を前のコミットに戻して <code>--update</code>（<a href="#zmk-update">ZMK の版を上げる</a>）</td></tr>
 <tr><td><code>Missing ZMK Compat</code></td><td>board 名から <code>/zmk</code> が落ちている。<code>xiao_ble/nrf52840/zmk</code> が正しい</td></tr>
 <tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code> の <code>board_root: .</code> を有効にしている</td></tr>
 <tr><td>書き込むと「デバイスが取り外されました」と出る</td><td>正常。書き込みが終わるとマイコンが再起動し、USB ドライブが消えるため。Finder のコピーで失敗するときは <code>cp -X</code> で書き込む（<a href="#flash">書き込み</a>）</td></tr>
@@ -460,7 +470,11 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>0</strong> 件 ／ 対応済み 7 件</p>
+<p>未対応 <strong>2</strong> 件 ／ 対応済み 7 件</p>
+<ul>
+<li>2026-10-12 zmk-build: 報告の「資料: 最新」は gen-docs.py --check（生成ブロックだけ）の結果で、手書きの説明の古さは分からない。最新と読み違えやすい（haiku の改善メモ）→ 報告の欄を「資料（生成部分）」とし、手書き部分は対象外と明記するとよい</li>
+<li>2026-10-12 CLAUDE.md（改善メモ）: 改善メモを足すと、資料の改善メモ一覧（生成部分）が古くなり gen-docs.py --check が落ちる。レビュー役は「対象外」と伝えたファイルが原因と気づくまで手間取った → 改善メモを書いたら gen-docs.py も実行する、と決まりに足すとよい</li>
+</ul>
 <details>
 <summary>最近の対応済み（5 件）</summary>
 <ul>

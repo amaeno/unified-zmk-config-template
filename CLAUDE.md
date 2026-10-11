@@ -60,7 +60,7 @@ HTML は長いので、目的の節を `id="…"` で Grep してから、その
 ```
 build.yaml                       ビルド対象 5 種の定義。全ての入口
 config/
-  west.yml                       ZMK 本体 + 外部モジュール 3 つ
+  west.yml                       ZMK 本体 + 外部モジュール 3 つ（動作を確かめたコミットで固定）
   sosho.keymap                   キーマップ・コンボ・エンコーダ挙動（普段触るのはここ）
 boards/shields/sosho/
   Kconfig.shield                 4 つのシールド名の定義

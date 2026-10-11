@@ -16,6 +16,7 @@ from .common import (
     WEST_YML,
     Page,
     SourceMissing,
+    badge,
     code,
     esc,
     generator,
@@ -63,7 +64,7 @@ def gen_zmk_versions(page: Page, args: dict[str, str]) -> str:
         rows.append(
             [
                 '<a href="%s">%s</a>' % (esc(url), esc(name)),
-                code(rev),
+                badge("コミットで固定", "ok") if rev == sha else code(rev),
                 '<a href="%s/commit/%s">%s</a>' % (esc(url), esc(sha), code(sha[:7])),
                 note,
             ]

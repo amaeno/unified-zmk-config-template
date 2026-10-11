@@ -95,10 +95,11 @@ def gen_west_projects(page: Page, args: dict[str, str]) -> str:
         pinned = re.fullmatch(r"[0-9a-f]{7,40}|v\d[\w.\-]*", rev) is not None
         if not pinned:
             floating.append(name)
+        is_sha = re.fullmatch(r"[0-9a-f]{40}", rev) is not None
         rows.append(
             [
                 '<a href="%s">%s</a>' % (esc(url), esc(name)),
-                code(rev) + ("" if pinned else " " + badge("ブランチ追従", "warn")),
+                (code(rev[:7]) if is_sha else code(rev)) + " " + (badge("固定", "ok") if pinned else badge("ブランチ追従", "warn")),
                 code(p.get("path", name)),
                 PROJECT_NOTES.get(name, "—"),
             ]
