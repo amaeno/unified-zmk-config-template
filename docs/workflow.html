@@ -482,7 +482,11 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>0</strong> 件 ／ 対応済み 13 件</p>
+<p>未対応 <strong>2</strong> 件 ／ 対応済み 13 件</p>
+<ul>
+<li>2026-10-12 zmk-researcher: Zephyr 本体のソースが .zmk-ref/ に無く、BLE の接続パラメータの自動更新の既定値などが推定どまりになった（並行した 1 本は Docker ボリューム sosho-zmk-ws の /ws/zephyr を自力で見つけて読めた。場所はエージェントのメモリに記録済み）→ 定義に Zephyr のある場所と読み取り用コマンドを書くか、build-local.sh --ref で Zephyr の subsys/bluetooth・drivers/input・dts/bindings/input も写すとよい（2 本の改善メモ）</li>
+<li>2026-10-12 config-reviewer: BLE の接続パラメータの変更で、Apple の規定を記憶で判断した（「上限 ≧ 下限 × 2」。一次資料の QA1931 とは違った）。メイン会話も最初は記憶で 15 ms 固定を選び、QA1931 の「15 ms 固定は 30 ms に広げられることがある」を見落としていた → 外部の規定（Apple・Bluetooth の仕様）が絡む変更は、一次資料を確かめるか「要確認」にする観点を足すとよい（レビュー役の改善メモ）</li>
+</ul>
 <details>
 <summary>最近の対応済み（5 件）</summary>
 <ul>

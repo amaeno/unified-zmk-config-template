@@ -42,6 +42,7 @@
 <li><a href="#scroll">スクロール</a></li>
 <li><a href="#pointer">ポインタ</a></li>
 <li><a href="#encoder">エンコーダ</a></li>
+<li><a href="#bluetooth">Bluetooth の接続</a></li>
 <li><a href="#kconfig">Kconfig</a></li>
 </ol>
 </nav>
@@ -70,7 +71,7 @@
 <code>1x</code>
 <!-- /gen:value --></td><td>トラックパッドの側（この機体は右）</td></tr>
 <tr><td><code>&amp;msc</code>（キーに割り当てたスクロール）の加速</td><td><code>config/sosho.keymap</code> の <code>&amp;msc</code></td><td><a href="#scroll">スクロール</a></td><td>右</td></tr>
-<tr><td>Bluetooth の接続パラメータ</td><td>各 <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
+<tr><td>PC との Bluetooth の接続間隔</td><td>右の <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code>（左の値は使われない）</td><td><a href="#bluetooth">Bluetooth の接続</a></td><td>右</td></tr>
 <tr><td>LED の電池残量の色分け</td><td>各 <code>*.conf</code> の <code>RGBLED_WIDGET_BATTERY_LEVEL_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
 <tr><td>ビルドするターゲット</td><td><code>build.yaml</code></td><td><a href="workflow.html#targets">ターゲット一覧</a></td><td>—</td></tr>
 <tr><td>ZMK・外部モジュールの版</td><td><code>config/west.yml</code></td><td><a href="workflow.html#modules">モジュール一覧</a></td><td>左右とも</td></tr>
@@ -171,6 +172,30 @@
 </section>
 
 <section>
+<h2 id="bluetooth">Bluetooth の接続</h2>
+<p>Bluetooth の接続は 2 本あります。設定が効くのは、右と PC の接続だけです。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>接続</th><th>接続条件を決めるもの</th><th>いまの値</th></tr></thead>
+<tbody>
+<tr><td>右（セントラル）と PC</td><td>右の <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code> を、右が接続後に PC へ要求する。最終的に決めるのは PC</td><td><!-- gen:value of=host-interval -->
+11.25〜15 ms（<code>MIN_INT=9</code> ／ <code>MAX_INT=12</code>）
+<!-- /gen:value --></td></tr>
+<tr><td>左（ペリフェラル）と右</td><td>右が接続するときに決める（ZMK の既定で 7.5 ms・latency 30）。左の <code>BT_PERIPHERAL_PREF_*</code> は使われない</td><td>ZMK の既定のまま</td></tr>
+</tbody>
+</table>
+</div>
+<p>根拠は <a href="zmk-reference.html#facts">ZMK リファレンス › このリポジトリで確かめた仕様</a> にあります。左の conf に残っている「フリーズ対策」の 3 行は本家由来で、効いていません。</p>
+<aside class="callout warn"><p><strong>Mac には Apple の規定に合う値を要求する:</strong> ZMK の既定（7.5〜15 ms）のままだと、Mac で全部の入力が 1 テンポ遅れて見えました（2026-10-12）。そこで右の要求を、Apple の規定（<a href="https://developer.apple.com/library/archive/qa/qa1931/_index.html">QA1931</a>）に合う値（上の表。<code>*_INT</code> の単位は 1.25 ms）に変えています。規定の要点は次のとおりです。</p>
+<ul>
+<li>下限は 15 ms 以上（15 ms の倍数）が原則。ただし HID（キーボードやマウス）なら 11.25 ms まで受け付けることがある</li>
+<li>上限は「下限 + 15 ms」以上。ただし上限 15 ms は認められる</li>
+<li>15 ms 固定（<code>12</code> / <code>12</code>）を要求すると、30 ms に広げる Apple の機器がある</li>
+</ul></aside>
+<p>Mac で反応が遅いと感じたら、まず右を USB ケーブルでつないで比べます。USB で遅れが消えるなら、原因は右と PC の Bluetooth の接続です。</p>
+</section>
+
+<section>
 <h2 id="kconfig">Kconfig</h2>
 <p>各シールドの <code>*.conf</code> に書いてある設定の一覧です。「この機体」の 2 つを左に並べ、使っていない 2 つは後ろにあります。左端に色の線がある行は、ファイルによって値が違うか、書いていないファイルがある設定です。</p>
 <!-- gen:kconfig-matrix -->
@@ -183,10 +208,10 @@
 <tr><td><code>ZMK_KEYBOARD_NAME</code><span class="note">キーボードの名前（Bluetooth の一覧に出る）</span></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td></tr>
 <tr class="group"><td colspan="5"><strong>Bluetooth</strong></td></tr>
 <tr><td><code>ZMK_BLE</code><span class="note">Bluetooth を使う</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">PC との接続間隔の希望の下限。効くのは右だけ（左の値は使われない）。Mac に合う値は「設定項目 › Bluetooth の接続」</span></td><td><code>9</code> <small>11.25 ms</small></td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">PC との接続間隔の希望の上限。効くのは右だけ</span></td><td><code>12</code> <small>15 ms</small></td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる。効くのは右だけ</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code></td></tr>
 <tr><td><code>BT_PERIPHERAL_PREF_TIMEOUT</code><span class="note">切断とみなすまでの時間</span></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">接続間隔の希望の下限。右では PC との接続、左では右との接続に効く</span></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">接続間隔の希望の上限</span></td><td>—</td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small></td></tr>
 <tr class="group"><td colspan="5"><strong>ZMK Studio</strong></td></tr>
 <tr class="diff"><td><code>ZMK_STUDIO</code><span class="note">ZMK Studio を有効にする</span></td><td><code>y</code></td><td>—</td><td><code>y</code></td><td>—</td></tr>
 <tr class="diff"><td><code>ZMK_STUDIO_LOCKING</code><span class="note">Studio の編集ロック（n = ロックしない。いつでも編集できる）</span></td><td><code>n</code></td><td>—</td><td><code>n</code></td><td>—</td></tr>

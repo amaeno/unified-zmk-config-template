@@ -58,11 +58,18 @@
 <ul>
 <li>トラックボールの報告間隔の下限（<code>PMW3610_ALT_REPORT_INTERVAL_MIN</code>）と解像度（<code>cpi</code>）</li>
 <li>トラックボールの軸の入れ替え（<code>x-input-code</code> / <code>y-input-code</code>）と向きの反転</li>
-<li>Bluetooth の接続間隔（右は PC との接続、左は右との接続）</li>
+<li>Bluetooth の接続間隔（右と PC の接続。左右間の接続は右が 7.5 ms に決めていて、左の設定は使われない）</li>
 <li>トラックパッドの感度（<code>sensitivity</code>。上げると Bluetooth で問題が出るという本家のコメントあり）</li>
 <li>L4 のスクロール: 長押しの判定時間（既定で約 200 ms）と、1 ノッチに要るカウント数（<a href="settings.html#scroll">設定項目 › スクロール</a>）</li>
 </ul>
 <p>2026-10-12 の土台固め（タグ <code>fw-2026-10-12</code> の版）から、左右とも同じ ZMK の版（分割の入力の処理が詰まる不具合の修正 #3110 を含む）を使います。そろえた状態でもっさり感が残るかを確かめてから調べます。</p>
+<p>2026-10-12 の調査で分かったこと:</p>
+<ul>
+<li>ポインタだけでなく、キーとエンコーダも含めて全部の入力が 1 テンポ遅れて見える。</li>
+<li>右を USB でつなぐと遅れが消える。同じ Mac に Bluetooth LE でつないだ別のマウス（MX Ergo）は遅れない。原因は、右と Mac の Bluetooth の接続と見ている。</li>
+<li>ZMK の既定の接続間隔（7.5〜15 ms）は、Apple の規定（HID でも下限 11.25 ms）に合わない。右の要求を 11.25〜15 ms に変えた（ブランチ <code>fix/ble-mac-latency</code>。実機での確認待ち）。詳しくは <a href="settings.html#bluetooth">設定項目 › Bluetooth の接続</a>。</li>
+<li>ファームウェアの中に、全部の入力をまとめて数十 ms 待たせる仕組みは見つからなかった。トラックボールの報告間隔の下限は最大 12 ms の間引きで、動かし始めは待たせない。</li>
+</ul>
 </section>
 
 </main>

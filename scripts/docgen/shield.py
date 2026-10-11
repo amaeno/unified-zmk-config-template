@@ -42,9 +42,9 @@ KCONFIG_NOTES = {
     "ZMK_SPLIT": ("基本", "分割キーボードとして動く"),
     "ZMK_SPLIT_ROLE_CENTRAL": ("基本", "セントラル（PC と繋がる側）として動く"),
     "ZMK_BLE": ("Bluetooth", "Bluetooth を使う"),
-    "BT_PERIPHERAL_PREF_MIN_INT": ("Bluetooth", "接続間隔の希望の下限。右では PC との接続、左では右との接続に効く"),
-    "BT_PERIPHERAL_PREF_MAX_INT": ("Bluetooth", "接続間隔の希望の上限"),
-    "BT_PERIPHERAL_PREF_LATENCY": ("Bluetooth", "応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる"),
+    "BT_PERIPHERAL_PREF_MIN_INT": ("Bluetooth", "PC との接続間隔の希望の下限。効くのは右だけ（左の値は使われない）。Mac に合う値は「設定項目 › Bluetooth の接続」"),
+    "BT_PERIPHERAL_PREF_MAX_INT": ("Bluetooth", "PC との接続間隔の希望の上限。効くのは右だけ"),
+    "BT_PERIPHERAL_PREF_LATENCY": ("Bluetooth", "応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる。効くのは右だけ"),
     "BT_PERIPHERAL_PREF_TIMEOUT": ("Bluetooth", "切断とみなすまでの時間"),
     "ZMK_STUDIO": ("ZMK Studio", "ZMK Studio を有効にする"),
     "ZMK_STUDIO_LOCKING": ("ZMK Studio", "Studio の編集ロック（n = ロックしない。いつでも編集できる）"),
@@ -395,6 +395,16 @@ def gen_value(page: Page, args: dict[str, str]) -> str:
             " ".join(code(x) for x in t if "_R_" in x),
             " ".join(code(x) for x in t if "_L_" in x),
         )
+    if key == "host-interval":
+        # この機体の右（PC と繋がる側）が PC に要求する接続間隔。単位は 1.25 ms
+        right = next((t for t in my_targets() if "_R_" in t), "")
+        vals = conf_values(SHIELD_DIR / (right + ".conf"))
+        lo = vals.get("BT_PERIPHERAL_PREF_MIN_INT", [""])[-1]
+        hi = vals.get("BT_PERIPHERAL_PREF_MAX_INT", [""])[-1]
+        if not (lo.isdigit() and hi.isdigit()):
+            raise ValueError("%s.conf に BT_PERIPHERAL_PREF_MIN_INT / MAX_INT がありません" % right)
+        return "%g〜%g ms（%s ／ %s）" % (
+            int(lo) * 1.25, int(hi) * 1.25, code("MIN_INT=" + lo), code("MAX_INT=" + hi))
     v = _value(key)
     if v == "":
         raise ValueError("%s の値が見つかりません" % key)
