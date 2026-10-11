@@ -12,18 +12,21 @@
 <!-- gen:nav -->
 <nav class="site-nav" aria-label="資料の目次">
 <a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
 <ul>
 <li><a href="index.html">トップ</a></li>
 <li><a href="workflow.html" aria-current="page">開発フロー</a></li>
 <li><a href="hardware.html">ハードウェア</a></li>
 <li><a href="keymap.html">キーマップ</a></li>
 <li><a href="settings.html">設定項目</a></li>
-<li><span class="nav-todo">機能<small>準備中</small></span></li>
-<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="features.html">機能</a></li>
+<li><a href="zmk-reference.html">ZMK リファレンス</a></li>
 <li><a href="known-issues.html">既知の課題</a></li>
-<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+<li><a href="changelog.html">変更履歴</a></li>
 </ul>
 </nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
 <!-- /gen:nav -->
 <main>
 <header class="page-head">
@@ -50,12 +53,12 @@
 
 <section>
 <h2 id="decide">ビルドが要るか</h2>
-<p>右側（セントラル）は ZMK Studio が有効です（<code>CONFIG_ZMK_STUDIO=y</code>、ロック無し）。キー割り当てを変えるだけなら、<a href="https://zmk.studio">zmk.studio</a> に USB でつなぐだけで済み、ビルドも書き込みも要りません。</p>
+<p>右側（セントラル）は ZMK Studio が有効です（<code>CONFIG_ZMK_STUDIO=y</code>、ロック無し）。<strong>キー割り当ての正本は ZMK Studio</strong> です。割り当てを変えるときは <a href="https://zmk.studio">zmk.studio</a> に USB でつなぎ、Studio で変えて保存します。ビルドも書き込みも要りません。</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>変えたいもの</th><th>手段</th><th>触るファイル</th></tr></thead>
 <tbody>
-<tr><td>キー割り当て、レイヤーの使い分け</td><td><span class="badge ok">ビルド不要</span> ZMK Studio</td><td>—</td></tr>
+<tr><td>キー割り当て、レイヤーの使い分け</td><td><span class="badge ok">ビルド不要</span> ZMK Studio（正本）</td><td>—</td></tr>
 <tr><td>コンボ、エンコーダの割り当て（<code>sensor-bindings</code>）、新しい behavior</td><td><span class="badge build">要ビルド</span></td><td><code>config/sosho.keymap</code></td></tr>
 <tr><td>スクロール量などのマクロ（<code>#define</code>）</td><td><span class="badge build">要ビルド</span></td><td><code>config/sosho.keymap</code></td></tr>
 <tr><td>ポインタの速度・反転・スクロール化（<code>input-processors</code>）</td><td><span class="badge build">要ビルド</span></td><td><code>boards/shields/sosho/*.overlay</code></td></tr>
@@ -68,7 +71,12 @@
 <p><strong>予約レイヤー:</strong> キーマップ末尾の <code>scroll</code> と <code>extra2</code> は <code>status = "reserved"</code> の空き枠です。Studio からレイヤーを増やすときに使われるので、Studio で使うだけなら再ビルドは要りません。</p>
 </aside>
 <aside class="callout warn">
-<p><strong>Studio とファイルの優先順位:</strong> 一度 Studio でキーマップを変えると、その後に <code>config/sosho.keymap</code> を書き換えて書き込んでも、キー割り当ては反映されません。ファイル側を反映させたいときは、Studio の「Restore Stock Settings」を実行します（ZMK 公式ドキュメントの記述による）。</p>
+<p><strong>キーマップのファイルとの関係:</strong> <code>config/sosho.keymap</code> の割り当て（各レイヤーの <code>bindings</code>）は初期値です。Studio で保存すると、その内容がキーボード本体に記録されてファイルより優先され、以後ファイルの割り当てを書き換えて書き込んでも反映されません（ZMK 公式ドキュメントの記述による）。</p>
+<ul>
+<li>そのため、資料のレイヤー図（ファイルから作る）は初期値を示します。実機のいまの割り当ては Studio で見ます。</li>
+<li>ファイルの初期値に戻したいときは、Studio の「Restore Stock Settings」を実行します（Studio での変更は消えます）。</li>
+<li>コンボ、behavior の定義、ポインタ、Kconfig など、Studio で扱えないものは引き続きファイルで管理します。</li>
+</ul>
 </aside>
 </section>
 
@@ -252,8 +260,9 @@ git switch main</code></pre>
 <h2 id="flash">書き込み</h2>
 <ol class="steps">
 <li><p><strong>ブートローダに入れる。</strong> XIAO のリセットボタンを素早く 2 回押すと、USB ドライブとして見えます。</p></li>
-<li><p><strong>uf2 をコピーする。</strong> <code>firmware/&lt;ターゲット&gt;.uf2</code> をそのドライブにコピーします。</p></li>
-<li><p><strong>再起動を待つ。</strong> 書き込みが終わると自動で再起動します。</p></li>
+<li><p><strong>uf2 をコピーする。</strong> <code>firmware/&lt;ターゲット&gt;.uf2</code> をそのドライブにコピーします。Finder でのコピーがうまくいかないときは、ターミナルでコピーします（ドライブ名は <code>ls /Volumes</code> で確かめる）。</p>
+<pre><code>cp -X firmware/sosho_R_trackpad.uf2 /Volumes/&lt;ドライブ名&gt;/</code></pre></li>
+<li><p><strong>再起動を待つ。</strong> 書き込みが終わると自動で再起動します。このときドライブが急に消えるので、macOS が「取り外された」と警告しますが、正常な動きです。</p></li>
 </ol>
 <aside class="callout warn">
 <p><strong>左右で別の uf2 です。</strong> <code>sosho_L_*</code> は左、<code>sosho_R_*</code> は右に書き込みます。トラックパッド版とトラックボール版も取り違えないでください。この機体の組み合わせは <!-- gen:value of=my-targets -->
@@ -273,6 +282,25 @@ git switch main</code></pre>
 </tbody>
 </table>
 </div>
+
+<h3 id="pc-pairing">PC とつながらないとき</h3>
+<p>右（セントラル）の LED が、起動時の電池残量の表示のあとに 1 回、PC との接続状態を点滅で示します。接続先を切り替えたときも同じように示します（色の意味は <code>zmk-rgbled-widget</code> の説明による）。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>色</th><th>状態</th><th>対処</th></tr></thead>
+<tbody>
+<tr><td>🔵 青</td><td>つながっている</td><td>USB ケーブルが刺さっていると入力は USB 側に出る。ケーブルを抜くか、<code>&amp;out OUT_BLE</code> で Bluetooth 出力に切り替える</td></tr>
+<tr><td>🟡 黄</td><td>いまの接続先にペアリング情報が無い（新しい接続を待っている）</td><td>下の手順の 1 → 3</td></tr>
+<tr><td>🔴 赤</td><td>ペアリング情報はあるのに、つながっていない（PC 側と記録が食い違っている）</td><td>下の手順の 1 → 2 → 3</td></tr>
+</tbody>
+</table>
+</div>
+<ol class="steps">
+<li><p><strong>PC 側の登録を消す。</strong> macOS ならシステム設定 → Bluetooth で <code>sosho</code> の ⓘ から「このデバイスの登録を解除」。</p></li>
+<li><p><strong>キーボード側の記録を消す。</strong> 接続先を選んでから（<code>&amp;bt BT_SEL 0</code>〜<code>4</code>）、<code>&amp;bt BT_CLR</code> を押します。LED が黄になります。ファイルの初期値のキーマップでは、どちらもレイヤー 3（右手の最下段、右から 2 番目の MO3 を押しているあいだ）にあり、接続先 0〜4 は U・I・O・P・BS の位置、<code>BT_CLR</code> は右手の右下の Shift の位置です。</p></li>
+<li><p><strong>PC からつなぐ。</strong> Bluetooth 設定の「近くのデバイス」に出てくる <code>sosho</code> を接続します。</p></li>
+</ol>
+<p>ファームウェアの書き込みでは、ふつうペアリング情報は消えません。それでも 2026-10-11 に右を書き込んだあと、PC とつながらなくなり、上の手順でつなぎ直しました（原因は未確認）。</p>
 
 <h3 id="reset">接続がおかしいとき</h3>
 <p>左右が繋がらない、ペアリングがおかしいといったときは、設定を消してから書き直します（ZMK 公式の手順）。</p>
@@ -297,7 +325,9 @@ git switch main</code></pre>
 <tr><td>何も変えていないのにビルドが壊れた</td><td><code>config/west.yml</code> はすべてブランチ追従。<code>--update</code> を実行したときだけ版が動くので、直前に <code>--update</code> したなら upstream の破壊的変更を疑う</td></tr>
 <tr><td><code>Missing ZMK Compat</code></td><td>board 名から <code>/zmk</code> が落ちている。<code>xiao_ble/nrf52840/zmk</code> が正しい</td></tr>
 <tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code> の <code>board_root: .</code> を有効にしている</td></tr>
-<tr><td>キーマップを書き換えて書き込んだのに、割り当てが変わらない</td><td>Studio での変更が優先されている。Studio の「Restore Stock Settings」を実行する（<a href="#decide">ビルドが要るか</a>）</td></tr>
+<tr><td>書き込むと「デバイスが取り外されました」と出る</td><td>正常。書き込みが終わるとマイコンが再起動し、USB ドライブが消えるため。Finder のコピーで失敗するときは <code>cp -X</code> で書き込む（<a href="#flash">書き込み</a>）</td></tr>
+<tr><td>書き込んだあと、PC とつながらない（左右はつながる）</td><td>右の LED の色で状態を見て、PC 側とキーボード側の記録を消してつなぎ直す（<a href="#pc-pairing">PC とつながらないとき</a>）</td></tr>
+<tr><td>キーマップのファイルを書き換えて書き込んだのに、割り当てが変わらない</td><td>Studio で保存した割り当てが優先されている。キー割り当ての正本は Studio なので、割り当ては Studio で変える。ファイルの初期値に戻したいときだけ Studio の「Restore Stock Settings」（Studio の変更は消える。<a href="#decide">ビルドが要るか</a>）</td></tr>
 <tr><td>USB 給電中に、Bluetooth 側でキー入力が届かない</td><td>USB 接続中は USB 出力が優先される。レイヤー 3 の <code>&amp;out OUT_BLE</code> で Bluetooth 出力に切り替える</td></tr>
 <tr><td>macOS で「接続済み」なのに入力できない</td><td>macOS の Bluetooth 設定からキーボードを削除し、該当プロファイルを選んだ状態でレイヤー 3 の <code>&amp;bt BT_CLR</code> を押してから、接続し直す</td></tr>
 </tbody>
@@ -321,15 +351,20 @@ git switch main</code></pre>
 
 <section>
 <h2 id="docs">資料の更新</h2>
-<p>資料は <code>docs/</code> の HTML です。<code>docs/index.html</code> をブラウザで開いて読みます。外部への依存は無いので、ファイルを直接開けば表示できます。</p>
+<p>資料は <code>docs/</code> の HTML です。<code>docs/index.html</code> をブラウザで開いて読みます。外部への依存は無いので、ファイルを直接開けば表示できます。左のナビの「資料を検索」（または入力欄の外で <kbd>/</kbd>）で、全ページをキーワードで探せます。スペースで区切ると、すべての語を含む節に絞り込みます。</p>
 
 <h3 id="docs-gen">手書きと自動生成</h3>
 <p>各ページは、手書きの説明と自動生成のブロックでできています。自動生成のブロックは HTML の中で次のように囲まれていて、<code>scripts/gen-docs.py</code> が中身を上書きします。</p>
 <pre><code>&lt;!-- gen:build-targets --&gt;
 （ここはスクリプトが上書きする）
 &lt;!-- /gen:build-targets --&gt;</code></pre>
-<pre><code>python3 scripts/gen-docs.py           # 生成ブロックを更新する
+<pre><code>python3 scripts/gen-docs.py           # 生成ブロックと検索の索引を更新する
 python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（要るなら終了コード 1）</code></pre>
+<ul>
+<li>検索の索引（<code>docs/assets/search-index.js</code>）も同時に作り直します。</li>
+<li>使っている ZMK の版や behavior の一覧は、git 管理外の <code>.zmk-ref/</code> から作ります。<code>.zmk-ref/</code> が無い環境では前の内容のまま残ります。</li>
+<li>変更履歴は git の履歴から作るので、実行したときの <code>main</code> の状態になります（<code>--check</code> では比べません）。</li>
+</ul>
 
 <h3 id="docs-rules">決まりごと</h3>
 <ul>

@@ -13,6 +13,9 @@ HTML の中の次の囲みだけを書き換える。囲みの外の手書き部
 build.yaml やキーマップのように繰り返し変わる事実を、手で二重管理しないための仕組み。
 資料に新しい事実を載せるときは、手で書く前に生成器を足せないか考える。
 生成器はテーマごとに scripts/docgen/ に分けてある（一覧は docgen/__init__.py）。
+あわせて、資料の検索索引 docs/assets/search-index.js も作り直す。
+git の履歴から作るもの（変更履歴）は --check では比べない。元が git 管理外で手元に無いもの
+（.zmk-ref/ から作るもの）は、前の内容のまま残す。
 ホストの python3 標準ライブラリだけで動く（PyYAML も使わない）。
 """
 from __future__ import annotations
@@ -22,7 +25,7 @@ import re
 import sys
 from pathlib import Path
 
-from docgen import DOCS, GENERATORS, Page, rel
+from docgen import DOCS, GENERATORS, VOLATILE, Page, SourceMissing, build_index, rel
 
 BLOCK = re.compile(
     r"(?P<open><!--\s*gen:(?P<name>[\w-]+)(?P<args>[^>]*?)\s*-->)"
@@ -30,9 +33,10 @@ BLOCK = re.compile(
     r"(?P<close><!--\s*/gen:(?P=name)\s*-->)",
     re.S,
 )
+SEARCH_INDEX = DOCS / "assets" / "search-index.js"
 
 
-def render(path: Path, text: str, errors: list[str]) -> str:
+def render(path: Path, text: str, errors: list[str], notes: list[str], check: bool = False) -> str:
     opens = len(re.findall(r"<!--\s*gen:", text))
     closes = len(re.findall(r"<!--\s*/gen:", text))
     if opens != closes:
@@ -46,9 +50,14 @@ def render(path: Path, text: str, errors: list[str]) -> str:
         if fn is None:
             errors.append("%s: 未知の生成ブロック gen:%s" % (rel(path), name))
             return m.group(0)
+        if check and name in VOLATILE:
+            return m.group(0)  # git の履歴など、作るたびに変わりうるものは比べない
         args = dict(a.split("=", 1) for a in m.group("args").split() if "=" in a)
         try:
             body = fn(page, args)
+        except SourceMissing as e:
+            notes.append("%s: gen:%s は前の内容のまま（%s）" % (rel(path), name, e))
+            return m.group(0)
         except (OSError, ValueError, IndexError, KeyError) as e:
             errors.append("%s: gen:%s %s を作れません: %s" % (rel(path), name, m.group("args").strip(), e))
             return m.group(0)
@@ -63,17 +72,28 @@ def main() -> int:
     args = ap.parse_args()
 
     errors: list[str] = []
+    notes: list[str] = []
     stale: list[Path] = []
+    texts: dict[Path, str] = {}
     n_blocks = 0
     for path in sorted(DOCS.glob("*.html")):
         old = path.read_text("utf-8")
         n_blocks += len(BLOCK.findall(old))
-        new = render(path, old, errors)
+        new = texts[path] = render(path, old, errors, notes, args.check)
         if new != old:
             stale.append(path)
             if not args.check:
                 path.write_text(new, "utf-8")
 
+    # 検索の索引は、生成し終えたページの文章から作る
+    index = build_index(texts)
+    if not SEARCH_INDEX.exists() or SEARCH_INDEX.read_text("utf-8") != index:
+        stale.append(SEARCH_INDEX)
+        if not args.check:
+            SEARCH_INDEX.write_text(index, "utf-8")
+
+    for n in notes:
+        print("note:  %s" % n)
     for e in errors:
         print("ERROR: %s" % e)
     if errors:

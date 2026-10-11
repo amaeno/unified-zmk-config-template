@@ -28,9 +28,12 @@ HTML は長いので、目的の節を `id="…"` で Grep してから、その
 | 知りたいこと | 場所 |
 |---|---|
 | 構成、ピン配置、エンコーダ、ポインタの配線、ファイル構成 | `docs/hardware.html` |
-| レイヤー図、**キー位置番号**（コンボの `key-positions` 用。テキスト版は `id="positions"`）、コンボ、エンコーダの割り当て | `docs/keymap.html` |
+| レイヤー図（ファイル上の初期値）、**キー位置番号**（コンボの `key-positions` 用。テキスト版は `id="positions"`）、コンボ、エンコーダの割り当て | `docs/keymap.html` |
 | どこを触ると何が変わるか。スクロール・ポインタ・エンコーダ・Kconfig の現在値と変え方 | `docs/settings.html` |
-| 既知の不整合（消すとビルドが壊れるものを含む）。**関係するファイルを編集する前に確認する** | `docs/known-issues.html` |
+| 既知の不整合（消すとビルドが壊れるものを含む）と未解決の課題。**関係するファイルを編集する前に確認する** | `docs/known-issues.html` |
+| 使っている機能、ZMK の behavior 一覧、追加できる機能の候補 | `docs/features.html` |
+| 使っている ZMK の版、手元の ZMK ソース（`.zmk-ref/`）の構成、確かめた仕様のメモ（出典つき） | `docs/zmk-reference.html` |
+| main に取り込んだ変更の履歴と、書き込んだ版のタグ | `docs/changelog.html` |
 | ビルドが要るかの判断、開発の流れ、git の運用 | `docs/workflow.html` の `#decide` `#loop` `#git` |
 | ビルドのコマンド・ターゲット・仕組み、書き込み手順 | `docs/workflow.html` の `#build` `#flash` `#reset` |
 | うまくいかないとき、ビルドスクリプトの制約 | `docs/workflow.html` の `#trouble` `#internals` |
@@ -41,12 +44,14 @@ HTML は長いので、目的の節を `id="…"` で Grep してから、その
 
 ## まず: ビルドが必要か判断する
 
-R 側（セントラル）は **ZMK Studio が有効**。単純なキー割り当ての変更なら [zmk.studio](https://zmk.studio) に
-USB 接続するだけで済み、**ビルドも書き込みも不要**。コンボ・エンコーダ挙動・behavior・Kconfig・
-ポインタ感度はファイルを編集してビルドする。詳細は `docs/workflow.html#decide`。
+**キー割り当ての正本は ZMK Studio**（ユーザーの決定。2026-10-11）。割り当ての変更は Studio で行い、
+ビルドも書き込みも要らない。`config/sosho.keymap` の各レイヤーの `bindings` は初期値で、Studio で保存したあとの
+実機とは一致しない（資料のレイヤー図も初期値）。Studio で保存したあとは、ファイルの割り当てを書き換えて
+書き込んでも「Restore Stock Settings」するまで反映されない。詳細は `docs/workflow.html#decide`。
 
-キーマップ末尾の `scroll` / `extra2` (`status = "reserved"`) は、Studio でレイヤーを増やせるようにするための
-予約枠。一度 Studio でキーマップを変えると、`.keymap` を書き換えても「Restore Stock Settings」するまで反映されない。
+- ファイルで管理するのは Studio で扱えないもの（コンボ、behavior の定義、エンコーダの割り当て、ポインタ、Kconfig）。これらはビルドが要る
+- 機能の追加で特定のキーへの割り当てが要るとき（例: `&lt`）は、ファイルの初期値を変えたうえで、Studio で保存済みなら Studio でも同じ割り当てをするようユーザーに頼む
+- キーマップ末尾の `scroll` / `extra2`（`status = "reserved"`）は、Studio でレイヤーを増やすための予約枠。`scroll`（L4）は左トラックボールのスクロールに使っている
 
 ---
 

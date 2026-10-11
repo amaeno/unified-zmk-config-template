@@ -12,18 +12,21 @@
 <!-- gen:nav -->
 <nav class="site-nav" aria-label="資料の目次">
 <a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
 <ul>
 <li><a href="index.html">トップ</a></li>
 <li><a href="workflow.html">開発フロー</a></li>
 <li><a href="hardware.html">ハードウェア</a></li>
 <li><a href="keymap.html">キーマップ</a></li>
 <li><a href="settings.html" aria-current="page">設定項目</a></li>
-<li><span class="nav-todo">機能<small>準備中</small></span></li>
-<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="features.html">機能</a></li>
+<li><a href="zmk-reference.html">ZMK リファレンス</a></li>
 <li><a href="known-issues.html">既知の課題</a></li>
-<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+<li><a href="changelog.html">変更履歴</a></li>
 </ul>
 </nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
 <!-- /gen:nav -->
 <main>
 <header class="page-head">
@@ -53,7 +56,7 @@
 <table>
 <thead><tr><th>変えたいこと</th><th>場所</th><th>いまの値</th><th>書き込む側</th></tr></thead>
 <tbody>
-<tr><td>キー割り当て・レイヤー</td><td>ZMK Studio（ビルド不要）、または <code>config/sosho.keymap</code></td><td><a href="keymap.html#layers">レイヤー図</a></td><td>右</td></tr>
+<tr><td>キー割り当て・レイヤー</td><td>ZMK Studio（正本。ビルド不要）。<code>config/sosho.keymap</code> の割り当ては初期値</td><td>Studio で見る（<a href="keymap.html#layers">レイヤー図</a>は初期値）</td><td>—（Studio で保存）</td></tr>
 <tr><td>コンボ</td><td><code>config/sosho.keymap</code> の <code>combos</code></td><td><a href="keymap.html#combos">コンボ一覧</a></td><td>右</td></tr>
 <tr><td>エンコーダの割り当て</td><td><code>config/sosho.keymap</code> の <code>sensor-bindings</code></td><td><a href="keymap.html#encoder">エンコーダ</a></td><td>右</td></tr>
 <tr><td>エンコーダ 1 クリックで動く量</td><td><code>sosho.dtsi</code> の <code>sensors</code> の <code>triggers-per-rotation</code></td><td><!-- gen:value of=encoder-triggers -->

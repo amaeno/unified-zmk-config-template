@@ -12,18 +12,21 @@
 <!-- gen:nav -->
 <nav class="site-nav" aria-label="資料の目次">
 <a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
 <ul>
 <li><a href="index.html" aria-current="page">トップ</a></li>
 <li><a href="workflow.html">開発フロー</a></li>
 <li><a href="hardware.html">ハードウェア</a></li>
 <li><a href="keymap.html">キーマップ</a></li>
 <li><a href="settings.html">設定項目</a></li>
-<li><span class="nav-todo">機能<small>準備中</small></span></li>
-<li><span class="nav-todo">ZMK リファレンス<small>準備中</small></span></li>
+<li><a href="features.html">機能</a></li>
+<li><a href="zmk-reference.html">ZMK リファレンス</a></li>
 <li><a href="known-issues.html">既知の課題</a></li>
-<li><span class="nav-todo">変更履歴<small>準備中</small></span></li>
+<li><a href="changelog.html">変更履歴</a></li>
 </ul>
 </nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
 <!-- /gen:nav -->
 <main>
 <header class="page-head">
@@ -51,8 +54,8 @@
 <table>
 <thead><tr><th>やりたいこと</th><th>手段</th><th>見る場所</th></tr></thead>
 <tbody>
-<tr><td>いまのキー割り当てを見る</td><td>レイヤー図</td><td><a href="keymap.html#layers">キーマップ › レイヤー</a></td></tr>
-<tr><td>キー割り当てを変える・レイヤーを使い分ける</td><td><span class="badge ok">ビルド不要</span> ZMK Studio</td><td><a href="workflow.html#decide">開発フロー › ビルドが要るか</a></td></tr>
+<tr><td>いまのキー割り当てを見る</td><td>ZMK Studio（実機の割り当て）。資料のレイヤー図はファイル上の初期値</td><td><a href="keymap.html#layers">キーマップ › レイヤー</a></td></tr>
+<tr><td>キー割り当てを変える・レイヤーを使い分ける</td><td><span class="badge ok">ビルド不要</span> ZMK Studio（正本）</td><td><a href="workflow.html#decide">開発フロー › ビルドが要るか</a></td></tr>
 <tr><td>コンボ・エンコーダ・ポインタの感度を変える</td><td><span class="badge build">要ビルド</span> ファイルを編集</td><td><a href="settings.html#map">設定項目 › どこを触ると何が変わるか</a></td></tr>
 <tr><td>左のトラックボールでスクロールする（L0 の 0 番を長押し）</td><td><span class="badge build">要ビルド</span> 速さ・向きは overlay を編集</td><td><a href="settings.html#scroll">設定項目 › スクロール</a></td></tr>
 <tr><td>コンボのキー位置番号を調べる</td><td>番号付きの図</td><td><a href="keymap.html#positions">キーマップ › キー位置番号</a></td></tr>
@@ -74,10 +77,10 @@
 <li><a href="hardware.html"><strong>ハードウェア</strong><span>マイコン・左右の役割・ピン配置・エンコーダ・ポインティングデバイス</span></a></li>
 <li><a href="keymap.html"><strong>キーマップ</strong><span>レイヤー図・キー位置番号・コンボ・エンコーダの割り当て</span></a></li>
 <li><a href="settings.html"><strong>設定項目</strong><span>変えられる項目と現在値、変え方、ビルドの要否</span></a></li>
-<li><div class="todo"><strong>機能<small>準備中</small></strong><span>使っている機能と、ZMK で追加できる機能の候補</span></div></li>
-<li><div class="todo"><strong>ZMK リファレンス<small>準備中</small></strong><span>参照している ZMK と外部モジュールの仕様メモ</span></div></li>
+<li><a href="features.html"><strong>機能</strong><span>使っている機能と、ZMK で追加できる機能の候補</span></a></li>
+<li><a href="zmk-reference.html"><strong>ZMK リファレンス</strong><span>参照している ZMK と外部モジュールの仕様メモ</span></a></li>
 <li><a href="known-issues.html"><strong>既知の課題</strong><span>動作に影響しない不整合と、未解決の課題</span></a></li>
-<li><div class="todo"><strong>変更履歴<small>準備中</small></strong><span>カスタマイズの履歴と設計判断</span></div></li>
+<li><a href="changelog.html"><strong>変更履歴</strong><span>カスタマイズの履歴と設計判断</span></a></li>
 </ul>
 <!-- /gen:page-cards -->
 </section>

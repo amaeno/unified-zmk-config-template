@@ -82,6 +82,8 @@ model: sonnet
 - 本文中に 1 つの値を埋め込むときは `<!-- gen:value of=キー -->` と `<!-- /gen:value -->` を使う（例: `of=scrl-val`）
 - 使える生成器の一覧: `grep -rn '@generator(' scripts/docgen/`。`value` のキーは `scripts/docgen/shield.py` の `_value()`
 - 生成器の中身が変・古いと思ったら、HTML ではなく生成器を直す
+- `gen-docs.py` は検索の索引 `docs/assets/search-index.js` も作り直す（手で直さない）。`h2`・`h3` に付けた `id` が検索結果の飛び先になる
+- 元が git 管理外のもの（`.zmk-ref/` から作る版や behavior の一覧）は、元が無い環境では前の内容のまま残る。git の履歴から作るもの（変更履歴）は `--check` で比べない。生成器を足すときは、前者なら `SourceMissing` を投げ、後者なら `@generator(..., volatile=True)` にする
 
 ## 生成器の足し方
 

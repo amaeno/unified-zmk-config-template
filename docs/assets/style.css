@@ -825,6 +825,114 @@ details pre {
   font-size: 0.92rem;
 }
 
+/* ------------------------------------------------------------ 検索 */
+
+.search-open {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 0 1rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.search-open:hover {
+  border-color: var(--accent);
+}
+
+.search-dialog {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: min(36rem, calc(100vh - 4rem));
+  margin-top: 8vh;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  color: var(--text);
+}
+
+.search-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.search-dialog input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  outline: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.search-results {
+  flex: 1;
+  margin: 0;
+  padding: 0.4rem;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.search-results li {
+  margin: 0;
+}
+
+.search-results a {
+  display: block;
+  padding: 0.55rem 0.7rem;
+  border-radius: 6px;
+  color: inherit;
+  line-height: 1.55;
+  text-decoration: none;
+}
+
+.search-results a:hover,
+.search-results a[aria-selected="true"] {
+  background: var(--accent-soft);
+}
+
+.sr-where {
+  display: block;
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.sr-snippet {
+  display: block;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.search-results mark {
+  padding: 0 0.1em;
+  background: var(--warn-bg);
+  border-radius: 2px;
+  color: var(--text);
+}
+
+.search-empty {
+  padding: 0.9rem 0.7rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 /* ------------------------------------------------------------ 狭い画面 */
 
 @media (max-width: 52rem) {

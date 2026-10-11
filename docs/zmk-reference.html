@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZMK リファレンス — 双掌 (sosho) カスタマイズ資料</title>
+<meta name="description" content="参照している ZMK と外部モジュールの版、よく見る公式ドキュメント、このリポジトリで確かめた仕様">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+<!-- gen:nav -->
+<nav class="site-nav" aria-label="資料の目次">
+<a class="brand" href="index.html">双掌<span>sosho カスタマイズ資料</span></a>
+<button class="search-open" type="button" data-search-open>資料を検索<kbd>/</kbd></button>
+<ul>
+<li><a href="index.html">トップ</a></li>
+<li><a href="workflow.html">開発フロー</a></li>
+<li><a href="hardware.html">ハードウェア</a></li>
+<li><a href="keymap.html">キーマップ</a></li>
+<li><a href="settings.html">設定項目</a></li>
+<li><a href="features.html">機能</a></li>
+<li><a href="zmk-reference.html" aria-current="page">ZMK リファレンス</a></li>
+<li><a href="known-issues.html">既知の課題</a></li>
+<li><a href="changelog.html">変更履歴</a></li>
+</ul>
+</nav>
+<script src="assets/search-index.js" defer></script>
+<script src="assets/search.js" defer></script>
+<!-- /gen:nav -->
+<main>
+<header class="page-head">
+<h1>ZMK リファレンス</h1>
+<p class="lead">このリポジトリが使っている ZMK と外部モジュールの版、よく見る公式ドキュメント、このリポジトリで確かめた仕様のメモです。ZMK は版によって書き方や挙動が変わるので、使っている版を基準に調べます。</p>
+</header>
+
+<!-- gen:toc -->
+<nav class="toc" aria-label="このページの目次">
+<p>このページの内容</p>
+<ol>
+<li><a href="#versions">使っている版</a></li>
+<li><a href="#local">手元の ZMK のソースと資料</a></li>
+<li><a href="#docs">よく見る公式ドキュメント</a></li>
+<li><a href="#facts">このリポジトリで確かめた仕様</a></li>
+</ol>
+</nav>
+<!-- /gen:toc -->
+
+<section>
+<h2 id="versions">使っている版</h2>
+<p>ビルドに使っている版です。<code>config/west.yml</code> はブランチの最新を指していますが、実際に取り込まれる版が動くのは <code>./scripts/build-local.sh --update</code> を実行したときだけです（<a href="known-issues.html#issue-west-floating">既知の課題</a>）。</p>
+<!-- gen:zmk-versions -->
+<div class="gen">
+<div class="table-wrap">
+<table>
+<thead><tr><th>プロジェクト</th><th>revision</th><th>使っているコミット</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/zmkfirmware/zmk">zmk</a></td><td><code>main</code></td><td><a href="https://github.com/zmkfirmware/zmk/commit/6e2ef41e022d555b10f116e395832913f71717b3"><code>6e2ef41</code></a></td><td>ZMK 本体</td></tr>
+<tr><td><a href="https://github.com/zmkfirmware/zephyr">zephyr</a></td><td><code>v4.1.0+zmk-fixes</code></td><td><a href="https://github.com/zmkfirmware/zephyr/commit/10ba6d0cb38bc3d258775d27982f707599320085"><code>10ba6d0</code></a></td><td>RTOS（ZMK 向けの修正入りのフォーク）</td></tr>
+<tr><td><a href="https://github.com/caksoylar/zmk-rgbled-widget">zmk-rgbled-widget</a></td><td><code>main</code></td><td><a href="https://github.com/caksoylar/zmk-rgbled-widget/commit/e6b467792a1dabef8cfa5c9fd26bfefc9c16662b"><code>e6b4677</code></a></td><td>RGB LED による状態表示（電池残量・接続状態）</td></tr>
+<tr><td><a href="https://github.com/badjeff/zmk-pmw3610-driver">zmk-pmw3610-driver</a></td><td><code>main</code></td><td><a href="https://github.com/badjeff/zmk-pmw3610-driver/commit/44b4a76b74d293a93cec4ccb7e04cb8d29c10f93"><code>44b4a76</code></a></td><td>トラックボール (PMW3610) のドライバ</td></tr>
+<tr><td><a href="https://github.com/elekit-official/zmk_encoder">zmk_encoder</a></td><td><code>main</code></td><td><a href="https://github.com/elekit-official/zmk_encoder/commit/1a34a5561f08eb7130823760fe597458f477e6db"><code>1a34a55</code></a></td><td>エンコーダでのスクロール（<code>zmk,behavior-encoder-mouse-scroll</code>）</td></tr>
+</tbody>
+</table>
+</div>
+<p class="gen-note">自動生成 · 元: <code>.zmk-ref/</code>（<code>./scripts/build-local.sh --ref</code> で作る） の <code>VERSIONS.txt</code></p>
+</div>
+<p>ほかに 54 個のプロジェクト（Nordic の HAL など）を取り込んでいます。全部の版は <code>.zmk-ref/VERSIONS.txt</code> にあります。</p>
+<!-- /gen:zmk-versions -->
+</section>
+
+<section>
+<h2 id="local">手元の ZMK のソースと資料</h2>
+<p>ビルド環境から、調べることの多い部分を <code>.zmk-ref/</code>（git 管理外）に写してあります。上の版と同じ中身なので、公式サイト（最新版の説明）より確実です。AI の調査役 <code>zmk-researcher</code> もここを読みます。作り直すときは <code>./scripts/build-local.sh --ref</code> です。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>場所</th><th>中身</th></tr></thead>
+<tbody>
+<tr><td><code>.zmk-ref/zmk-docs/</code></td><td>ZMK 公式ドキュメント（md）。<code>keymaps/behaviors/</code> に behavior ごとの使い方、<code>config/</code> に設定の一覧、<code>keymaps/input-processors/</code> にポインタの加工</td></tr>
+<tr><td><code>.zmk-ref/zmk-app/</code></td><td>ZMK 本体のソース。<code>dts/bindings/</code> に devicetree の仕様、<code>dts/behaviors/</code> に標準の behavior、<code>src/</code> に実装</td></tr>
+<tr><td><code>.zmk-ref/zmk-rgbled-widget/</code> ほか</td><td>外部モジュール（LED 表示、トラックボールのドライバ、エンコーダのスクロール）</td></tr>
+<tr><td><code>.zmk-ref/zephyr-xiao_ble/</code></td><td>XIAO nRF52840 のボード定義（ピンの名前など）</td></tr>
+<tr><td><code>.zmk-ref/VERSIONS.txt</code></td><td>写したときの各プロジェクトの版</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2 id="docs">よく見る公式ドキュメント</h2>
+<p>公式サイトは最新版の説明です。使っている版と違うことがあるので、細かい仕様は手元のコピーで確かめます。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>知りたいこと</th><th>公式ドキュメント</th></tr></thead>
+<tbody>
+<tr><td>behavior の全体像</td><td><a href="https://zmk.dev/docs/keymaps/behaviors">Behaviors</a></td></tr>
+<tr><td>レイヤー（<code>&amp;mo</code> <code>&amp;lt</code> <code>&amp;to</code> <code>&amp;tog</code>）</td><td><a href="https://zmk.dev/docs/keymaps/behaviors/layers">Layers</a></td></tr>
+<tr><td>長押しとタップの使い分け</td><td><a href="https://zmk.dev/docs/keymaps/behaviors/hold-tap">Hold-Tap</a></td></tr>
+<tr><td>コンボ</td><td><a href="https://zmk.dev/docs/keymaps/combos">Combos</a>、<a href="https://zmk.dev/docs/config/combos">Combo の設定</a></td></tr>
+<tr><td>エンコーダ</td><td><a href="https://zmk.dev/docs/keymaps/behaviors/sensor-rotate">Sensor Rotation</a>、<a href="https://zmk.dev/docs/features/encoders">Encoders</a></td></tr>
+<tr><td>マウス操作のキー</td><td><a href="https://zmk.dev/docs/keymaps/behaviors/mouse-emulation">Mouse Emulation</a></td></tr>
+<tr><td>ポインタの加工</td><td><a href="https://zmk.dev/docs/keymaps/input-processors">Input Processors</a>、<a href="https://zmk.dev/docs/features/pointing">Pointing</a></td></tr>
+<tr><td>分割キーボード</td><td><a href="https://zmk.dev/docs/features/split-keyboards">Split Keyboards</a></td></tr>
+<tr><td>ZMK Studio</td><td><a href="https://zmk.dev/docs/features/studio">ZMK Studio</a></td></tr>
+<tr><td>Bluetooth のトラブル</td><td><a href="https://zmk.dev/docs/troubleshooting/connection-issues">Connection Issues</a></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2 id="facts">このリポジトリで確かめた仕様</h2>
+<p>作業の中で、使っている版のソースやドキュメントで確かめたことです（基準: ZMK <!-- gen:zmk-commit -->
+<code>6e2ef41</code>
+<!-- /gen:zmk-commit -->）。出典は <code>.zmk-ref/</code> の中のパスです。版を上げたら、関係するものは確かめ直します。</p>
+<ul class="item-list">
+<li><p class="item-head">エンコーダの割り当ては「時計回り、反時計回り」の順</p><p><code>sensor-bindings</code> の第 1 引数が時計回り。出典: <code>zmk-docs/keymaps/behaviors/sensor-rotate.md</code></p></li>
+<li><p class="item-head">割り当ての無いレイヤーでは、下のレイヤーのエンコーダ割り当てが効く</p><p>有効なレイヤーを上から見て、割り当てのある最初のものを使う。出典: <code>zmk-app/src/keymap.c</code> の <code>zmk_keymap_sensor_event</code></p></li>
+<li><p class="item-head">エンコーダのスクロールは 1 回の発火で 1 ノッチ</p><p><code>zmk_encoder</code> は値の向きだけを使い、量をそろえる。そのため <code>ZMK_POINTING_DEFAULT_SCRL_VAL</code> は効かない（<code>&amp;msc</code> の最大速度にだけ効く）。出典: <code>zmk_encoder/src/behavior_encoder_mouse_scroll.c</code>、<code>zmk-app/include/dt-bindings/zmk/pointing.h</code></p></li>
+<li><p class="item-head">Studio で保存した割り当てはファイルより優先される</p><p>ファイル側に戻すには「Restore Stock Settings」。出典: <code>zmk-docs/features/studio.md</code></p></li>
+<li><p class="item-head">Studio はエンコーダの割り当てとコンボを扱わない</p><p>Studio の通信の処理に、どちらも出てこない。出典: <code>zmk-app/src/studio/</code></p></li>
+<li><p class="item-head">Studio が有効なときだけ、予約レイヤーも数えられる</p><p>Studio を外すと <code>scroll</code> などの予約レイヤーは無いことになり、呼び出すキーが効かなくなる。出典: <code>zmk-app/src/studio/Kconfig</code>、<code>zmk-app/include/zmk/keymap.h</code></p></li>
+<li><p class="item-head">リスナーの子ノードで、レイヤーごとに input-processors を上書きできる</p><p><code>layers</code> に当てはまるあいだは親の設定の代わりに使われる（<code>process-next</code> を付けたときを除く）。出典: <code>zmk-docs/keymaps/input-processors/usage.md</code>、<code>zmk-app/src/pointing/input_listener.c</code></p></li>
+<li><p class="item-head"><code>zip_xy_scaler</code> の分母は 16 以下が推奨</p><p>もっと縮めたいときは段を重ねる（端数はそれぞれ持ち越される）。出典: <code>zmk-docs/keymaps/input-processors/scaler.md</code></p></li>
+<li><p class="item-head">トラックボールの CPI はキーで切り替えられない</p><p><code>cpi</code> は 200〜3200 の 200 刻みで、起動時に設定される。出典: <code>zmk-pmw3610-driver/src/pmw3610.c</code>、<code>zmk-pmw3610-driver/dts/bindings/pixart,pmw3610-alt.yml</code></p></li>
+<li><p class="item-head">EC11 の <code>resolution</code> は <code>steps</code> があると使われない</p><p>出典: <code>zmk-app/module/drivers/sensor/ec11/ec11.c</code></p></li>
+<li><p class="item-head">コンボの誤爆を防ぐ設定がある</p><p><code>require-prior-idle-ms</code>（ms）、<code>layers</code>、<code>slow-release</code>。出典: <code>zmk-app/dts/bindings/zmk,combos.yaml</code>、<code>zmk-app/src/combo.c</code></p></li>
+<li><p class="item-head">状態表示 LED の色</p><p>接続状態は 青 = つながっている、黄 = 待ち受け、赤 = 切れている。出典: <code>zmk-rgbled-widget/README.md</code></p></li>
+<li><p class="item-head"><code>CONFIG_NFCT_PINS_AS_GPIOS</code> は非推奨</p><p>後継は devicetree の <code>&amp;uicr { nfct-pins-as-gpios; }</code>。出典: Zephyr の <code>soc/nordic/Kconfig</code>（<code>.zmk-ref/</code> には写していない）</p></li>
+</ul>
+</section>
+</main>
+</div>
+</body>
+</html>
