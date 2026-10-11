@@ -5,7 +5,7 @@ argument-hint: "[ターゲット名... | --all]"
 model: haiku
 context: fork
 background: false
-allowed-tools: Bash(python3 scripts/lint-keymap.py:*) Bash(./scripts/build-local.sh:*) Read Grep
+allowed-tools: Bash(python3 scripts/lint-keymap.py:*) Bash(python3 scripts/gen-docs.py --check) Bash(./scripts/build-local.sh:*) Bash(grep:*) Read Grep
 disallowed-tools: Write Edit NotebookEdit
 ---
 
@@ -30,16 +30,19 @@ disallowed-tools: Write Edit NotebookEdit
 
 1. `python3 scripts/lint-keymap.py` を実行する。
    終了コードが 0 でなければ、`ERROR:` の行をそのまま報告して終わる（ビルドしない）
-2. `./scripts/build-local.sh <ターゲット...>` を実行する。Bash のタイムアウトは 600000 ms にする
+2. `python3 scripts/gen-docs.py --check` を実行する。資料が古くてもビルドは続けるが、報告の「資料」に書く
+   （仕様を変えたら資料も必ず更新する決まりなので、更新漏れをここで知らせる）
+3. `./scripts/build-local.sh <ターゲット...>` を実行する。Bash のタイムアウトは 600000 ms にする
    （初回は west ワークスペースの取得で約 6 分かかる。2 回目以降は 1 ターゲット 10〜20 秒）
-3. 失敗したら、`docs/workflow.html` を `id="trouble"` で Grep し、その表を Read する。
+4. 失敗したら、`docs/workflow.html` を `id="trouble"` で検索し（Grep が無ければ Bash の `grep -n`）、その表を Read する。
    症状に合う行があれば、その対処を報告に含める。合う行が無ければ、最初のエラー行とその前後数行をそのまま報告する
-4. 下の形で報告する
+5. 下の形で報告する
 
 ## 報告の形（これ以外は書かない）
 
 - **結果**: 成功 / lint で失敗 / ビルドで失敗
 - **成果物**: 成功したターゲットごとに `firmware/<ターゲット>.uf2` と書き込む側（右 / 左 / 左右とも）
 - **失敗の内容**: エラー行の抜粋と、trouble 表に合う対処（あれば）
+- **資料**: 最新 / 要更新（`gen-docs.py --check` が挙げたファイル）
 - **所要時間**: 分かれば
 - **改善メモ**: この手順どおりに進まなかった点（足りない前提、表に無かった失敗など）があれば 1〜2 行。無ければ書かない

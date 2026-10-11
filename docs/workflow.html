@@ -335,7 +335,7 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <ul>
 <li><strong>繰り返し変わる事実は手で書かない。</strong> ビルドターゲット、モジュール、キーマップ、設定値などは <code>scripts/gen-docs.py</code> に生成器を足して作ります。手書きは「なぜそうなっているか」「どう変えるか」の説明に使います。</li>
 <li><strong>同じ事実を 2 か所に書かない。</strong> 事実の正本は資料にあり、<code>CLAUDE.md</code> や skills からは資料へのリンクで済ませます。AI へのルールだけは <code>CLAUDE.md</code> が正本で、資料はそれを自動で取り込みます。</li>
-<li><strong>設定を変えたら資料も作り直す。</strong> 生成結果も同じコミットに含めます。</li>
+<li><strong>仕様を変えたら、資料も必ず同じコミットで更新する。</strong> 挙動・設定値・キー割り当て・手順・AI ツールの使い方が変わったら、生成部分は <code>python3 scripts/gen-docs.py</code> で作り直し、手書きの説明も直します。資料が古いままの変更はコミットしません。AI 側では、skills とサブエージェントの手順にもこの決まりが組み込まれていて、レビュー役は更新漏れを「要修正」として指摘します。</li>
 <li><strong>本家の資料はオリジナルのまま残す。</strong> <code>memo.md</code>（本家の verB2 リリースノート）は編集しません。</li>
 </ul>
 
@@ -425,7 +425,14 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>0</strong> 件 ／ 対応済み 2 件</p>
+<p>未対応 <strong>5</strong> 件 ／ 対応済み 2 件</p>
+<ul>
+<li>2026-10-11 zmk-researcher: 改善メモで「zmk-docs は zmk-docs/keymaps/… で docs/ を挟まない」と再指摘。定義の「ZMK の docs/docs/ をそのまま写したもの」が zmk-docs/docs/ と読まれやすい（直下に keymaps/ などが並ぶと明記するとよい）</li>
+<li>2026-10-11 retro-nudge: 区切りの判定が「未コミットの変更が無い」だけなので、機能の設計を相談している途中（main で、まだ何も編集していない状態）でも発火しうる。main にいて、かつ機能ブランチの作業が終わったときに絞るなど、判定を見直す余地がある</li>
+<li>2026-10-11 config-reviewer: ZMK の調査用コピー（.zmk-ref/）の存在を知らず、「ローカルに ZMK のソースが無い」として zip_x_scaler の存在を要確認にした → 定義に .zmk-ref/ と、その中のどこを見ればよいかを足すとよい</li>
+<li>2026-10-11 add-feature: ビルドとレビューを並行させたため、レビュー役がビルド成功（＝ラベルが実在する裏付け）を知らずに要確認を出した → ビルドを先に済ませ、結果をレビューの依頼文に含めると手順に明記するとよい</li>
+<li>2026-10-11 lint-keymap: input-processors や keymap が参照する ZMK 標準のラベル（&amp;zip_* など）が実在するかは調べていない（レビュー役の改善メモ）→ .zmk-ref/ があれば dts の定義と照合する検査を足す案</li>
+</ul>
 <details>
 <summary>最近の対応済み（2 件）</summary>
 <ul>

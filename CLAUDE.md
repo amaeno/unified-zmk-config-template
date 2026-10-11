@@ -119,7 +119,7 @@ python3 scripts/gen-docs.py                 # 資料の生成ブロックを更�
 - `<!-- gen:… -->` から `<!-- /gen:… -->` の中は `scripts/gen-docs.py` が上書きする。手で編集しない
 - 繰り返し変わる事実は手書きせず、`scripts/docgen/` に生成器を足す。本文中の 1 つの値は `gen:value` で埋め込む
 - 同じ事実を複数の場所に書かない。このファイルと skills は資料の節へのリンクで済ませる
-- コードや設定を変えたら `python3 scripts/gen-docs.py` を実行し、生成結果も同じコミットに含める。手書き部分が古くなったら合わせて直す
+- **仕様（挙動・設定値・キー割り当て・手順・AI ツールの使い方）を変えたら、資料を必ず同じコミットで更新する。** 生成部分は `python3 scripts/gen-docs.py`、手書き部分は docs-sync か update-docs skill で直す。資料が古いままの変更はコミットしない
 - 新しいページは既存のページをひな形にし、`scripts/docgen/site.py` の `PAGES` に登録する
 - 既知の課題を直したら、`docs/known-issues.html` の表示が「解消済み」に変わるので、その節を消す
 - 本家由来の資料（`memo.md`）はオリジナルのまま残す
