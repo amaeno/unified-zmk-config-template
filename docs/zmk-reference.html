@@ -116,7 +116,7 @@
 <ul class="item-list">
 <li><p class="item-head">エンコーダの割り当ては「時計回り、反時計回り」の順</p><p><code>sensor-bindings</code> の第 1 引数が時計回り。出典: <code>zmk-docs/keymaps/behaviors/sensor-rotate.md</code></p></li>
 <li><p class="item-head">割り当ての無いレイヤーでは、下のレイヤーのエンコーダ割り当てが効く</p><p>有効なレイヤーを上から見て、割り当てのある最初のものを使う。出典: <code>zmk-app/src/keymap.c</code> の <code>zmk_keymap_sensor_event</code></p></li>
-<li><p class="item-head">エンコーダのスクロールは 1 回の発火で 1 ノッチ</p><p><code>zmk_encoder</code> は値の向きだけを使い、量をそろえる。そのため <code>ZMK_POINTING_DEFAULT_SCRL_VAL</code> は効かない（<code>&amp;msc</code> の最大速度にだけ効く）。出典: <code>zmk_encoder/src/behavior_encoder_mouse_scroll.c</code>、<code>zmk-app/include/dt-bindings/zmk/pointing.h</code></p></li>
+<li><p class="item-head">エンコーダのスクロールは 1 回の発火で 1 ノッチ</p><p><code>zmk_encoder</code> は値の向きだけを使い、量をそろえる。そのため <code>ZMK_POINTING_DEFAULT_SCRL_VAL</code> は効かない（<code>&amp;msc</code> の最大速度にだけ効く。このキーマップでは定義していないので ZMK の既定値）。出典: <code>zmk_encoder/src/behavior_encoder_mouse_scroll.c</code>、<code>zmk-app/include/dt-bindings/zmk/pointing.h</code></p></li>
 <li><p class="item-head">Studio で保存した割り当てはファイルより優先される</p><p>ファイル側に戻すには「Restore Stock Settings」。出典: <code>zmk-docs/features/studio.md</code></p></li>
 <li><p class="item-head">Studio はエンコーダの割り当てとコンボを扱わない</p><p>Studio の通信の処理に、どちらも出てこない。出典: <code>zmk-app/src/studio/</code></p></li>
 <li><p class="item-head">Studio が有効なときだけ、予約レイヤーも数えられる</p><p>Studio を外すと <code>scroll</code> などの予約レイヤーは無いことになり、呼び出すキーが効かなくなる。出典: <code>zmk-app/src/studio/Kconfig</code>、<code>zmk-app/include/zmk/keymap.h</code></p></li>
@@ -126,7 +126,7 @@
 <li><p class="item-head">EC11 の <code>resolution</code> は <code>steps</code> があると使われない</p><p>出典: <code>zmk-app/module/drivers/sensor/ec11/ec11.c</code></p></li>
 <li><p class="item-head">コンボの誤爆を防ぐ設定がある</p><p><code>require-prior-idle-ms</code>（ms）、<code>layers</code>、<code>slow-release</code>。出典: <code>zmk-app/dts/bindings/zmk,combos.yaml</code>、<code>zmk-app/src/combo.c</code></p></li>
 <li><p class="item-head">状態表示 LED の色</p><p>接続状態は 青 = つながっている、黄 = 待ち受け、赤 = 切れている。出典: <code>zmk-rgbled-widget/README.md</code></p></li>
-<li><p class="item-head"><code>CONFIG_NFCT_PINS_AS_GPIOS</code> は非推奨</p><p>後継は devicetree の <code>&amp;uicr { nfct-pins-as-gpios; }</code>。出典: Zephyr の <code>soc/nordic/Kconfig</code>（<code>.zmk-ref/</code> には写していない）</p></li>
+<li><p class="item-head"><code>CONFIG_NFCT_PINS_AS_GPIOS</code> は非推奨</p><p>後継は devicetree の <code>&amp;uicr { nfct-pins-as-gpios; }</code>（このリポジトリは 2026-10-12 に移行済み）。出典: Zephyr の <code>soc/nordic/Kconfig</code>（<code>.zmk-ref/</code> には写していない）</p></li>
 </ul>
 </section>
 </main>

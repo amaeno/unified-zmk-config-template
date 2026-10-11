@@ -36,7 +36,7 @@ LISTENERS = {
 DEVICE_NAMES = {"glidepoint": "トラックパッド", "trackball": "トラックボール"}
 
 # Kconfig の説明。(分類, 説明)。分類はこの順で並べる。ここに無いものは「その他」に入る。
-KCONFIG_GROUPS = ["基本", "Bluetooth", "ZMK Studio", "エンコーダ", "ポインタ", "ハードウェア", "LED", "電池・電源", "その他"]
+KCONFIG_GROUPS = ["基本", "Bluetooth", "ZMK Studio", "エンコーダ", "ポインタ", "LED", "電池・電源", "その他"]
 KCONFIG_NOTES = {
     "ZMK_KEYBOARD_NAME": ("基本", "キーボードの名前（Bluetooth の一覧に出る）"),
     "ZMK_SPLIT": ("基本", "分割キーボードとして動く"),
@@ -52,7 +52,6 @@ KCONFIG_NOTES = {
     "EC11_TRIGGER_GLOBAL_THREAD": ("エンコーダ", "エンコーダの割り込みを共有のスレッドで処理する"),
     "ZMK_BEHAVIORS_QUEUE_SIZE": ("エンコーダ", "behavior の待ち行列の長さ（既定 64）。エンコーダを速く回したときの取りこぼし対策"),
     "USB_HID_POLL_INTERVAL_MS": ("エンコーダ", "USB HID の問い合わせ間隔 (ms)"),
-    "ZMK_MOUSE": ("ポインタ", "マウス機能の旧名（非推奨。ZMK_POINTING と同じ意味）"),
     "ZMK_POINTING": ("ポインタ", "マウス・ポインタ機能"),
     "SPI": ("ポインタ", "SPI バス（トラックパッド・トラックボールの接続に使う）"),
     "INPUT": ("ポインタ", "Zephyr の入力サブシステム"),
@@ -60,7 +59,6 @@ KCONFIG_NOTES = {
     "INPUT_PINNACLE": ("ポインタ", "Cirque Pinnacle（トラックパッド）のドライバ"),
     "PMW3610_ALT": ("ポインタ", "PMW3610（トラックボール）のドライバ"),
     "PMW3610_ALT_REPORT_INTERVAL_MIN": ("ポインタ", "トラックボールの報告間隔の下限（既定 0）。無線で送りきれるよう間引く"),
-    "NFCT_PINS_AS_GPIOS": ("ハードウェア", "NFC 用のピン（P0.09・P0.10）を普通のピンとして使う。列のピンに使っているので必須"),
     "RGBLED_WIDGET": ("LED", "RGB LED で電池残量と接続状態を表示する"),
     "RGBLED_WIDGET_BATTERY_LEVEL_HIGH": ("LED", "電池残量の色分けで「多い」とする下限 %（既定 80）"),
     "RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL": ("LED", "電池残量の色分けで「危険」とする上限 %（既定 5）"),
@@ -145,11 +143,10 @@ def gen_encoders(page: Page, args: dict[str, str]) -> str:
                 pin(*a[0]) if a else "—",
                 pin(*b[0]) if b else "—",
                 esc(dts.prop_int(body, "steps")),
-                esc(dts.prop_int(body, "resolution")),
             ]
         )
     sensors = dts.find_node(src, "sensors") or ""
-    out = table(["ノード", "有効にする側", "A ピン", "B ピン", "steps", "resolution"], rows, sources(SHIELD, *SIDE_DTSI.values()))
+    out = table(["ノード", "有効にする側", "A ピン", "B ピン", "steps"], rows, sources(SHIELD, *SIDE_DTSI.values()))
     return out.replace(
         '<p class="gen-note">',
         "<p>1 回転あたりの発火数（triggers-per-rotation）: <strong>%s</strong></p>\n<p class=\"gen-note\">"
@@ -355,8 +352,6 @@ def _value(key: str) -> str:
     def s(v: object) -> str:
         return "" if v is None else str(v)  # 0 も正しい値なので `or` で潰さない
 
-    if key == "scrl-val":
-        return dts.defines(km).get("ZMK_POINTING_DEFAULT_SCRL_VAL", "")
     if key in ("msc-time-to-max", "msc-accel"):
         prop = {"msc-time-to-max": "time-to-max-speed-ms", "msc-accel": "acceleration-exponent"}[key]
         return s(dts.prop_int(dts.find_node(km, "&msc") or "", prop))
@@ -364,8 +359,8 @@ def _value(key: str) -> str:
         return s(dts.prop_int(dts.find_labeled(src, "trackball") or "", "cpi"))
     if key == "trackpad-sensitivity":
         return s(dts.prop_str(dts.find_labeled(src, "glidepoint") or "", "sensitivity"))
-    if key in ("encoder-steps", "encoder-resolution"):
-        return s(dts.prop_int(dts.find_labeled(src, "left_encoder") or "", key.split("-")[1]))
+    if key == "encoder-steps":
+        return s(dts.prop_int(dts.find_labeled(src, "left_encoder") or "", "steps"))
     if key == "encoder-triggers":
         return s(dts.prop_int(dts.find_node(src, "sensors") or "", "triggers-per-rotation"))
     if key == "scroll-counts":

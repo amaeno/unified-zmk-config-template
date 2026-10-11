@@ -14,7 +14,7 @@ color: yellow
 
 - この機体は右が `sosho_R_trackpad`（セントラル）、左が `sosho_L_trackball`（CLAUDE.md の「この機体」）
 - キーマップ・コンボ・エンコーダの割り当ては右だけが処理する。ポインタの `input-processors` は右の overlay にある（左のトラックボールの分も）
-- 事実の正本は `docs/*.html`。消すとビルドが壊れる箇所などは `docs/known-issues.html` にある
+- 事実の正本は `docs/*.html`。未解決の課題は `docs/known-issues.html` にある
 - ZMK 本体と外部モジュールのソース・資料は `.zmk-ref/`（git 管理外の調査用コピー）にある。標準のラベル（`&zip_*` や `&kp` など）の定義は `.zmk-ref/zmk-app/dts/` の `*.dtsi`、プロパティの仕様は `.zmk-ref/zmk-app/dts/bindings/`、使い方は `.zmk-ref/zmk-docs/` で確かめる。`.zmk-ref/` が無ければ「`./scripts/build-local.sh --ref` で作れる」と報告する
 - 依頼文にビルドの結果があれば根拠に使う（ビルドが通っていれば、参照しているラベルは実在する）
 
@@ -28,7 +28,7 @@ color: yellow
 ## 観点
 
 - **キーマップ**: バインディングの引数の数、存在しない behavior やキーコード、レイヤー番号、コンボの位置（`docs/keymap.html` の `id="positions"` のテキスト版）と `timeout-ms`、`sensor-bindings` の向き（第 1 引数が時計回り）
-- **devicetree**: 参照しているラベルが存在するか、`status`、左右どちらのファイルか、`sosho.dtsi` 冒頭の `&physical_layout0` の上書きを消していないか
+- **devicetree**: 参照しているラベルが存在するか、`status`、左右どちらのファイルか、NFC ピンを普通のピンにする `&uicr { nfct-pins-as-gpios; }`（列 3・5 のキーに必要）を消していないか
 - **Kconfig**: 右だけ・左だけに要る設定か、同じファイル内の重複宣言（後勝ち）、非推奨のシンボル
 - **書き込み先**: 変更から、右・左・左右のどれに書き込むべきか（`docs/workflow.html` の `id="flash"` の表）
 - **資料**: `gen-docs.py --check` が通るか。手書き部分に古くなった記述が無いか（変えたファイル名や値で `docs/` を Grep する）。仕様（挙動・設定値・キー割り当て・手順）が変わったのに資料が更新されていなければ、判定は「要修正」にする（資料は必ず同じコミットで更新する決まりのため）

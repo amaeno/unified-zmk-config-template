@@ -69,9 +69,7 @@
 <tr><td>トラックパッドの感度</td><td><code>sosho.dtsi</code> の <code>glidepoint</code> の <code>sensitivity</code></td><td><!-- gen:value of=trackpad-sensitivity -->
 <code>1x</code>
 <!-- /gen:value --></td><td>トラックパッドの側（この機体は右）</td></tr>
-<tr><td><code>&amp;msc</code> キーのスクロール量</td><td><code>config/sosho.keymap</code> の <code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code></td><td><!-- gen:value of=scrl-val -->
-<code>150</code>
-<!-- /gen:value -->（<a href="known-issues.html#issue-scrl-unused">いまは効いていない</a>）</td><td>右</td></tr>
+<tr><td><code>&amp;msc</code>（キーに割り当てたスクロール）の加速</td><td><code>config/sosho.keymap</code> の <code>&amp;msc</code></td><td><a href="#scroll">スクロール</a></td><td>右</td></tr>
 <tr><td>Bluetooth の接続パラメータ</td><td>各 <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
 <tr><td>LED の電池残量の色分け</td><td>各 <code>*.conf</code> の <code>RGBLED_WIDGET_BATTERY_LEVEL_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
 <tr><td>ビルドするターゲット</td><td><code>build.yaml</code></td><td><a href="workflow.html#targets">ターゲット一覧</a></td><td>—</td></tr>
@@ -93,9 +91,7 @@
 <code>24</code>
 <!-- /gen:value -->、1 回転あたり）で決まる。音量など他のエンコーダ操作も同じ値を使う。細かい量は OS のスクロール設定で調整する</td></tr>
 <tr><td>ポインタの動きをスクロールに変える（<code>zip_xy_to_scroll_mapper</code>）</td><td>右の overlay の <code>input-processors</code> で、前に <code>zip_xy_scaler</code> を置いて速さを変える。この機体では、<strong>L4 <code>scroll</code> のあいだの左トラックボール</strong>がこの方法でスクロールになる（下の注記）</td></tr>
-<tr><td>キーにスクロールを割り当てる（<code>&amp;msc</code>）</td><td><code>#define ZMK_POINTING_DEFAULT_SCRL_VAL</code>（最大の速さ。いま <!-- gen:value of=scrl-val -->
-<code>150</code>
-<!-- /gen:value -->）と、<code>&amp;msc</code> の <code>time-to-max-speed-ms</code>（いま <!-- gen:value of=msc-time-to-max -->
+<tr><td>キーにスクロールを割り当てる（<code>&amp;msc</code>）</td><td>いまのファイルの割り当てでは使っていない。使うときの最大の速さは <code>SCRL_UP</code> などの値（ZMK の既定）、加速は <code>config/sosho.keymap</code> の <code>&amp;msc</code> の <code>time-to-max-speed-ms</code>（いま<!-- gen:value of=msc-time-to-max -->
 <code>0</code>
 <!-- /gen:value -->）・<code>acceleration-exponent</code>（いま <!-- gen:value of=msc-accel -->
 <code>0</code>
@@ -112,10 +108,7 @@
 </ol>
 <p><strong>速さ</strong>は <code>zip_xy_scaler</code> の「分母 ÷ 分子」の積で決まります。いまは <!-- gen:value of=scroll-counts -->
 <code>32</code>
-<!-- /gen:value --> カウントで 1 ノッチで、大きくするほど遅くなります。<strong>向きが逆</strong>なら、mapper の前に <code>&lt;&amp;zip_xy_transform INPUT_TRANSFORM_Y_INVERT&gt;</code> を足します。実機での動作確認はまだです。</p>
-</aside>
-<aside class="callout warn">
-<p><strong>キーマップ冒頭の「スクロール量の調整」は、いまのエンコーダには効きません。</strong> <code>zmk_encoder</code> モジュールは、受け取った値の向きだけを使い、量は常に 1 ノッチにそろえるためです（モジュールのソースで確認）。この値が効くのは <code>&amp;msc</code> を割り当てたキーだけで、いまのキーマップにはそのキーがありません。詳しくは <a href="known-issues.html#issue-scrl-unused">既知の課題</a>。</p>
+<!-- /gen:value --> カウントで 1 ノッチで、大きくするほど遅くなります。<strong>向きが逆</strong>なら、mapper の前に <code>&lt;&amp;zip_xy_transform INPUT_TRANSFORM_Y_INVERT&gt;</code> を足します。スクロールに切り替わることは実機で確認済みです。横の動きが本当に捨てられているかと、速さの調整は、<a href="known-issues.html#issue-pointer-sluggish">もっさり感の調査</a>のときに見直します。</p>
 </aside>
 </section>
 
@@ -190,10 +183,10 @@
 <tr><td><code>ZMK_KEYBOARD_NAME</code><span class="note">キーボードの名前（Bluetooth の一覧に出る）</span></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td><td><code>&quot;sosho&quot;</code></td></tr>
 <tr class="group"><td colspan="5"><strong>Bluetooth</strong></td></tr>
 <tr><td><code>ZMK_BLE</code><span class="note">Bluetooth を使う</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
-<tr><td><code>BT_PERIPHERAL_PREF_TIMEOUT</code><span class="note">切断とみなすまでの時間</span></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">接続間隔の希望の下限。右では PC との接続、左では右との接続に効く</span></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
-<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">接続間隔の希望の上限</span></td><td>—</td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small> <span class="badge warn">2 回宣言・後勝ち</span></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_LATENCY</code><span class="note">応答を省いてよい接続イベントの数。大きいほど省電力だが反応が遅れうる</span></td><td><code>0</code></td><td><code>10</code></td><td><code>0</code></td><td><code>10</code></td></tr>
+<tr><td><code>BT_PERIPHERAL_PREF_TIMEOUT</code><span class="note">切断とみなすまでの時間</span></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td><td><code>400</code> <small>4 秒</small></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MIN_INT</code><span class="note">接続間隔の希望の下限。右では PC との接続、左では右との接続に効く</span></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td><td>—</td><td><code>10</code> <small>12.5 ms</small></td></tr>
+<tr class="diff"><td><code>BT_PERIPHERAL_PREF_MAX_INT</code><span class="note">接続間隔の希望の上限</span></td><td>—</td><td><code>20</code> <small>25 ms</small></td><td>—</td><td><code>20</code> <small>25 ms</small></td></tr>
 <tr class="group"><td colspan="5"><strong>ZMK Studio</strong></td></tr>
 <tr class="diff"><td><code>ZMK_STUDIO</code><span class="note">ZMK Studio を有効にする</span></td><td><code>y</code></td><td>—</td><td><code>y</code></td><td>—</td></tr>
 <tr class="diff"><td><code>ZMK_STUDIO_LOCKING</code><span class="note">Studio の編集ロック（n = ロックしない。いつでも編集できる）</span></td><td><code>n</code></td><td>—</td><td><code>n</code></td><td>—</td></tr>
@@ -203,7 +196,6 @@
 <tr><td><code>ZMK_BEHAVIORS_QUEUE_SIZE</code><span class="note">behavior の待ち行列の長さ（既定 64）。エンコーダを速く回したときの取りこぼし対策</span></td><td><code>128</code></td><td><code>128</code></td><td><code>128</code></td><td><code>128</code></td></tr>
 <tr class="diff"><td><code>USB_HID_POLL_INTERVAL_MS</code><span class="note">USB HID の問い合わせ間隔 (ms)</span></td><td>—</td><td>—</td><td>—</td><td><code>1</code> <small>ms</small></td></tr>
 <tr class="group"><td colspan="5"><strong>ポインタ</strong></td></tr>
-<tr><td><code>ZMK_MOUSE</code><span class="note">マウス機能の旧名（非推奨。ZMK_POINTING と同じ意味）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr><td><code>ZMK_POINTING</code><span class="note">マウス・ポインタ機能</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr><td><code>SPI</code><span class="note">SPI バス（トラックパッド・トラックボールの接続に使う）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr><td><code>INPUT</code><span class="note">Zephyr の入力サブシステム</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
@@ -211,8 +203,6 @@
 <tr class="diff"><td><code>INPUT_PINNACLE</code><span class="note">Cirque Pinnacle（トラックパッド）のドライバ</span></td><td><code>y</code></td><td>—</td><td>—</td><td><code>y</code></td></tr>
 <tr class="diff"><td><code>PMW3610_ALT</code><span class="note">PMW3610（トラックボール）のドライバ</span></td><td>—</td><td><code>y</code></td><td><code>y</code></td><td>—</td></tr>
 <tr class="diff"><td><code>PMW3610_ALT_REPORT_INTERVAL_MIN</code><span class="note">トラックボールの報告間隔の下限（既定 0）。無線で送りきれるよう間引く</span></td><td>—</td><td><code>12</code> <small>ms</small></td><td><code>12</code> <small>ms</small></td><td>—</td></tr>
-<tr class="group"><td colspan="5"><strong>ハードウェア</strong></td></tr>
-<tr><td><code>NFCT_PINS_AS_GPIOS</code><span class="note">NFC 用のピン（P0.09・P0.10）を普通のピンとして使う。列のピンに使っているので必須</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr class="group"><td colspan="5"><strong>LED</strong></td></tr>
 <tr><td><code>RGBLED_WIDGET</code><span class="note">RGB LED で電池残量と接続状態を表示する</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr><td><code>RGBLED_WIDGET_BATTERY_LEVEL_HIGH</code><span class="note">電池残量の色分けで「多い」とする下限 %（既定 80）</span></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td></tr>

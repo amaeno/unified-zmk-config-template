@@ -20,7 +20,7 @@ model: opus
 ## 1. 調べる
 
 - 触るファイルと現在値: `docs/settings.html` の `id="map"`
-- 触るファイルが `docs/known-issues.html` に載っていないか（消すとビルドが壊れる箇所がある）
+- 触るところが `docs/known-issues.html` の未解決の課題に関係しないか
 - ZMK の仕様が絡むなら **zmk-researcher** に聞く。記憶で書かない（版で書き方が変わるため）
 - キーの位置は `docs/keymap.html` の `id="positions"` のテキスト版
 
