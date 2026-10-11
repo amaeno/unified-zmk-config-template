@@ -29,12 +29,6 @@ def active_lines(path, pattern: str) -> list[str]:
     return [l for l in read(path).splitlines() if not l.lstrip().startswith("#") and re.search(pattern, l)]
 
 
-@check("pointer-sluggish")
-def _pointer_sluggish() -> tuple[bool, str]:
-    # 実機の操作感の課題なので、ファイルからは判定できない。解決したら節ごと消す
-    return True, "要調査（実機の操作感）"
-
-
 def status_html(issue_id: str) -> str:
     fn = CHECKS.get(issue_id)
     if fn is None:
@@ -55,6 +49,9 @@ def gen_issue_summary(page: Page, args: dict[str, str]) -> str:
     rows = []
     for issue_id, title in re.findall(r'<h2 id="issue-([\w-]+)">(.*?)</h2>', page.text, re.S):
         rows.append('<tr><td><a href="#issue-%s">%s</a></td><td>%s</td></tr>' % (issue_id, title, status_html(issue_id)))
+    note = '<p class="gen-note">自動生成 · 状態は %s がファイルを調べて判定</p>' % code("scripts/docgen/issues.py")
+    if not rows:
+        return "\n".join(['<div class="gen">', "<p>いま、未解決の課題はありません。</p>", note, "</div>"])
     return "\n".join(
         [
             '<div class="gen">',
@@ -66,7 +63,7 @@ def gen_issue_summary(page: Page, args: dict[str, str]) -> str:
             "</tbody>",
             "</table>",
             "</div>",
-            '<p class="gen-note">自動生成 · 状態は %s がファイルを調べて判定</p>' % code("scripts/docgen/issues.py"),
+            note,
             "</div>",
         ]
     )
