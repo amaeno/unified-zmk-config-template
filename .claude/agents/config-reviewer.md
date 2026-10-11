@@ -15,6 +15,8 @@ color: yellow
 - この機体は右が `sosho_R_trackpad`（セントラル）、左が `sosho_L_trackball`（CLAUDE.md の「この機体」）
 - キーマップ・コンボ・エンコーダの割り当ては右だけが処理する。ポインタの `input-processors` は右の overlay にある（左のトラックボールの分も）
 - 事実の正本は `docs/*.html`。消すとビルドが壊れる箇所などは `docs/known-issues.html` にある
+- ZMK 本体と外部モジュールのソース・資料は `.zmk-ref/`（git 管理外の調査用コピー）にある。標準のラベル（`&zip_*` や `&kp` など）の定義は `.zmk-ref/zmk-app/dts/` の `*.dtsi`、プロパティの仕様は `.zmk-ref/zmk-app/dts/bindings/`、使い方は `.zmk-ref/zmk-docs/` で確かめる。`.zmk-ref/` が無ければ「`./scripts/build-local.sh --ref` で作れる」と報告する
+- 依頼文にビルドの結果があれば根拠に使う（ビルドが通っていれば、参照しているラベルは実在する）
 
 ## 手順
 

@@ -6,7 +6,9 @@
 
   - Stop フックによる継続中ではない（stop_hook_active が false）
   - .claude/improvements.md の「未対応」に 1 件以上ある
-  - 未コミットの変更が無い（作業の区切り。improvements.md 自体の変更は数えない）
+  - 未コミットの変更が無い（improvements.md 自体の変更は数えない）
+  - 直近 30 分以内にコミットがある（何かを仕上げてコミットした直後を「区切り」とみなす。
+    設計の相談中など、まだ何も仕上げていない時点では促さない）
   - このセッションでまだ促していない（.claude/state/retro-nudge.json に記録）
 
 どれかが欠ければ何も出力せずに終わるので、メモが無いあいだはトークンを使わない。
@@ -19,10 +21,12 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 LOG = Path(".claude") / "improvements.md"
 STATE = Path(".claude") / "state" / "retro-nudge.json"
+RECENT_SEC = 30 * 60  # これより前のコミットしか無ければ、まだ区切りではない
 
 
 def pending(root: Path) -> list[str]:
@@ -41,6 +45,14 @@ def at_break(root: Path) -> bool:
         return False
     changed = [l[3:].strip() for l in r.stdout.splitlines() if l.strip()]
     return all(p == LOG.as_posix() for p in changed)
+
+
+def committed_recently(root: Path) -> bool:
+    r = subprocess.run(["git", "log", "-1", "--format=%ct"], cwd=root, capture_output=True, text=True)
+    try:
+        return time.time() - int(r.stdout.strip()) <= RECENT_SEC
+    except ValueError:
+        return False
 
 
 def already_nudged(root: Path, session_id: str) -> bool:
@@ -62,7 +74,7 @@ def main() -> int:
     root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or ".")
     memos = pending(root)
     session_id = str(data.get("session_id", ""))
-    if not memos or not at_break(root) or already_nudged(root, session_id):
+    if not memos or not at_break(root) or not committed_recently(root) or already_nudged(root, session_id):
         return 0
     (root / STATE).parent.mkdir(parents=True, exist_ok=True)
     (root / STATE).write_text(json.dumps({"session_id": session_id}), "utf-8")
