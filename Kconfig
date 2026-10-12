@@ -32,7 +32,7 @@ config SOSHO_CHARGING_LED_FADE_MIN_PCT
 config SOSHO_CHARGING_LED_YELLOW_RED_PCT
     int "黄を作るときの赤の強さ（緑に対する %）"
     range 0 100
-    default 50
+    default 70
     help
       XIAO の緑の LED は抵抗が大きく暗い（赤 2.2 kΩ、緑 10 kΩ）。赤と緑を同じだけ点けるとオレンジに見えるので、
       赤を弱めて黄に寄せる。上げるとオレンジ寄りで明るく、下げると緑寄りで暗くなる
