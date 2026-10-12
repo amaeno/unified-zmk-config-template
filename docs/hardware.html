@@ -44,6 +44,7 @@
 <li><a href="#encoders">エンコーダ</a></li>
 <li><a href="#pointing">ポインティングデバイス</a></li>
 <li><a href="#split">左の入力が右に届くまで</a></li>
+<li><a href="#charging">電池と充電</a></li>
 <li><a href="#files">ファイル構成</a></li>
 </ol>
 </nav>
@@ -74,7 +75,7 @@
 <li>左右それぞれに Seeed XIAO nRF52840 が載っていて、左右は Bluetooth で繋がります。</li>
 <li><strong>右がセントラル</strong>です。PC と Bluetooth（または USB）で繋がり、キーマップの処理もここで行います。ZMK Studio で USB 接続するのも右です。</li>
 <li><strong>左はペリフェラル</strong>です。キーが押された位置、エンコーダの回転、ポインタの動きを右へ送るだけで、キーマップは持ちません。</li>
-<li>状態表示の RGB LED は、ビルド時に一緒に指定する <code>rgbled_adapter</code> シールドと、<code>zmk-rgbled-widget</code> モジュールで動かします。使う LED は、<code>sosho.dtsi</code> の <code>aliases</code>（<code>led-red</code> = <code>led0</code> など）で XIAO 基板上の LED に割り当てています。</li>
+<li>状態表示の RGB LED は、ビルド時に一緒に指定する <code>rgbled_adapter</code> シールドと、<code>zmk-rgbled-widget</code> モジュールで動かします。使う LED は、<code>sosho.dtsi</code> の <code>aliases</code>（<code>led-red</code> = <code>led0</code> など）で XIAO 基板上の LED に割り当てています。電池残量と接続状態に加えて、USB でつないでいるときは充電の状態も出します（<a href="#charging">電池と充電</a>）。</li>
 </ul>
 <aside class="callout note">
 <p><strong>ピンの表記:</strong> <code>P0.02</code> は nRF52840 のピン名（ポート 0 の 2 番）です。横の <code>D0</code> などは XIAO の基板に印刷されている名前です。D0〜D10 以外のピンは、XIAO nRF52840 Plus で増えた裏面のピンです。</p>
@@ -197,6 +198,49 @@
 </section>
 
 <section>
+<h2 id="charging">電池と充電</h2>
+<p>左右それぞれが、自分の電池の充電状態を状態表示の LED に出します（<code>src/charging_led.c</code>）。充電そのものの動きには触りません。XIAO 基板上の赤い充電 LED もそのまま点きます。</p>
+
+<h3 id="charging-led">LED の表示</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>状態</th><th>表示</th><th>意味</th></tr></thead>
+<tbody>
+<tr><td>充電中</td><td>黄を 3 秒おきに 200 ms 点滅</td><td>充電 IC が充電している</td></tr>
+<tr><td>完了</td><td>緑を点灯（USB を抜くまで）</td><td>充電が止まり、電池電圧が 4000 mV 以上</td></tr>
+<tr><td>要確認</td><td>赤を 3 秒おきに 200 ms 点滅</td><td>充電が止まっているのに、電池電圧が 4000 mV 未満（または測れない）。電池・温度・安全タイマーの打ち切りなどを疑う</td></tr>
+<tr><td>USB なし</td><td>何もしない</td><td>従来の表示（電池残量・接続状態）のまま</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>判定の仕組み:</strong> 充電 IC の CHG 信号（P0.17。充電中は Low）と、nRF52840 の USB 給電の検出（POWER の <code>USBREGSTATUS.VBUSDETECT</code>）を 1 秒ごとに読み、同じ状態が 3 秒続いたら確定します。</li>
+<li><strong>完了と要確認の分け方:</strong> CHG が High になったら電池電圧を測ります。充電が止まっている間は 60 秒ごとに測り直します。電池残量（%）で判定しないのは、充電中は電圧が高く出て % が早く 100% になるためです。</li>
+<li><strong>電圧を自分で測る理由:</strong> ZMK の電池の測定は、操作が無いまま 30 秒で止まります。このモジュールは完了の判定のときに自分で測ります（ZMK の測定と同じ低優先度のキューで動かし、測定が重ならないようにしています）。</li>
+<li><strong>deep sleep:</strong> ZMK は USB から給電されている間は deep sleep に入らないので、充電中に表示が消えることはありません。左も同じです（<a href="zmk-reference.html#facts">ZMK リファレンス › 確かめた仕様</a>）。deep sleep に入るときは LED を直接消します。</li>
+<li><strong>設定:</strong> 点滅の長さ・間隔と完了とみなす電圧は Kconfig で変えます（<a href="settings.html#charging-led">設定項目 › 充電表示</a>）。</li>
+</ul>
+<aside class="callout warn">
+<p><strong>zmk-rgbled-widget の内部に頼っています。</strong> <code>src/widget.c</code> の大域変数 <code>led_msgq</code>・<code>led_layer_color</code>・<code>led_current_color</code> と <code>struct blink_item</code> の並びを使っています。widget の版を上げるときは、これらが変わっていないか確かめます（<a href="workflow.html#zmk-update">開発フロー › ZMK の版を上げる</a>）。起動時に <code>led_msgq</code> の項目の大きさが合わないと、ログにエラーを出して充電の表示は動きません。</p>
+</aside>
+
+<h3 id="charging-hw">充電まわりのハードウェア</h3>
+<p>出典: <a href="https://files.seeedstudio.com/wiki/XIAO-BLE/Seeed-Studio-XIAO-nRF52840-Sense-v1.1.pdf">XIAO nRF52840 v1.1 の回路図</a>、<a href="https://www.ti.com/document-viewer/BQ25101/datasheet/detailed_description">TI BQ25101 データシート</a>、<a href="https://wiki.seeedstudio.com/XIAO_BLE/">Seeed Wiki</a> と <a href="https://wiki.seeedstudio.com/battery_charging_considerations/">充電の注意</a>。</p>
+<ul class="item-list">
+<li><p class="item-head">充電 IC は BQ25101</p><p>定電流で充電したあと、4.2 V（誤差 1%）の定電圧で充電し、電流が小さくなったら終えます。終えたあと 4.1 V（4.2 V の 100 mV 下）まで下がったら継ぎ足します。10 時間の安全タイマーで打ち切ります（データシート）。</p></li>
+<li><p class="item-head">CHG は「電源をつないでから最初の充電の間だけ」Low</p><p>継ぎ足しの充電では Low に戻りません。安全タイマーで止まったときは High になります（データシート 8.3.2・8.3.9）。このため「完了」は CHG が High になったうえで電圧でも確かめています。</p></li>
+<li><p class="item-head">CHG は赤い充電 LED と P0.17 につながる</p><p>XIAO の赤い充電 LED（3V3 から 2.2 kΩ）と P0.17 が同じ信号です。赤い LED は充電中に点き、完了で消えます（回路図）。</p></li>
+<li><p class="item-head">USB 給電中は電池が切り離される</p><p>3.3 V のレギュレータには VBUS からダイオード経由で給電され、電池は P-MOSFET で切り離されます（回路図の Q1・D1）。打っている最中でも充電の終了判定が狂いません。</p></li>
+<li><p class="item-head">電池の温度監視は無効</p><p>TS 端子は 10 kΩ で GND に固定されています（回路図の注記「Disable Temp sense function」）。そのため、暑い場所や 0 ℃ 以下では充電 IC が自分では止まりません。</p></li>
+<li><p class="item-head">充電電流は約 50 mA</p><p>ISET の抵抗 2.7 kΩ（固定）と、P0.13 につながるもう 1 本の 2.7 kΩ で決まります。P0.13 を Low にすると約 100 mA、触らなければ（ハイインピーダンス）約 50 mA です。ZMK は P0.13 を使っていないので約 50 mA です（回路図と Seeed Wiki）。</p></li>
+<li><p class="item-head">電池電圧は P0.31 で測る</p><p>VBAT から 1 MΩ / 510 kΩ の分圧で、下側は P0.14 です。Seeed は「充電中に P0.14 を High にすると P0.31 が 3.6 V に達して壊れるおそれ」と注意しています。ZMK のボード定義は P0.14 をオープンドレインのアクティブ Low にしていて、測るときだけ Low にし、ふだんは離します（High には駆動しません）。出典: <code>.zmk-ref/zmk-app/boards/seeed/xiao_ble/xiao_ble_zmk.dts</code>、<code>battery_voltage_divider.c</code></p></li>
+</ul>
+
+<h3 id="overcharge">つなぎっぱなしで過充電にならないか</h3>
+<p>4.2 V を超えて充電され続けることはありません（上の電圧制御・終了・安全タイマーのため）。つなぎっぱなしの影響は寿命の問題です。満充電の近く（4.1〜4.2 V）に張り付くので、容量の減りや膨らみが早まります（熱で悪化します）。完了したら外す運用がよいです。電池側の保護回路（過充電で切る保護基板）の有無は手元の電池によります。</p>
+</section>
+
+<section>
 <h2 id="files">ファイル構成</h2>
 <!-- gen:claude-md section=ファイル構成 -->
 <div class="gen">
@@ -214,6 +258,8 @@ boards/shields/sosho/
   sosho_{L,R}_{trackpad,trackball}.conf      Kconfig（BLE/LED/電池/Studio 等）
   sosho.zmk.yml                  シールドのメタ情報
   sosho.layout.json              旧形式のレイアウト情報（どのビルドからも参照されていない）
+src/charging_led.c               このリポジトリ独自のファームウェアのコード: 充電状態を LED に出す
+CMakeLists.txt / Kconfig         src/ のビルド定義と設定項目（CONFIG_SOSHO_*）
 docs/                            人間向けの資料（HTML）。事実の正本
   assets/style.css               全ページ共通のスタイル
 scripts/                         ビルド・lint・資料生成（一覧は docs/workflow.html#scripts）
@@ -223,7 +269,7 @@ scripts/                         ビルド・lint・資料生成（一覧は doc
   hooks/retro-nudge.py           作業の区切りで改善提案を促す Stop フック
   improvements.md                skills・エージェントの改善メモ（/retro が読む）
 .zmk-ref/                        ZMK のソースと資料の調査用コピー（git 管理外。build-local.sh --ref で作る）
-zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
+zephyr/module.yml                board_root: . で boards/ を、cmake・kconfig で src/ を ZMK に認識させる要
 memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）</code></pre>
 <p class="gen-note">自動生成 · 元: <code>CLAUDE.md</code> の「ファイル構成」節</p>
 </div>

@@ -72,6 +72,8 @@ boards/shields/sosho/
   sosho_{L,R}_{trackpad,trackball}.conf      Kconfig（BLE/LED/電池/Studio 等）
   sosho.zmk.yml                  シールドのメタ情報
   sosho.layout.json              旧形式のレイアウト情報（どのビルドからも参照されていない）
+src/charging_led.c               このリポジトリ独自のファームウェアのコード: 充電状態を LED に出す
+CMakeLists.txt / Kconfig         src/ のビルド定義と設定項目（CONFIG_SOSHO_*）
 docs/                            人間向けの資料（HTML）。事実の正本
   assets/style.css               全ページ共通のスタイル
 scripts/                         ビルド・lint・資料生成（一覧は docs/workflow.html#scripts）
@@ -81,7 +83,7 @@ scripts/                         ビルド・lint・資料生成（一覧は doc
   hooks/retro-nudge.py           作業の区切りで改善提案を促す Stop フック
   improvements.md                skills・エージェントの改善メモ（/retro が読む）
 .zmk-ref/                        ZMK のソースと資料の調査用コピー（git 管理外。build-local.sh --ref で作る）
-zephyr/module.yml                board_root: . を供給。boards/ を ZMK に認識させる要
+zephyr/module.yml                board_root: . で boards/ を、cmake・kconfig で src/ を ZMK に認識させる要
 memo.md                          本家の verB2 リリースノート（オリジナルのまま残す）
 ```
 

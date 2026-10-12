@@ -132,6 +132,7 @@ build_one() {
 
   # ZMK_EXTRA_MODULES がリポジトリを Zephyr モジュールとして読み込ませる。
   # これが zephyr/module.yml の board_root: . を有効にし、boards/shields/sosho/ を見つけさせる。
+  # 同じファイルの cmake・kconfig で、リポジトリ直下の CMakeLists.txt・Kconfig（src/ のコード）も入る。
   local -a cargs=(-DZMK_CONFIG="$WS/config" -DZMK_EXTRA_MODULES="$REPO")
   # shield が複数語のときは、フラグを分けず 1 つの空白区切り文字列として渡す
   # （Kconfig.shield の shields_list_contains がこのリストを解釈する）。

@@ -120,6 +120,12 @@
     leds {
         status = "okay";
     };
+
+	/* 充電 IC（BQ25101）の CHG 信号。充電中は Low（XIAO の赤い充電 LED と同じ線）。
+	   src/charging_led.c が読むだけで、充電電流を切り替える P0.13 には触らない */
+    zephyr,user {
+        chg-gpios = <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
 };
 
 &pinctrl {

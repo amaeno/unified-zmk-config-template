@@ -63,6 +63,7 @@
 <tr><td>スクロール量などのマクロ（<code>#define</code>）</td><td><span class="badge build">要ビルド</span></td><td><code>config/sosho.keymap</code></td></tr>
 <tr><td>ポインタの速度・反転・スクロール化（<code>input-processors</code>）</td><td><span class="badge build">要ビルド</span></td><td><code>boards/shields/sosho/*.overlay</code></td></tr>
 <tr><td>Bluetooth・LED・電池などの設定（Kconfig）</td><td><span class="badge build">要ビルド</span></td><td><code>boards/shields/sosho/*.conf</code></td></tr>
+<tr><td>このリポジトリ独自のコード（<code>src/</code>・<code>Kconfig</code>・<code>CMakeLists.txt</code>。充電表示など）</td><td><span class="badge build">要ビルド</span></td><td><code>src/</code></td></tr>
 <tr><td>ピン配置などのハードウェア定義、外部モジュール</td><td><span class="badge build">要ビルド</span></td><td><code>*.dtsi</code>・<code>config/west.yml</code></td></tr>
 </tbody>
 </table>
@@ -233,6 +234,7 @@ git switch main</code></pre>
 <ul>
 <li>ビルドは Docker イメージ <code>zmkfirmware/zmk-build-arm:stable</code> の中で動きます。</li>
 <li>west ワークスペース（ZMK 本体と依存一式）と ccache は、名前付きボリューム <code>sosho-zmk-ws</code> に置きます。初回に取得したものを以降ずっと再利用します。</li>
+<li>このリポジトリ自身も Zephyr のモジュールです。<code>zephyr/module.yml</code> が <code>board_root</code>（シールドの場所）に加えて、独自のコードの <code>cmake</code>（<code>CMakeLists.txt</code>・<code>src/</code>）と <code>kconfig</code>（<code>Kconfig</code>）を供給します。</li>
 <li>ディスク使用量はイメージ 2.2GB とワークスペース 3.2GB です。捨てるときは <code>docker volume rm sosho-zmk-ws</code>。</li>
 <li>ZMK や外部モジュールの版は、<code>config/west.yml</code> で動作を確かめたコミットに固定しています。<code>--update</code> しても固定した版を取り直すだけで、版は動きません。</li>
 </ul>
@@ -258,6 +260,9 @@ git switch main</code></pre>
 
 <h3 id="zmk-update">ZMK の版を上げる</h3>
 <p>ZMK 本体や外部モジュールの修正を取り込みたいときの手順です。版を上げるとビルドが壊れたり挙動が変わったりすることがあるので、専用のブランチで試し、実機で確かめてから固定し直します。左右は必ず同じ版にそろえます。</p>
+<aside class="callout warn">
+<p><strong>zmk-rgbled-widget を上げるとき:</strong> <code>src/charging_led.c</code> が widget の内部（<code>src/widget.c</code> の大域変数 <code>led_msgq</code>・<code>led_layer_color</code>・<code>led_current_color</code> と <code>struct blink_item</code> の並び）に頼っています。これらが変わっていないか確かめます（<a href="hardware.html#charging">ハードウェア › 電池と充電</a>）。</p>
+</aside>
 <ol class="steps">
 <li><p><strong>ブランチを切る。</strong> <code>git switch -c build/update-zmk main</code></p></li>
 <li><p><strong>上げたいものの revision を書き換える。</strong> <code>config/west.yml</code> の該当プロジェクトを <code>main</code>（最新）か、タグ・新しいコミットにします。</p></li>
@@ -336,7 +341,8 @@ git switch main</code></pre>
 <tr><td><code>config/west.yml</code> を変えたのに反映されない</td><td><code>./scripts/build-local.sh --update</code></td></tr>
 <tr><td>ZMK の版を上げたら、ビルドが壊れた・動きが変わった</td><td>上げた版での変更（名前の変わった設定や behavior）を疑う。新旧の <code>.zmk-ref/VERSIONS.txt</code> と ZMK の変更履歴を比べる。戻すなら <code>config/west.yml</code> を前のコミットに戻して <code>--update</code>（<a href="#zmk-update">ZMK の版を上げる</a>）</td></tr>
 <tr><td><code>Missing ZMK Compat</code></td><td>board 名から <code>/zmk</code> が落ちている。<code>xiao_ble/nrf52840/zmk</code> が正しい</td></tr>
-<tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code> の <code>board_root: .</code> を有効にしている</td></tr>
+<tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code>（<code>board_root: .</code> と独自コードの cmake・kconfig）を有効にしている</td></tr>
+<tr><td>USB でつないでも充電の表示（黄・緑・赤）が出ない</td><td>その側の <code>*.conf</code> に <code>CONFIG_SOSHO_CHARGING_LED=y</code> があるか、ビルド結果の <code>.config</code> で有効になっているかを見る。zmk-rgbled-widget の版を上げた直後なら、widget の内部が変わっていないか確かめる（<a href="#zmk-update">ZMK の版を上げる</a>）。起動時のログに <code>led_msgq</code> の大きさが合わないエラーが出ることがある</td></tr>
 <tr><td>書き込むと「デバイスが取り外されました」と出る</td><td>正常。書き込みが終わるとマイコンが再起動し、USB ドライブが消えるため。Finder のコピーで失敗するときは <code>cp -X</code> で書き込む（<a href="#flash">書き込み</a>）</td></tr>
 <tr><td>書き込んだあと、PC とつながらない（左右はつながる）</td><td>右の LED の色で状態を見て、PC 側とキーボード側の記録を消してつなぎ直す（<a href="#pc-pairing">PC とつながらないとき</a>）</td></tr>
 <tr><td>キーマップのファイルを書き換えて書き込んだのに、割り当てが変わらない</td><td>Studio で保存した割り当てが優先されている。キー割り当ての正本は Studio なので、割り当ては Studio で変える。ファイルの初期値に戻したいときだけ Studio の「Restore Stock Settings」（Studio の変更は消える。<a href="#decide">ビルドが要るか</a>）</td></tr>
@@ -352,7 +358,7 @@ git switch main</code></pre>
 <h2 id="internals">ビルドスクリプトを直すとき</h2>
 <p><code>scripts/build-local.sh</code> と <code>scripts/build-in-container.sh</code> には、壊すとビルドが通らなくなる前提があります。</p>
 <ul>
-<li><strong>west ワークスペースをリポジトリ直下に置かない。</strong> <code>west init -l config</code> は topdir をリポジトリルートにするため、<code>west update</code> が作る <code>zephyr/</code> が既存の <code>zephyr/module.yml</code> と衝突します。この <code>module.yml</code> が <code>board_root: .</code> を供給しており、失うと <code>boards/</code> が見つからなくなります。ZMK 公式 CI も同じ回避をしています。シンボリックリンクも不可です（<code>west init -l</code> は <code>Path.resolve()</code> するのでリポジトリ内に戻ってしまう）。</li>
+<li><strong>west ワークスペースをリポジトリ直下に置かない。</strong> <code>west init -l config</code> は topdir をリポジトリルートにするため、<code>west update</code> が作る <code>zephyr/</code> が既存の <code>zephyr/module.yml</code> と衝突します。この <code>module.yml</code> が <code>board_root: .</code> と独自コードの cmake・kconfig を供給しており、失うと <code>boards/</code> と <code>src/</code> が見つからなくなります。ZMK 公式 CI も同じ回避をしています。シンボリックリンクも不可です（<code>west init -l</code> は <code>Path.resolve()</code> するのでリポジトリ内に戻ってしまう）。</li>
 <li><strong><code>-u $(id -u)</code> を付けない。</strong> Zephyr SDK は root の CMake パッケージレジストリ（<code>/root/.cmake/packages/Zephyr-sdk</code>）に登録されています。同じ理由で <code>/root</code> に何もマウントしないこと。</li>
 <li><strong>ビルドディレクトリは名前付きボリュームに置く。</strong> macOS の bind mount は小さなファイルが大量にあると極端に遅くなります。</li>
 <li><strong><code>west zephyr-export</code> を毎回実行する。</strong> <code>--rm</code> で <code>/root</code> が消えるためです。</li>
@@ -484,7 +490,12 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>0</strong> 件 ／ 対応済み 19 件</p>
+<p>未対応 <strong>3</strong> 件 ／ 対応済み 19 件</p>
+<ul>
+<li>2026-10-12 zmk-build: 引数に 2 つのターゲット（sosho_R_trackpad sosho_L_trackball）を渡したのに、右だけをビルドして報告し、左は古い成果物のままだった（左だけを渡して再実行して解決）→ 手順 3 に「渡されたターゲットを全部 1 回の build-local.sh に渡す」、報告に「ターゲットごとの成果物の大きさ」を必須にするとよい</li>
+<li>2026-10-12 メイン会話（add-feature の調査）: 「左は ZMK_USB が無いので USB 給電中でも 15 分で寝る」と Kconfig の依存だけで判断してユーザーに説明した。実際は XIAO のボード定義が USB シリアルのために USB_DEVICE_STACK を有効にしていて、左でも給電中は寝ない（ビルド結果の .config で判明）→ add-feature の手順 1 に「ZMK の挙動を左右の違いで判断するときは、両方のビルド結果の .config で前提の設定を確かめる」を足すとよい</li>
+<li>2026-10-12 config-reviewer: 初めて独自の C コード（src/charging_led.c）を足したとき、並行性や deep sleep 直前の競合は依頼文で頼まれてから見た → 観点に「SYS_INIT・スレッド・ワークキューを使う独自コードを足したら、初期化の順序、複数スレッドからの書き込み、deep sleep 直前の競合を確かめる」を足すとよい（レビュー役の改善メモ）</li>
+</ul>
 <details>
 <summary>最近の対応済み（5 件）</summary>
 <ul>

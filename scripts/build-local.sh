@@ -41,7 +41,7 @@ TTY_FLAGS="-i"
 #
 # west ワークスペースは名前付きボリューム上に置く。リポジトリ直下に置くと
 # west が作る zephyr/ が既存の zephyr/module.yml と衝突する（module.yml は
-# board_root: . を供給しているので失うと boards/ が見つからなくなる）。
+# board_root: . と src/ のビルド定義を供給しているので、失うと boards/ と src/ が見つからなくなる）。
 # ZMK 公式 CI も zephyr/module.yml があるリポジトリでは同じ回避をしている。
 exec docker run --rm $TTY_FLAGS \
   -v "$VOLUME:/ws" \

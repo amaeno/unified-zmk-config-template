@@ -1,4 +1,7 @@
 name: zmk-keyboard-sosho
 build:
+  # このリポジトリ独自のファームウェアのコード（CMakeLists.txt・Kconfig・src/）
+  cmake: .
+  kconfig: Kconfig
   settings:
     board_root: .
