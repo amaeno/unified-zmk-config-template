@@ -9,12 +9,11 @@
 
 ## 未対応
 
-- 2026-10-12 zmk-build: 引数に 2 つのターゲット（sosho_R_trackpad sosho_L_trackball）を渡したのに、右だけをビルドして報告し、左は古い成果物のままだった（左だけを渡して再実行して解決）→ 手順 3 に「渡されたターゲットを全部 1 回の build-local.sh に渡す」、報告に「ターゲットごとの成果物の大きさ」を必須にするとよい
-- 2026-10-12 メイン会話（add-feature の調査）: 「左は ZMK_USB が無いので USB 給電中でも 15 分で寝る」と Kconfig の依存だけで判断してユーザーに説明した。実際は XIAO のボード定義が USB シリアルのために USB_DEVICE_STACK を有効にしていて、左でも給電中は寝ない（ビルド結果の .config で判明）→ add-feature の手順 1 に「ZMK の挙動を左右の違いで判断するときは、両方のビルド結果の .config で前提の設定を確かめる」を足すとよい
-- 2026-10-12 config-reviewer: 初めて独自の C コード（src/charging_led.c）を足したとき、並行性や deep sleep 直前の競合は依頼文で頼まれてから見た → 観点に「SYS_INIT・スレッド・ワークキューを使う独自コードを足したら、初期化の順序、複数スレッドからの書き込み、deep sleep 直前の競合を確かめる」を足すとよい（レビュー役の改善メモ）
-
 ## 対応済み
 
+- 2026-10-12 zmk-build: 引数に 2 つのターゲット（sosho_R_trackpad sosho_L_trackball）を渡したのに、右だけをビルドして報告し、左は古い成果物のままだった（左だけを渡して再実行して解決）→ 手順 3 に「渡されたターゲットを全部 1 回の build-local.sh に渡す」、報告に「ターゲットごとの成果物の大きさ」を必須にするとよい → /retro で承認。zmk-build の手順 3 に「渡されたターゲットは全部 1 回のコマンドに並べて渡す」を、報告の成果物にターゲットごとの大きさと「uf2 が無ければ失敗」を足した
+- 2026-10-12 メイン会話（add-feature の調査）: 「左は ZMK_USB が無いので USB 給電中でも 15 分で寝る」と Kconfig の依存だけで判断してユーザーに説明した。実際は XIAO のボード定義が USB シリアルのために USB_DEVICE_STACK を有効にしていて、左でも給電中は寝ない（ビルド結果の .config で判明）→ add-feature の手順 1 に「ZMK の挙動を左右の違いで判断するときは、両方のビルド結果の .config で前提の設定を確かめる」を足すとよい → /retro で承認。add-feature の手順 1 に「左右で挙動が違うと判断するときは、両方のビルド結果の .config で前提の設定を確かめる」を足した。あわせて手順 4 の 4 に「src/ のコードを足したら zmk.elf に入ったかを nm で確かめる」とコマンドを足した（このセッションの出来事から）
+- 2026-10-12 config-reviewer: 初めて独自の C コード（src/charging_led.c）を足したとき、並行性や deep sleep 直前の競合は依頼文で頼まれてから見た → 観点に「SYS_INIT・スレッド・ワークキューを使う独自コードを足したら、初期化の順序、複数スレッドからの書き込み、deep sleep 直前の競合を確かめる」を足すとよい（レビュー役の改善メモ） → /retro で承認。config-reviewer の観点に「独自のコード（src/）」（SYS_INIT の順序、複数スレッドから触る変数、deep sleep 直前の競合、外部モジュールの内部への依存）を足した
 - 2026-10-12 zmk-researcher: Zephyr 本体のソースが .zmk-ref/ に無く、BLE の接続パラメータの自動更新の既定値などが推定どまりになった（並行した 1 本は Docker ボリューム sosho-zmk-ws の /ws/zephyr を自力で見つけて読めた。場所はエージェントのメモリに記録済み）→ 定義に Zephyr のある場所と読み取り用コマンドを書くか、build-local.sh --ref で Zephyr の subsys/bluetooth・drivers/input・dts/bindings/input も写すとよい（2 本の改善メモ） → /retro で承認。zmk-researcher の「調べる場所」に Docker ボリュームの Zephyr とビルド結果（.config・zephyr.dts）、読み取り専用の docker コマンドを足し、build-local.sh --ref で Zephyr の Bluetooth と入力まわり（約 3 MB）も .zmk-ref/zephyr/ に写すようにした
 - 2026-10-12 config-reviewer: BLE の接続パラメータの変更で、Apple の規定を記憶で判断した（「上限 ≧ 下限 × 2」。一次資料の QA1931 とは違った）。メイン会話も最初は記憶で 15 ms 固定を選び、QA1931 の「15 ms 固定は 30 ms に広げられることがある」を見落としていた → 外部の規定（Apple・Bluetooth の仕様）が絡む変更は、一次資料を確かめるか「要確認」にする観点を足すとよい（レビュー役の改善メモ） → /retro で承認。add-feature の手順 1 と config-reviewer の観点に「ZMK の外の規定は一次資料で確かめる（確かめていなければ要確認）」を足した
 - 2026-10-12 config-reviewer: 外部モジュールの input-processor を足したとき、ラベルの定義（type・codes）と置く位置（処理の順序。scroller の mapper より前か）の確認を、依頼文で頼まれてから行った → 観点に「外部モジュールを追加・更新したら、モジュールの .c とラベルの定義を読み、置く位置と処理の順序が合っているか確かめる」を足すとよい（レビュー役の改善メモ） → /retro で承認。add-feature の手順 1 と config-reviewer の観点に「外部モジュールはソースとラベルの定義を読み、置く位置と処理の順序を確かめる」を足した

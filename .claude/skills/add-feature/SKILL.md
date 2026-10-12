@@ -23,6 +23,7 @@ model: opus
 - 触るところが `docs/known-issues.html` の未解決の課題に関係しないか
 - ZMK の仕様が絡むなら **zmk-researcher** に聞く。記憶で書かない（版で書き方が変わるため）
 - ZMK の外のものも一次情報で確かめる。Apple や Bluetooth の規格などの規定は一次資料を読む（例: 接続間隔は Apple の QA1931）。外部モジュールはソースとラベルの定義（`type`・`codes` など）を読み、置く位置と処理の順序を決める（記憶や要約は誤ることがあるため。2026-10-12 に Apple の規定を記憶で判断し、値を誤りかけた）
+- 左右で挙動が違うと判断するときは、両方のビルド結果の `.config` で前提の設定を確かめる（手順 4 の 4 のコマンド）。Kconfig の依存だけで決めない（ボードの defconfig が有効にしている設定があるため。2026-10-12 に「左は ZMK_USB が無いので USB 給電中でも寝る」と誤って説明した。実際は XIAO のボード定義が左でも `USB_DEVICE_STACK` を有効にしていて、寝ない）
 - キーの位置は `docs/keymap.html` の `id="positions"` のテキスト版
 
 ## 2. ブランチを切る
@@ -43,7 +44,7 @@ git switch -c feature/<名前> main   # 不具合なら fix/、ビルド環境�
 1. `python3 scripts/lint-keymap.py`
 2. `python3 scripts/gen-docs.py`（資料の生成部分を更新）
 3. `/zmk-build <ターゲット>` — 書き込む側のターゲットをビルドする（`docs/workflow.html` の `id="flash"` の表）。ビルドログはこの skill が要約して返す
-4. Kconfig や devicetree を変えたら、ビルド結果に値が実際に入ったかを確かめる（conf に書いても、依存や既定値の関係で効かないことがあるため）。Kconfig は `.config`、devicetree は `zephyr.dts` を読む: `docker run --rm -v sosho-zmk-ws:/ws:ro zmkfirmware/zmk-build-arm:stable bash -c 'grep -E "<設定名>" /ws/build/<ターゲット>/zephyr/.config'`
+4. Kconfig や devicetree を変えたら、ビルド結果に値が実際に入ったかを確かめる（conf に書いても、依存や既定値の関係で効かないことがあるため）。Kconfig は `.config`、devicetree は `zephyr.dts` を読む: `docker run --rm -v sosho-zmk-ws:/ws:ro zmkfirmware/zmk-build-arm:stable bash -c 'grep -E "<設定名>" /ws/build/<ターゲット>/zephyr/.config'`。`src/` のコードを足したら、ファームウェアにコードが入ったかも確かめる（conf に `=y` と書いても、Kconfig の依存が満たされないと黙って無効になり、コードが入らないため）: `docker run --rm -v sosho-zmk-ws:/ws:ro zmkfirmware/zmk-build-arm:stable bash -c '/opt/zephyr-sdk-*/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc-nm /ws/build/<ターゲット>/zephyr/zmk.elf | grep -E "<関数名>"'`
 5. **config-reviewer** に変更を見せる。**ビルドが済んでから**頼み、ビルドの結果（成否と警告の要点、上の 4 で確かめた値）を依頼文に含める（レビュー役はビルドしないので、結果を知らないと、ビルドで裏付けられた点まで「要確認」にしてしまうため）。要修正なら直して 1 からやり直す
 6. **資料を必ず更新する。** 仕様（挙動・設定値・キー割り当て・手順）が変わったら、生成部分だけでなく手書きの説明も直す。**docs-sync** に頼むか、小さな修正なら update-docs skill に従って自分で直す（資料は事実の正本なので、実態とずれると次の作業を誤らせるため）。直したら、ほかの記述と矛盾していないかを確かめる（CLAUDE.md の「資料の規約」。docs-sync が「直さずに残した矛盾」を返したら、正しい方を確かめて直す）
 
