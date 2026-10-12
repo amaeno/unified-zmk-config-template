@@ -50,6 +50,18 @@
 <!-- gen:changelog -->
 <div class="gen">
 <ul class="item-list history">
+<li><p class="item-head"><code>2026-10-12</code> 充電状態を状態表示の LED に出す（充電中 = 黄のフェード、完了 = 緑の点灯） <span class="badge ok">fw-2026-10-12.4</span> <small>R: sosho_R_trackpad / L: sosho_L_trackball（充電状態の LED 表示。左右とも書き込み）</small></p>
+<ul>
+<li>充電 IC（BQ25101）の CHG 信号（P0.17）と nRF52840 の VBUS の検出を読み、充電中は黄を PWM でフェード（3 秒で 1 往復、いちばん暗いときも見た目 20 %）、完了は緑の点灯（USB を抜くまで）、充電が止まったのに電池電圧が 4.0 V 未満なら赤のフェード（要確認）を出す。左右それぞれ</li>
+<li>完了は CHG と電池電圧の両方で確かめる（電池残量の % は充電中に高く出るので使わない）。信号を読むだけで、充電の動きには触らない</li>
+<li>黄は赤を緑の 90 % にして作る（XIAO の緑の LED は暗いので、実機で見ながら 10 % → 90 % に調整した）</li>
+<li>&amp;pwm1 を LED の赤・緑に割り当て、ボード定義の &amp;pwm0（出力が P0.17 = CHG）とボードの pwmleds を無効にした。LED のピンは widget の GPIO と共有し、widget が表示するときはフェードを止めて返す</li>
+<li>このリポジトリに独自のコード（src/charging_led.c・Kconfig・CMakeLists.txt）を置けるよう、zephyr/module.yml に cmake・kconfig を足した</li>
+<li>資料: ハードウェアに「電池と充電」（過充電にならない理由、つなぎっぱなしの影響、回路の事実）、設定項目に「充電表示」、確かめた仕様、トラブルの表（充電の表示が出ない、Finder の書き込みのエラー -36）</li>
+<li>振り返り（4 回目）: zmk-build・add-feature・config-reviewer を直した。改善メモ 1 件（Kconfig の既定値だけを変えたら -p でビルド）は未対応</li>
+</ul>
+<p>充電の完了がわからず、いつまで USB をつないでおけばよいか判断できなかったため。書き込みは左右とも。</p>
+</li>
 <li><p class="item-head"><code>2026-10-12</code> 振り返り（3 回目）: 改善メモ 3 件とこのセッションの出来事 3 件を反映する</p>
 <ul>
 <li>zmk-researcher: 調べる場所に、Docker ボリュームの Zephyr 本体とビルド結果（.config・zephyr.dts）と、読み取り専用の docker コマンドを足す</li>
