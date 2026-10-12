@@ -59,7 +59,8 @@
 <tr><td>トラックボールのスクロール</td><td>0 番の長押し（レイヤー 4 <code>scroll</code>）のあいだ、左のトラックボールが縦スクロールになる</td><td><a href="settings.html#scroll">設定項目 › スクロール</a></td></tr>
 <tr><td>Bluetooth の送信の調整</td><td>Mac に合う接続間隔を要求し、ポインタのレポートを間引き（<code>zmk-input-processor-report-rate-limit</code>）、送信出力を上げる。操作の遅れを防ぐ</td><td><a href="settings.html#bluetooth">設定項目 › Bluetooth の接続</a></td></tr>
 <tr><td>状態表示 LED</td><td>電池残量と接続状態を色で示す（<code>zmk-rgbled-widget</code>）</td><td><a href="workflow.html#pc-pairing">開発フロー › PC とつながらないとき</a></td></tr>
-<tr><td>電池と省電力</td><td>左右の電池残量を PC に報告する。操作が無いと deep sleep に入る</td><td><a href="settings.html#kconfig">設定項目 › Kconfig</a></td></tr>
+<tr><td>充電状態の表示</td><td>USB でつないでいるとき、充電中は黄のフェード（呼吸）、完了は緑の点灯、要確認は赤のフェードを LED に出す（左右それぞれ。<code>src/charging_led.c</code>）</td><td><a href="hardware.html#charging">ハードウェア › 電池と充電</a></td></tr>
+<tr><td>電池と省電力</td><td>左右の電池残量を PC に報告する。操作が無いと deep sleep に入る（USB 給電中は入らない）</td><td><a href="settings.html#kconfig">設定項目 › Kconfig</a></td></tr>
 </tbody>
 </table>
 </div>

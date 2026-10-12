@@ -63,6 +63,7 @@ KCONFIG_NOTES = {
     "RGBLED_WIDGET": ("LED", "RGB LED で電池残量と接続状態を表示する"),
     "RGBLED_WIDGET_BATTERY_LEVEL_HIGH": ("LED", "電池残量の色分けで「多い」とする下限 %（既定 80）"),
     "RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL": ("LED", "電池残量の色分けで「危険」とする上限 %（既定 5）"),
+    "SOSHO_CHARGING_LED": ("LED", "充電状態を LED に出す（充電中 = 黄のフェード、完了 = 緑の点灯）。このリポジトリの src/charging_led.c"),
     "ZMK_BATTERY_REPORTING": ("電池・電源", "電池残量を測って報告する"),
     "ZMK_SLEEP": ("電池・電源", "操作が無いと deep sleep に入る（既定 15 分）"),
     "BT_BAS": ("電池・電源", "Bluetooth の電池残量サービス（PC に残量を見せる）"),

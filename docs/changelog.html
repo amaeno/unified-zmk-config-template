@@ -50,6 +50,18 @@
 <!-- gen:changelog -->
 <div class="gen">
 <ul class="item-list history">
+<li><p class="item-head"><code>2026-10-12</code> 振り返り（3 回目）: 改善メモ 3 件とこのセッションの出来事 3 件を反映する</p>
+<ul>
+<li>zmk-researcher: 調べる場所に、Docker ボリュームの Zephyr 本体とビルド結果（.config・zephyr.dts）と、読み取り専用の docker コマンドを足す</li>
+<li>build-local.sh --ref: Zephyr の Bluetooth（host と Kconfig）と入力まわり（subsys/input・drivers/input・dts/bindings/input）も .zmk-ref/zephyr/ に写す（約 3 MB）</li>
+<li>add-feature・config-reviewer: ZMK の外の規定は一次資料で確かめる。外部モジュールはソースとラベルの定義を読み、置く位置と処理の順序を確かめる</li>
+<li>add-feature: 設定を変えたら、ビルド結果の .config・zephyr.dts で値が入ったかを確かめる</li>
+<li>retro: improvements.md は書き換える直前に読み直し、材料にしていないメモは残す</li>
+<li>add-feature・開発フロー: 取り込みとタグは別々のコマンドで実行し、タグの前に git log -1 で確かめる。取り込みのメッセージはファイルで -F に渡す</li>
+<li>資料: ZMK リファレンスと開発フローの .zmk-ref/ の説明を更新。改善メモを対応済みへ</li>
+</ul>
+<p>資料と AI ツールの変更だけで、ファームウェアは変わらない（書き込み不要）。</p>
+</li>
 <li><p class="item-head"><code>2026-10-12</code> Mac で Bluetooth のとき操作が 1 テンポ遅れる問題を直す <span class="badge ok">fw-2026-10-12.3</span> <small>R: sosho_R_trackpad（Mac での Bluetooth の遅れ対策。接続間隔・レポートの間引き・送信出力）/ L: 更新なし（fw-2026-10-12.2 のまま）</small></p>
 <ul>
 <li>右が Mac に要求する接続間隔を 11.25〜15 ms にする（ZMK の既定の 7.5〜15 ms は Apple の規定に合わない。15 ms 固定は 30 ms に広げられることがあるので避けた）</li>
