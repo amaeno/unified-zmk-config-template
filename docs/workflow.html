@@ -344,6 +344,7 @@ git switch main</code></pre>
 <tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code>（<code>board_root: .</code> と独自コードの cmake・kconfig）を有効にしている</td></tr>
 <tr><td>USB でつないでも充電の表示（黄・緑・赤）が出ない</td><td>その側の <code>*.conf</code> に <code>CONFIG_SOSHO_CHARGING_LED=y</code> があるか、ビルド結果の <code>.config</code> で有効になっているかを見る。zmk-rgbled-widget の版を上げた直後なら、widget の内部が変わっていないか確かめる（<a href="#zmk-update">ZMK の版を上げる</a>）。起動時のログに <code>led_msgq</code> の大きさが合わないエラーや、<code>LED PWM not ready</code>（PWM の準備ができていない）が出ることがある</td></tr>
 <tr><td>書き込むと「デバイスが取り外されました」と出る</td><td>正常。書き込みが終わるとマイコンが再起動し、USB ドライブが消えるため。Finder のコピーで失敗するときは <code>cp -X</code> で書き込む（<a href="#flash">書き込み</a>）</td></tr>
+<tr><td>Finder で uf2 をコピーすると「一部のデータを読み込めないか書き込めないため、操作を完了できません（エラーコード -36）」と出て書き込めない</td><td>ターミナルで <code>cp -X</code>（拡張属性を付けずにコピー）で書き込み直す。これで書き込めた（2026-10-12）。途中まで書かれていても、書き込み直せば元に戻る。uf2 ファイル自体は正常だった。原因は、Finder がファイルの拡張属性（<code>ls -l@</code> で見える <code>com.apple.macl</code> など）もドライブに書こうとすることと思われる（未確認。<a href="#flash">書き込み</a>）</td></tr>
 <tr><td>書き込んだあと、PC とつながらない（左右はつながる）</td><td>右の LED の色で状態を見て、PC 側とキーボード側の記録を消してつなぎ直す（<a href="#pc-pairing">PC とつながらないとき</a>）</td></tr>
 <tr><td>キーマップのファイルを書き換えて書き込んだのに、割り当てが変わらない</td><td>Studio で保存した割り当てが優先されている。キー割り当ての正本は Studio なので、割り当ては Studio で変える。ファイルの初期値に戻したいときだけ Studio の「Restore Stock Settings」（Studio の変更は消える。<a href="#decide">ビルドが要るか</a>）</td></tr>
 <tr><td>USB 給電中に、Bluetooth 側でキー入力が届かない</td><td>USB 接続中は USB 出力が優先される。レイヤー 3 の <code>&amp;out OUT_BLE</code> で Bluetooth 出力に切り替える</td></tr>
