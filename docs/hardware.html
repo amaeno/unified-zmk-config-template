@@ -206,9 +206,9 @@
 <table>
 <thead><tr><th>状態</th><th>表示</th><th>意味</th></tr></thead>
 <tbody>
-<tr><td>充電中</td><td>黄を 3 秒おきに 200 ms 点滅</td><td>充電 IC が充電している</td></tr>
+<tr><td>充電中</td><td>黄をゆっくりフェード（呼吸のように明るくなり、暗くなる。2 秒で 1 往復）</td><td>充電 IC が充電している</td></tr>
 <tr><td>完了</td><td>緑を点灯（USB を抜くまで）</td><td>充電が止まり、電池電圧が 4000 mV 以上</td></tr>
-<tr><td>要確認</td><td>赤を 3 秒おきに 200 ms 点滅</td><td>充電が止まっているのに、電池電圧が 4000 mV 未満（または測れない）。電池・温度・安全タイマーの打ち切りなどを疑う</td></tr>
+<tr><td>要確認</td><td>赤を同じようにフェード</td><td>充電が止まっているのに、電池電圧が 4000 mV 未満（または測れない）。電池・温度・安全タイマーの打ち切りなどを疑う</td></tr>
 <tr><td>USB なし</td><td>何もしない</td><td>従来の表示（電池残量・接続状態）のまま</td></tr>
 </tbody>
 </table>
@@ -217,8 +217,11 @@
 <li><strong>判定の仕組み:</strong> 充電 IC の CHG 信号（P0.17。充電中は Low）と、nRF52840 の USB 給電の検出（POWER の <code>USBREGSTATUS.VBUSDETECT</code>）を 1 秒ごとに読み、同じ状態が 3 秒続いたら確定します。</li>
 <li><strong>完了と要確認の分け方:</strong> CHG が High になったら電池電圧を測ります。充電が止まっている間は 60 秒ごとに測り直します。電池残量（%）で判定しないのは、充電中は電圧が高く出て % が早く 100% になるためです。</li>
 <li><strong>電圧を自分で測る理由:</strong> ZMK の電池の測定は、操作が無いまま 30 秒で止まります。このモジュールは完了の判定のときに自分で測ります（ZMK の測定と同じ低優先度のキューで動かし、測定が重ならないようにしています）。</li>
-<li><strong>deep sleep:</strong> ZMK は USB から給電されている間は deep sleep に入らないので、充電中に表示が消えることはありません。左も同じです（<a href="zmk-reference.html#facts">ZMK リファレンス › 確かめた仕様</a>）。deep sleep に入るときは LED を直接消します。</li>
-<li><strong>設定:</strong> 点滅の長さ・間隔と完了とみなす電圧は Kconfig で変えます（<a href="settings.html#charging-led">設定項目 › 充電表示</a>）。</li>
+<li><strong>deep sleep:</strong> ZMK は USB から給電されている間は deep sleep に入らないので、充電中に表示が消えることはありません。左も同じです（<a href="zmk-reference.html#facts">ZMK リファレンス › 確かめた仕様</a>）。deep sleep に入るときはフェードを止め（作業の終わりを待ってから）、LED を消します。</li>
+<li><strong>フェードの仕組み:</strong> <code>&amp;pwm1</code> を LED の赤（P0.26）と緑（P0.30）に割り当て、周期 1 ms（1 kHz）の PWM で明るさを変えます（LED は Low で点くので反転）。1 往復の前半で明るく、後半で暗くし、端はなめらかにつなぎます。いちばん暗いときも見た目の明るさで 20 % を残します（目の感じ方に合わせて、LED に流す時間の割合はその 2 乗の 4 % です）。フェード中は 20 ms ごと、それ以外は 1 秒ごとに動きます。PWM が動くのはフェード中（USB 給電中）だけです。</li>
+<li><strong>黄の色味:</strong> XIAO の緑の LED は抵抗が 10 kΩ で、赤・青の 2.2 kΩ よりずっと暗いため（回路図の R7・R4・R3）、赤と緑を同じだけ点けるとオレンジに見えます（widget の「黄」もそうです）。フェードの黄は、赤を緑の 10 % に弱めて黄に寄せています。上げるとオレンジ寄りで明るく、下げると緑寄りで暗くなります。</li>
+<li><strong>widget との受け渡し:</strong> LED の赤・緑のピンは、widget の GPIO（<code>gpio-leds</code>）と PWM の両方が使います。デューティが 0 % か 100 % のチャンネルでは、Zephyr の nRF の PWM ドライバが PWM を止めて GPIO の出力に任せるので（<code>drivers/pwm/pwm_nrfx.c</code> のコメント）、フェードを止めれば widget の点け消しがそのまま効きます。widget が何かを表示しようとしたとき（表示待ちの列に項目がある、または LED のピンの出力が点灯になっている）は、フェードを止めて LED を widget に返します。そのため充電中でも、接続先を切り替えたときの点滅などはふだんどおり見えます。デューティを 99 % で頭打ちにしているのは、100 % にするとドライバが出力を点灯に書き換え、widget の表示と見分けられなくなるためです。</li>
+<li><strong>設定:</strong> フェードの速さ・暗いときの明るさ・黄の色味と、完了とみなす電圧は Kconfig で変えます（<a href="settings.html#charging-led">設定項目 › 充電表示</a>）。</li>
 </ul>
 <aside class="callout warn">
 <p><strong>zmk-rgbled-widget の内部に頼っています。</strong> <code>src/widget.c</code> の大域変数 <code>led_msgq</code>・<code>led_layer_color</code>・<code>led_current_color</code> と <code>struct blink_item</code> の並びを使っています。widget の版を上げるときは、これらが変わっていないか確かめます（<a href="workflow.html#zmk-update">開発フロー › ZMK の版を上げる</a>）。起動時に <code>led_msgq</code> の項目の大きさが合わないと、ログにエラーを出して充電の表示は動きません。</p>
@@ -230,6 +233,8 @@
 <li><p class="item-head">充電 IC は BQ25101</p><p>定電流で充電したあと、4.2 V（誤差 1%）の定電圧で充電し、電流が小さくなったら終えます。終えたあと 4.1 V（4.2 V の 100 mV 下）まで下がったら継ぎ足します。10 時間の安全タイマーで打ち切ります（データシート）。</p></li>
 <li><p class="item-head">CHG は「電源をつないでから最初の充電の間だけ」Low</p><p>継ぎ足しの充電では Low に戻りません。安全タイマーで止まったときは High になります（データシート 8.3.2・8.3.9）。このため「完了」は CHG が High になったうえで電圧でも確かめています。</p></li>
 <li><p class="item-head">CHG は赤い充電 LED と P0.17 につながる</p><p>XIAO の赤い充電 LED（3V3 から 2.2 kΩ）と P0.17 が同じ信号です。赤い LED は充電中に点き、完了で消えます（回路図）。</p></li>
+<li><p class="item-head">状態表示 LED の明るさは色ごとに違う</p><p>緑の LED は抵抗が 10 kΩ、赤・青は 2.2 kΩ で、緑がとても暗いです（回路図の R7・R4・R3）。</p></li>
+<li><p class="item-head">ボード定義の <code>&amp;pwm0</code> は P0.17（CHG の線）に出力する</p><p>PWM のドライバを入れるとマイコンが CHG の線を駆動してしまうので、<code>sosho.dtsi</code> で <code>&amp;pwm0</code> とボードの <code>pwmleds</code> を無効にしています。出典: <code>.zmk-ref/zephyr-xiao_ble/xiao_ble-pinctrl.dtsi</code> の <code>pwm0_default</code>、<code>xiao_ble_common.dtsi</code></p></li>
 <li><p class="item-head">USB 給電中は電池が切り離される</p><p>3.3 V のレギュレータには VBUS からダイオード経由で給電され、電池は P-MOSFET で切り離されます（回路図の Q1・D1）。打っている最中でも充電の終了判定が狂いません。</p></li>
 <li><p class="item-head">電池の温度監視は無効</p><p>TS 端子は 10 kΩ で GND に固定されています（回路図の注記「Disable Temp sense function」）。そのため、暑い場所や 0 ℃ 以下では充電 IC が自分では止まりません。</p></li>
 <li><p class="item-head">充電電流は約 50 mA</p><p>ISET の抵抗 2.7 kΩ（固定）と、P0.13 につながるもう 1 本の 2.7 kΩ で決まります。P0.13 を Low にすると約 100 mA、触らなければ（ハイインピーダンス）約 50 mA です。ZMK は P0.13 を使っていないので約 50 mA です（回路図と Seeed Wiki）。</p></li>

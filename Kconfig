@@ -5,22 +5,37 @@ config SOSHO_CHARGING_LED
     depends on RGBLED_WIDGET && ZMK_BATTERY_REPORTING && SOC_NRF52840
     # 緑の点灯に widget の「点滅のあとに戻す色」を使うので、レイヤーの色の表示とは同時に使えない
     depends on !RGBLED_WIDGET_SHOW_LAYER_COLORS
+    # 充電中のフェードに使う（sosho.dtsi の &pwm1）
+    select PWM
     help
       XIAO nRF52840 の充電 IC（BQ25101）の CHG 信号（P0.17）と USB 給電の有無を読み、
-      zmk-rgbled-widget の LED に出す。充電中は黄の点滅、完了は緑の点灯（USB を抜くまで）、
-      充電が止まったのに電池電圧が低いときは赤の点滅。src/charging_led.c
+      zmk-rgbled-widget の LED に出す。充電中は黄のフェード（呼吸）、完了は緑の点灯（USB を抜くまで）、
+      充電が止まったのに電池電圧が低いときは赤のフェード。src/charging_led.c
 
 if SOSHO_CHARGING_LED
 
-config SOSHO_CHARGING_LED_BLINK_MS
-    int "充電中・要確認の点滅 1 回の長さ (ms)"
-    default 200
-
-config SOSHO_CHARGING_LED_PERIOD_MS
-    int "充電中・要確認の点滅の間隔 (ms)"
-    default 3000
+config SOSHO_CHARGING_LED_FADE_PERIOD_MS
+    int "充電中・要確認のフェード 1 往復の時間 (ms)"
+    range 200 20000
+    default 2000
     help
-      信号は 1 秒ごとに読むので、1 秒単位で効く
+      前半で明るくなり、後半で暗くなる
+
+config SOSHO_CHARGING_LED_FADE_MIN_PCT
+    int "フェードのいちばん暗いときの明るさ（見た目の %）"
+    range 0 100
+    default 20
+    help
+      0 にすると、いちばん暗いときに消える。見た目の明るさで指定する
+      （LED に流す時間の割合はこの 2 乗。20 % なら 4 %）
+
+config SOSHO_CHARGING_LED_YELLOW_RED_PCT
+    int "黄を作るときの赤の強さ（緑に対する %）"
+    range 0 100
+    default 10
+    help
+      XIAO の緑の LED は抵抗が大きく暗い（赤 2.2 kΩ、緑 10 kΩ）。赤と緑を同じだけ点けるとオレンジに見えるので、
+      赤を弱めて黄に寄せる。上げるとオレンジ寄りで明るく、下げると緑寄りで暗くなる
 
 config SOSHO_CHARGING_LED_FULL_MV
     int "充電が止まったとき、完了とみなす電池電圧の下限 (mV)"

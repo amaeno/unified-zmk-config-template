@@ -74,7 +74,7 @@
 <tr><td><code>&amp;msc</code>（キーに割り当てたスクロール）の加速</td><td><code>config/sosho.keymap</code> の <code>&amp;msc</code></td><td><a href="#scroll">スクロール</a></td><td>右</td></tr>
 <tr><td>PC との Bluetooth の接続間隔</td><td>右の <code>*.conf</code> の <code>BT_PERIPHERAL_PREF_*</code>（左の値は使われない）</td><td><a href="#bluetooth">Bluetooth の接続</a></td><td>右</td></tr>
 <tr><td>LED の電池残量の色分け</td><td>各 <code>*.conf</code> の <code>RGBLED_WIDGET_BATTERY_LEVEL_*</code></td><td><a href="#kconfig">Kconfig 一覧</a></td><td>変えた側</td></tr>
-<tr><td>充電表示の点滅の長さ・間隔、完了とみなす電圧</td><td>各 <code>*.conf</code> の <code>SOSHO_CHARGING_LED_*</code></td><td><a href="#charging-led">充電表示</a></td><td>変えた側</td></tr>
+<tr><td>充電表示のフェードの速さ・暗いときの明るさ・黄の色味、完了とみなす電圧</td><td>各 <code>*.conf</code> の <code>SOSHO_CHARGING_LED_*</code></td><td><a href="#charging-led">充電表示</a></td><td>変えた側</td></tr>
 <tr><td>ビルドするターゲット</td><td><code>build.yaml</code></td><td><a href="workflow.html#targets">ターゲット一覧</a></td><td>—</td></tr>
 <tr><td>ZMK・外部モジュールの版</td><td><code>config/west.yml</code></td><td><a href="workflow.html#modules">モジュール一覧</a></td><td>左右とも</td></tr>
 </tbody>
@@ -213,8 +213,9 @@
 <thead><tr><th>設定</th><th>既定</th><th>意味</th></tr></thead>
 <tbody>
 <tr><td><code>SOSHO_CHARGING_LED</code></td><td>各 <code>*.conf</code> で <code>y</code></td><td>充電表示の有効化</td></tr>
-<tr><td><code>SOSHO_CHARGING_LED_BLINK_MS</code></td><td>200</td><td>点滅の長さ（ms）</td></tr>
-<tr><td><code>SOSHO_CHARGING_LED_PERIOD_MS</code></td><td>3000</td><td>点滅の間隔（ms）。状態を 1 秒ごとに読むので、1 秒単位で効く</td></tr>
+<tr><td><code>SOSHO_CHARGING_LED_FADE_PERIOD_MS</code></td><td>2000</td><td>フェードの 1 往復の時間（ms）</td></tr>
+<tr><td><code>SOSHO_CHARGING_LED_FADE_MIN_PCT</code></td><td>20</td><td>いちばん暗いときの見た目の明るさ（%）。0 で消える</td></tr>
+<tr><td><code>SOSHO_CHARGING_LED_YELLOW_RED_PCT</code></td><td>10</td><td>黄を作るときの赤の強さ（緑に対する %）。上げるとオレンジ寄りで明るく、下げると緑寄りで暗くなる</td></tr>
 <tr><td><code>SOSHO_CHARGING_LED_FULL_MV</code></td><td>4000</td><td>この電圧（mV）以上なら「完了」、未満なら「要確認」</td></tr>
 </tbody>
 </table>
@@ -259,7 +260,7 @@
 <tr><td><code>RGBLED_WIDGET</code><span class="note">RGB LED で電池残量と接続状態を表示する</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr><td><code>RGBLED_WIDGET_BATTERY_LEVEL_HIGH</code><span class="note">電池残量の色分けで「多い」とする下限 %（既定 80）</span></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td><td><code>30</code> <small>%</small></td></tr>
 <tr><td><code>RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL</code><span class="note">電池残量の色分けで「危険」とする上限 %（既定 5）</span></td><td><code>10</code> <small>%</small></td><td><code>10</code> <small>%</small></td><td><code>10</code> <small>%</small></td><td><code>10</code> <small>%</small></td></tr>
-<tr><td><code>SOSHO_CHARGING_LED</code><span class="note">充電状態を LED に出す（充電中 = 黄の点滅、完了 = 緑の点灯）。このリポジトリの src/charging_led.c</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
+<tr><td><code>SOSHO_CHARGING_LED</code><span class="note">充電状態を LED に出す（充電中 = 黄のフェード、完了 = 緑の点灯）。このリポジトリの src/charging_led.c</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr class="group"><td colspan="5"><strong>電池・電源</strong></td></tr>
 <tr><td><code>ZMK_BATTERY_REPORTING</code><span class="note">電池残量を測って報告する</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>
 <tr><td><code>ZMK_SLEEP</code><span class="note">操作が無いと deep sleep に入る（既定 15 分）</span></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td><td><code>y</code></td></tr>

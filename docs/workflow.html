@@ -342,7 +342,7 @@ git switch main</code></pre>
 <tr><td>ZMK の版を上げたら、ビルドが壊れた・動きが変わった</td><td>上げた版での変更（名前の変わった設定や behavior）を疑う。新旧の <code>.zmk-ref/VERSIONS.txt</code> と ZMK の変更履歴を比べる。戻すなら <code>config/west.yml</code> を前のコミットに戻して <code>--update</code>（<a href="#zmk-update">ZMK の版を上げる</a>）</td></tr>
 <tr><td><code>Missing ZMK Compat</code></td><td>board 名から <code>/zmk</code> が落ちている。<code>xiao_ble/nrf52840/zmk</code> が正しい</td></tr>
 <tr><td>シールドが見つからない</td><td><code>-DZMK_EXTRA_MODULES</code> が渡っていない。これが <code>zephyr/module.yml</code>（<code>board_root: .</code> と独自コードの cmake・kconfig）を有効にしている</td></tr>
-<tr><td>USB でつないでも充電の表示（黄・緑・赤）が出ない</td><td>その側の <code>*.conf</code> に <code>CONFIG_SOSHO_CHARGING_LED=y</code> があるか、ビルド結果の <code>.config</code> で有効になっているかを見る。zmk-rgbled-widget の版を上げた直後なら、widget の内部が変わっていないか確かめる（<a href="#zmk-update">ZMK の版を上げる</a>）。起動時のログに <code>led_msgq</code> の大きさが合わないエラーが出ることがある</td></tr>
+<tr><td>USB でつないでも充電の表示（黄・緑・赤）が出ない</td><td>その側の <code>*.conf</code> に <code>CONFIG_SOSHO_CHARGING_LED=y</code> があるか、ビルド結果の <code>.config</code> で有効になっているかを見る。zmk-rgbled-widget の版を上げた直後なら、widget の内部が変わっていないか確かめる（<a href="#zmk-update">ZMK の版を上げる</a>）。起動時のログに <code>led_msgq</code> の大きさが合わないエラーや、<code>LED PWM not ready</code>（PWM の準備ができていない）が出ることがある</td></tr>
 <tr><td>書き込むと「デバイスが取り外されました」と出る</td><td>正常。書き込みが終わるとマイコンが再起動し、USB ドライブが消えるため。Finder のコピーで失敗するときは <code>cp -X</code> で書き込む（<a href="#flash">書き込み</a>）</td></tr>
 <tr><td>書き込んだあと、PC とつながらない（左右はつながる）</td><td>右の LED の色で状態を見て、PC 側とキーボード側の記録を消してつなぎ直す（<a href="#pc-pairing">PC とつながらないとき</a>）</td></tr>
 <tr><td>キーマップのファイルを書き換えて書き込んだのに、割り当てが変わらない</td><td>Studio で保存した割り当てが優先されている。キー割り当ての正本は Studio なので、割り当ては Studio で変える。ファイルの初期値に戻したいときだけ Studio の「Restore Stock Settings」（Studio の変更は消える。<a href="#decide">ビルドが要るか</a>）</td></tr>
