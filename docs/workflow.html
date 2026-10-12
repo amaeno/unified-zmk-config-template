@@ -490,7 +490,10 @@ python3 scripts/gen-docs.py --check   # 更新が要るかだけを調べる（�
 <h4 id="ai-improve-log">いまの改善メモ</h4>
 <!-- gen:improvements -->
 <div class="gen">
-<p>未対応 <strong>0</strong> 件 ／ 対応済み 22 件</p>
+<p>未対応 <strong>1</strong> 件 ／ 対応済み 22 件</p>
+<ul>
+<li>2026-10-12 build-local.sh（add-feature の手順 4）: リポジトリ直下の Kconfig の既定値だけを変えたとき、差分ビルドでは設定の段階が走らず、.config が古い値のまま成功した（手順 4 の 4 の .config の確認で気づき、-p で解決）→ add-feature の手順 4 か zmk-build に「Kconfig（リポジトリ直下やモジュール）の既定値だけを変えたら -p でビルドする」を足すとよい。資料の workflow.html#trouble にも行を足すとよい</li>
+</ul>
 <details>
 <summary>最近の対応済み（5 件）</summary>
 <ul>

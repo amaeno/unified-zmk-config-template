@@ -17,7 +17,7 @@ if SOSHO_CHARGING_LED
 config SOSHO_CHARGING_LED_FADE_PERIOD_MS
     int "充電中・要確認のフェード 1 往復の時間 (ms)"
     range 200 20000
-    default 2000
+    default 3000
     help
       前半で明るくなり、後半で暗くなる
 
@@ -32,7 +32,7 @@ config SOSHO_CHARGING_LED_FADE_MIN_PCT
 config SOSHO_CHARGING_LED_YELLOW_RED_PCT
     int "黄を作るときの赤の強さ（緑に対する %）"
     range 0 100
-    default 10
+    default 30
     help
       XIAO の緑の LED は抵抗が大きく暗い（赤 2.2 kΩ、緑 10 kΩ）。赤と緑を同じだけ点けるとオレンジに見えるので、
       赤を弱めて黄に寄せる。上げるとオレンジ寄りで明るく、下げると緑寄りで暗くなる
